@@ -56,12 +56,13 @@ How to use it :
 
 
 
-fsm_manager - class constructor
-===============================
+Machine State Definition
+========================
+
+The states are defined with a javascript object with the following organization:
 
 ```javascript
-aStateDefinition //states definition object
-
+var aStateDefinition =
 { 
 	<aStateName1> :
 	{
