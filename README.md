@@ -149,7 +149,7 @@ aStateDefinition //states definition object
   
 Remarks
 ========
-  - state function should return a boulean : true: ok works fine; false: error
+  - state function should return a boolean : true: ok works fine; false: error
   - state function should have the following input :
   	- parameters : the properties_<init/out>_function
   	- event : the event 
