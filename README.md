@@ -5,7 +5,7 @@ Finite State Machine for javascript and JQuery
 
 How to use it :
 ===============
-```
+```javascript
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,7 +57,7 @@ How to use it :
 fsm_manager - class constructor
 ===============================
 
-```
+```javascript
 aStateDefinition //states definition object
 
 { 
