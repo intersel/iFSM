@@ -9,45 +9,47 @@ How to use it :
 <!DOCTYPE html>
 <html>
 <head>
-	<title>iFSM in action! a Finite State Machine for jQuery</title>
-	<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="jquery.dotimeout.js"></script>
-	<script type="text/javascript" src="jquery.attrchange.js"></script>
-	<script type="text/javascript" src="ifsm.js"></script>
-	
-	<script type="text/javascript">
-	var aStateDefinition = {
-		IsDisplayed		: 
-		{
-			click	:	
-			{
-				init_function		: function(){this.opts.aDiv.hide()},
-				next_state		: 'IsNotDisplayed'
-			}
-		}, 
-		IsNotDisplayed		: 
-		{
-			displayButton	:	
-			{
-				init_function		: function(){this.opts.aDiv.show()},
-				next_state		: 'IsDisplayed'
-			}
-		}
-		DefaultState		:
-		{
-			start	:
-			{
-				next_state	: 'IsDisplayed'
-			}
-		}
-	}
-	myFsm1 = new fsm_manager($('#myButton', aStateDefinition,{aDiv:$('#adiv')}); //we create the FSM object
-	myFsm1->InitManager(); //then we init it 
+    <title>iFSM in action! a Finite State Machine for jQuery</title>
+    <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="jquery.dotimeout.js"></script>
+    <script type="text/javascript" src="jquery.attrchange.js"></script>
+    <script type="text/javascript" src="ifsm.js"></script>
+
+    <script type="text/javascript">
+    var aStateDefinition = {
+        IsDisplayed     : 
+        {
+            click   :   
+            {
+                init_function       : function(){this.opts.aDiv.hide()},
+                next_state      : 'IsNotDisplayed'
+            }
+        }, 
+        IsNotDisplayed      : 
+        {
+            click   :   
+            {
+                init_function       : function(){this.opts.aDiv.show()},
+                next_state      : 'IsDisplayed'
+            }
+        },
+        DefaultState        :
+        {
+            start   :
+            {
+                next_state  : 'IsDisplayed'
+            }
+        }
+    };
+    $(document).ready(function() {
+	    myFsm1 = new fsm_manager($('#myButton'), aStateDefinition,{aDiv:$('#adiv')}); //we create the FSM object
+	    myFsm1.InitManager(); //then we init it 
+    });
 	</script>
 </head>
 <body style="margin:100px;">
-	<button id="myButton">hello</button>
-	<div id="adiv">a nice text to show the FSM capabilities :-)</div>
+    <button id="myButton">hello</button>
+    <div id="adiv">a nice text to show the FSM capabilities :-)</div>
 </body>
 </html>
 ```
