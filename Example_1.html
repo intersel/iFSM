@@ -7,174 +7,101 @@
 <script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
 <script type="text/javascript" src="ifsm.js"></script>
 
-
-<style>
-#playerchoice_bar {
-	width:600px;
-}
-#playerchoice_bar > div {
-    background-color: #BBBBBB;
-    float: left;
-    height: 50px;
-    margin: 5px;
-    width: 50px;
-}
+<style type="text/css">
+  html {
+    font-family: Helvetica, Arial, sans-serif;
+  }
+  body {
+    padding: 0 20px;
+  }
+  button {
+    margin: 0 2px;
+    font-size: 20px;
+    border: 1px solid #333;
+    width: 70px;
+    text-shadow: 0 -1px 0 #333;
+    border-radius: 5px;
+  }
+  button.on {
+    color: #dfd;
+    background: #00aa00;
+    background: -moz-linear-gradient(top, rgba(0,153,0,1) 0%, rgba(0,119,0,1) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,153,0,1)), color-stop(100%,rgba(0,119,0,1)));
+    background: -webkit-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+    background: -o-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+    background: -ms-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+    background: linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+  }
+  button.off {
+    color: #fdd;
+    background: #CC0000;
+    background: -moz-linear-gradient(top, rgba(204,0,0,1) 0%, rgba(153,0,0,1) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(204,0,0,1)), color-stop(100%,rgba(153,0,0,1)));
+    background: -webkit-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+    background: -o-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+    background: -ms-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+    background: linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+  }
 </style>
 
 <script type="text/javascript">
 
+var aStateDefinitionButton = {
 
-function InitMaster()
-{
-}
-
-var MasterManager = {
-
-	NotPlaying		: 
-	{
-		click		:
+		ButtonDisplayed		: 
 		{
-			init_function				: function (){this.myObject.html('Quit');this.opts.gamedisplay.trigger('show');},
-			out_function				: function (){this.myObject.trigger('startgame');}
-		},
-		startgame	:	
-		{
-			init_function 				: InitMaster,
-			next_state					: 'GameStarted',
-
-		},
-	},
-	GameStarted		: 
-	{
-		click		:
-		{
-			init_function				: function (){return confirm('Are you sure you want to quit?')},
-			propagate_event				: 'quitGame'
-		},
-		quitGame		:
-		{
-			init_function				: function (){this.myObject.html('Start Game');this.opts.gamedisplay.trigger('hide');},
-			out_function				: function (){this.opts.gamedisplay.trigger('restart');},
-			next_state					: 'NotPlaying',
-		},
-		testchoice	:	
-		{
-		}
-	},
-	DefaultState	:
-	{
-		start	: 
-		{
-			init_function				: function (){this.opts.gamedisplay.trigger('hide')},
-			next_state					: 'NotPlaying'
-
-		}
-	}
-}
-
-var GamePlay = {
-		GamePlayDisplayed	:
-		{
-			hide 	:
+			enterState : 
 			{
-				init_function				: function (){this.myObject.hide();},
-				next_state					: 'GamePlayHidden'
+				init_function					: function (){this.myUIObject.html("on").attr({'class':'on'});}
+			},
+			exitState : 
+			{
+				init_function					: function (){this.myUIObject.html("wait");}
+			},
+			click	:	
+			{
+				next_state					: 'ButtonUnDisplayed'
 			}
 		},
-		GamePlayHidden	:
+		ButtonUnDisplayed		: 
 		{
-			show 	:
+			enterState : 
 			{
-				init_function				: function (){this.myObject.show();},
-				next_state					: 'GamePlayDisplayed'
+				init_function					: function (){this.myUIObject.trigger('setText');}
+			},
+			setText :
+			{
+				init_function					: function (){this.myUIObject.html("off").attr({'class':'off'});},
+				how_process_event				: {delay:1000}
+			},
+			click	:	
+			{
+				next_state					: 'ButtonDisplayed'
 			}
 		},
-		DefaultState	:
+		DefaultState			:
 		{
-			start	: 
+			start	:	
 			{
-				next_state					: 'GamePlayDisplayed',
-				propagate_event				: 'hide'
-			},
-			restart	: 
-			{
-				init_function				: function (){this.opts.playerchoices.trigger('start');}
-			},
-			attrchange	:
-			{
-				init_function				: function (param,event,data){this.opts.alert.html('attrchange:'+data.attributeName+'/'+data.newValue);}
-			},
-			attrchange_class	:
-			{
-				init_function				: function (param,event,data){this.opts.alert.html('attrchange_class:'+data.newValue+'/'+data.oldValue);}
-			},
-			attrchange_style_display	:
-			{
-				init_function				: function (param,event,data){this.opts.alert.html('attrchange_style_display:'+data.newValue+'/'+data.oldValue);}
-			},
-		}
-	}
-
-var PlayerChoice = {
-		DefaultState	:
-		{
-			start	: 
-			{
-				init_function				: function (){
-												this.opts.color=-1;
-												this.myObject.trigger('setcolor');},
-
-			},
-			click		:
-			{
-				init_function				: function (){
-												this.myObject.trigger('setcolor');
-												},
-			},
-			setcolor	: 
-			{
-				init_function				: function (param,event,data){
-												this.opts.color=this.opts.color + 1;
-												if (this.opts.color == this.opts.colorArray.length)
-													this.opts.color=0;
-												this.myObject.css('background-color', this.opts.colorArray[this.opts.color]);
-												},
-	
-			},
-			'attrchange_style_backgroundColor'	:
-			{
-				init_function				: function (param,event,data){this.opts.alert.html(data.newValue+'/'+data.oldValue);}
-			},
-		}
-	}
-
-var colorArray=new Array('#BBB','red','blue','yellow','orange','green');
+				next_state					: 'ButtonDisplayed'
+			}
+		}				
+}
+ 
 $(document).ready(function() {
-	 myFsm1 = new fsm_manager($('#startgame'),MasterManager,{gamedisplay:$('#theGame')}); //we create the class
-	 myFsm1.InitManager(); //then we init it
-	 $('#playerchoice_bar > div').each(function(){
-		 var aFSM = new fsm_manager($(this),PlayerChoice,{alert:$('#alert'),colorArray:colorArray}); //we create the class
-		 aFSM.InitManager();
+	 $(".onoff").each(function(){
+		 var aFSM = new fsm_manager($(this),aStateDefinitionButton); //create the machine
+		 aFSM.InitManager();	//start it
 	 });
-	 
-	 myFSM3 = new fsm_manager($('#theGame'),GamePlay,{alert:$('#alert'),playerchoices:$('#playerchoice_bar > div')}); //we create the class
-	 myFSM3.InitManager(); //then we init it
-	 
 });
  </script>
  </head>
-<body style="margin-top:100px;">
-<h1>Example 1</h1>
-<div id="alert"></div>
-<p>Choose a color for each column and test if your choice is the correct one</p>
- 
-<button id="startgame">Start Game</button>
-
-<div id="theGame">
-	<div id="playerchoice_bar"><div id="color1"></div><div id="color2"></div><div id="color3"></div><div id="color4"></div></div>
-	<button id="testchoice">Test</button>
-	<div id="results"></div>
-</div>
-
+<body style="margin:100px;">
+    <h2>On-Off Buttons:</h2>
+    <button class="onoff" id="onoff_button1"></button>
+    <button class="onoff" id="onoff_button2"></button>
+    <button class="onoff" id="onoff_button3"></button>
+    <button class="onoff" id="onoff_button4"></button>
+    <button class="onoff" id="onoff_button5"></button>
 </body>
 </html>
