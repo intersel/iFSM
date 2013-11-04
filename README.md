@@ -177,3 +177,7 @@ Within the call of FSM function, you can refer to the FSM by 'this' :
  - this.opts
  - this.EventIteration : the current event iteration
  
+Contact
+=======
+If you have any ideas, feedback, requests or bug reports, you can reach me at emmanuel.podvin@intersel.fr, 
+or via my website: http://www.intersel.fr
