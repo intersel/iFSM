@@ -8,12 +8,12 @@
  * -----------------------------------------------------------------------------------------
  * Modifications :
  * - 2013/10/23 - E.Podvin - V1.0 - Creation
- * - 2012/11/03 - E.Podvin - V1.1 - 	add enter and exit events
- * 					debug on event handlers
+ * - 2013/11/03 - E.Podvin - V1.1 - add
+ * - 2013/11/04 - E.Podvin - V1.2 - add process_event_if condition  
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.1
+ * @version : 1.2
  * -----------------------------------------------------------------------------------------
  */
 
@@ -65,13 +65,15 @@
  * 		<aEventName1>:
  * 		{
  * 			how_process_event: <immediate||push||{delay:<adelay>,preventcancel:<false(default)|true>}>,
+ * 			process_event_if : <a statement that returns boolean>,
+ * 			propagate_event_on_refused : <anEventName>
  * 			init_function: <a function(parameters, event, data)>,
  * 			properties_init_function: <parameters for init_function>,
  * 			next_state: <aStateName>,
  * 			next_state_when: <a statement that returns boolean>,
  * 			out_function: <a function(parameters, event, data)>,
  * 			properties_out_function: <parameters for out_function>,
- * 			next_state_if_error: <aStateName>,
+ * 			next_state_if_error: <aStateName to go if init_function returns false>,
  * 			propagate_event: <void||anEventName>
  * 		},
  * 		<aEventName....>:
@@ -121,6 +123,10 @@
  *   			if delay is defined, the processing of the event is delayed and activated at 'delay'
  *   			by default, any event delayed will be cancelled if the state changes
  *   			if preventcancel is defined, the delayed event won't be cancelled
+ * 			- process_event_if :
+ *   			Definition of condition test that will be evaluated, and if result is true then event will be processed
+ *   			if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
+ * 			- propagate_event_on_refused : an event name to trigger if process_event_if is false
  *   		- init_function  : function name
  *   		- properties_init_function : parameters to send to init_function
  *   		- next_state : next state once init_function done
@@ -420,8 +426,24 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			return;
 		}
 
-		
+		//verify if the event can be processed according to enter condition
+		if 	(		(currentEventConfiguration.process_event_if)
+				&& 	(eval(currentEventConfiguration.process_event_if) == false)					
+			)
+		{
+			this._log('processEvent: event not allowed to process ');
+			if 	(currentEventConfiguration.propagate_event_on_refused)
+			{
+				this._log('processEvent: propagate_event_on_refused ---> '+anEvent+'-'+currentEventConfiguration.propagate_event_on_refused);
+				this.myUIObject.trigger(currentEventConfiguration.propagate_event_on_refused);
+			}
+			//exit as not accepted...
+			return;
+		}
+
+		//ok we will process this event...
 		this.processEventStatus = 'processing';
+		
 		
 		if (this._stateDefinition[currentStateEvent][anEvent].EventIteration == undefined)
 			this._stateDefinition[currentStateEvent][anEvent].EventIteration =0;
