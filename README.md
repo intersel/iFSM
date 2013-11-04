@@ -96,17 +96,17 @@ aStateDefinition //states definition object
 	- 'exitState' : this event is automatically sent and immediatly executed when the FSM exit the state
 	- 'attrchange' : received if any attribute of the jquery object (myUIObject) changed
 		- data sent : event - event object
-						* event.attributeName - Name of the attribute modified
-						* event.oldValue      - Previous value of the modified attribute
-						* event.newValue      - New value of the modified attribute
+			* event.attributeName - Name of the attribute modified
+			* event.oldValue      - Previous value of the modified attribute
+			* event.newValue      - New value of the modified attribute
 	- 'attrchange_<attributename>' (ex: 'attrchange_class') : received if the attribute of the jquery object changed
 		- data sent :
 			* newValue      - New value of the modified attribute
 			* oldValue      - Previous value of the modified attribute
 	- 'attrchange_style_<cssattributename_in_camelcase>' (ex:'attrchange_style_width') : received if the css attribute of the jquery object changed
-    - data sent :
-    	* newValue      - New value of the modified attribute
-    	* oldValue      - Previous value of the modified attribute
+		- data sent :
+		    * newValue      - New value of the modified attribute
+		    * oldValue      - Previous value of the modified attribute
 
   - **how_process_event** [default:{push}] : {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
   	if delay is defined, the processing of the event is delayed and activated at 'delay'
