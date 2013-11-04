@@ -1,7 +1,7 @@
 iFSM
 ====
 
-a Finite State Machine for javascript and JQuery, by Emmanuel Podvin (emmanuel.podvin@intersel.fr) from Intersel (http://www.intersel.fr).
+a powerful Finite State Machine (FSM) for javascript and JQuery, by Emmanuel Podvin (emmanuel.podvin@intersel.fr) from Intersel (http://www.intersel.fr).
 
 How to use it :
 ===============
