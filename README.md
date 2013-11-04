@@ -5,7 +5,7 @@ Finite State Machine for javascript and JQuery
 
 How to use it :
 ===============
-```javascript
+```html
 <!DOCTYPE html>
 <html>
 <head>
