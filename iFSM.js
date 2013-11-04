@@ -8,10 +8,12 @@
  * -----------------------------------------------------------------------------------------
  * Modifications :
  * - 2013/10/23 - E.Podvin - V1.0 - Creation
+ * - 2012/11/03 - E.Podvin - V1.1 - 	add enter and exit events
+ * 					debug on event handlers
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.0
+ * @version : 1.1
  * -----------------------------------------------------------------------------------------
  */
 
@@ -47,7 +49,7 @@
  *				}
  * }
  * myFsm1 = new fsm_manager($('#myButton1', aStateDefinition); //we create the FSM object
- * myFsm1->InitManager(); //then we init it and attach it to an jquery object
+ * myFsm1->InitManager(); //then we init it 
  * </script>
  * </code>
  *
@@ -74,16 +76,19 @@
  * 		},
  * 		<aEventName....>:
  * 		{
- * 		}
+ * 			....
+ * 		},
+ * 		'enterState' : ...
+ * 		'exitState' :  ...
  * 	},
  * 	<aStateName...> :
  * 	{
+ * 		....
  * 	},
  *  DefaultState :
  * 	{
  * 		start: //a default start event received at the FSM start
  * 		{
- * 			
  * 		},
  * 		<aEventName....>:
  * 		{
@@ -96,7 +101,10 @@
  *   			the name of an event. may be any event name supported by JQuery.
  *   			define an event we want to be alerted when it occurs on the object
  *   			specific events :
- *   				- 'attrchange' : received if any attribute of the jquery object changed
+ *   				- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
+ *   				- 'enterState' : this event is automatically sent and immediatly executed when the FSM enter the state
+ *   				- 'exitState' : this event is automatically sent and immediatly executed when the FSM exit the state
+ *   				- 'attrchange' : received if any attribute of the jquery object (myUIObject) changed
  *   					- data sent : event - event object
  *   									* event.attributeName - Name of the attribute modified
  *   									* event.oldValue      - Previous value of the modified attribute
@@ -137,8 +145,11 @@
  *   - event trigger should be sent at the end of the state function with a return just behind...
  *   - state function should have one argument : data
  *   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
+ *   - an event is first search in the current state, then if not found in the 'DefaultState'
+ *   - if an event is not found, nothing is done...
  *   - it will be applied if there is no event definition in the current state
  *   - a 'start' event is triggered when the FSM is started with InitManager
+ *   - 
  *   
  * the public available variables :
  * 	- myFSM.currentState
@@ -146,6 +157,7 @@
  *  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration
  *  
  * @param anObject - a jquery object on which the FSM applies. 
+ * 						should have the property 'id' defined
  * @param options - an object defining the options:
  * 	- boolean debug
  *  - integer LogLevel -
@@ -188,9 +200,9 @@ var fsm_manager =  function (anObject, aStateDefinition, options)
 	this.pushEventList	= new Array();
 	
 	/*
-	 * myObject		- Target object of the FSM
+	 * myUIObject		- Target object of the FSM
 	 */
-	this.myObject	= anObject;
+	this.myUIObject	= anObject;
 
 	var aState;
 	var aEvent;
@@ -323,7 +335,7 @@ fsm_manager.prototype.InitManager	= function(aInitState)
 	if (this._stateDefinition['DefaultState']==undefined)
 		this._stateDefinition.DefaultState={};
 	
-	this.myObject.trigger('start');
+	this.myUIObject.trigger('start');
 	
 };//
 
@@ -354,10 +366,12 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			return;
 		}
 		
+		if ( ( anEvent == 'enterState' ) || ( anEvent == 'exitState' ) ) doForceProcess = true;
+		
 		currentEventConfiguration = this._stateDefinition[currentState][anEvent];
 		
 		//element is not a right target...
-		if (!this.myObject.is(currentEvent.target) && !$.isWindow(currentEvent.target)) 
+		if (!this.myUIObject.is(currentEvent.target) && !$.isWindow(currentEvent.target)) 
 		{
 			this._log('processEvent: object not a good target  ---> '+$(currentEvent.target).attr('id'),2);
 			return;
@@ -440,19 +454,26 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			//we cancel any waiting events on the state
 			this.cancelDelayedProcess();
 			
+			//we alert that we're exiting the state
+			this.myUIObject.trigger('exitState');
+
 			//we change the current state
 			this.currentState = currentEventConfiguration.next_state;
+			
+			//and now that we're entering the new state
+			this.myUIObject.trigger('enterState');
 
 			//propagate event if asked
 			this._log('processEvent: new state ---> '+this.currentState);
+
 			if 	(currentEventConfiguration.propagate_event != undefined)
 			{
 				//on propage que si état différent... attention tout de même aux boucles!
 				this._log('processEvent: trigger event ---> '+anEvent+'-'+currentEventConfiguration.propagate_event);
 				if (currentEventConfiguration.propagate_event == null) 
-					this.myObject.trigger( anEvent, data[1]);
+					this.myUIObject.trigger( anEvent, data[1]);
 				else
-					this.myObject.trigger( currentEventConfiguration.propagate_event, data[1]);
+					this.myUIObject.trigger( currentEventConfiguration.propagate_event, data[1]);
 			}
 		}
 		else if ( 	(funcReturn != false) 
@@ -462,9 +483,9 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			//propagate if the event is different from the current one... but user should take care of loop!
 			this._log('processEvent: trigger event same state ---> '+anEvent+'-'+currentEventConfiguration.propagate_event);
 			if (currentEventConfiguration.propagate_event == null) 
-				this.myObject.trigger( anEvent, data[1]);
+				this.myUIObject.trigger( anEvent, data[1]);
 			else if (currentEventConfiguration.propagate_event != anEvent) //to avoid loop
-				this.myObject.trigger( currentEventConfiguration.propagate_event, data[1]);
+				this.myUIObject.trigger( currentEventConfiguration.propagate_event, data[1]);
 		}
 		//oups there was an error during the processing of the action
 		else if ( (funcReturn == false) && (currentEventConfiguration.next_state_if_error) )
@@ -473,12 +494,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			this.currentState = currentEventConfiguration.next_state_if_error;
 		}
 		
-		this.processEventStatus = 'idle'; //we globally finished the job, we can process the triggered event
+		this.processEventStatus = lastprocessEventStatus; //we globally finished the job...
 		
-		// processing lasting events
-		while (this.popEvent());
-		this._log('processEvent: popevent done ---> ');
-
 		// do the exit action
 		if (currentEventConfiguration.out_function) 
 		{
@@ -487,6 +504,14 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			funcReturn= currentEventConfiguration.out_function.apply(this,localdata);
 			this._log('processEvent: end out---> '+anEvent);
 		}
+
+		// processing lasting events
+		//we don't process the events if we were currently on an immediate event...
+		if (this.processEventStatus == 'idle')
+			while (this.popEvent());
+
+		this._log('processEvent: popevent done ---> ');
+
 };//end of processEvent
 
 
@@ -532,7 +557,7 @@ fsm_manager.prototype.popEvent	= function() {
 fsm_manager.prototype.delayProcess	= function(anEvent, aDelay, data) {
 	this._log('delayProcess:  ---> '+anEvent);
 	//setTimeout(this.launchProcess,aDelay,this,anEvent,data);
-	jQuery.doTimeout(this._stateDefinition[this.currentState]+anEvent,aDelay,fsm_manager_launchProcess,this,anEvent,data);
+	jQuery.doTimeout(this.myUIObject.attr('id')+this._stateDefinition[this.currentState]+anEvent,aDelay,fsm_manager_launchProcess,this,anEvent,data);
 };
 
 /*
