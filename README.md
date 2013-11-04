@@ -1,7 +1,7 @@
 iFSM
 ====
 
-a powerful Finite State Machine (FSM) for javascript and JQuery, by Emmanuel Podvin (emmanuel.podvin@intersel.fr) from Intersel (http://www.intersel.fr).
+A  (yet another) powerful and flexible Finite State Machine (FSM) for javascript and JQuery.
 
 How to use it :
 ===============
@@ -104,8 +104,8 @@ aStateDefinition //states definition object
 
 - **statename** :
   - **eventname** : <br>
-  the name of an event. may be any event name supported by JQuery.<br>
-  define an event we want to be alerted when it occurs on the object<br>
+  the name of an event. May be any event name, supported by javascript or not (should be manually triggered).<br>
+  It defines an event we want to be alerted when it occurs on the object<br>
 	specific events :<br>
 	- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
 	- 'enterState' : this event is automatically sent and immediatly executed when the FSM enter the state
@@ -154,12 +154,9 @@ Remarks
   	- parameters : the properties_<init/out>_function
   	- event : the event 
   	- data : the data sent with the event
-  - event trigger should be sent at the end of the state function with a return just behind...
-  - state function should have one argument : data
   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
   - an event is first search in the current state, then if not found in the 'DefaultState'
   - if an event is not found, nothing is done...
-  - it will be applied if there is no event definition in the current state
   - a 'start' event is triggered when the FSM is started with InitManager
   
 The public available variables
