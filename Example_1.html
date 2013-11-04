@@ -48,50 +48,50 @@
 
 var aStateDefinitionButton = {
 
-		ButtonDisplayed		: 
+	ButtonDisplayed		: 
+	{
+		enterState : 
 		{
-			enterState : 
-			{
-				init_function					: function (){this.myUIObject.html("on").attr({'class':'on'});this.opts.counter=3}
-			},
-			exitState : 
-			{
-				init_function					: function (){this.myUIObject.html("wait");}
-			},
-			click	:	
-			{
-				process_event_if			: '(this.opts.counter<=0)',
-				propagate_event_on_refused	: 'notReady',
-				next_state					: 'ButtonUnDisplayed'
-			},
-			notReady :
-			{
-				init_function				: function (){this.myUIObject.html(this.opts.counter);this.opts.counter=this.opts.counter-1;}
-			}
+			init_function		: function (){this.myUIObject.html("on").attr({'class':'on'});this.opts.counter=3}
 		},
-		ButtonUnDisplayed		: 
+		exitState : 
 		{
-			enterState : 
-			{
-				init_function					: function (){this.myUIObject.trigger('setText');}
-			},
-			setText :
-			{
-				init_function					: function (){this.myUIObject.html("off").attr({'class':'off'});},
-				how_process_event				: {delay:1000}
-			},
-			click	:	
-			{
-				next_state					: 'ButtonDisplayed'
-			}
+			init_function		: function (){this.myUIObject.html("wait");}
 		},
-		DefaultState			:
+		click	:	
 		{
-			start	:	
-			{
-				next_state					: 'ButtonDisplayed'
-			}
-		}				
+			process_event_if		: '(this.opts.counter<=0)',
+			propagate_event_on_refused	: 'notReady',
+			next_state			: 'ButtonUnDisplayed'
+		},
+		notReady :
+		{
+			init_function		: function (){this.myUIObject.html(this.opts.counter);this.opts.counter=this.opts.counter-1;}
+		}
+	},
+	ButtonUnDisplayed		: 
+	{
+		enterState : 
+		{
+			init_function		: function (){this.myUIObject.trigger('setText');}
+		},
+		setText :
+		{
+			init_function		: function (){this.myUIObject.html("off").attr({'class':'off'});},
+			how_process_event	: {delay:1000}
+		},
+		click	:	
+		{
+			next_state		: 'ButtonDisplayed'
+		}
+	},
+	DefaultState			:
+	{
+		start	:	
+		{
+			next_state		: 'ButtonDisplayed'
+		}
+	}				
 }
  
 $(document).ready(function() {
