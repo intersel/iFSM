@@ -16,7 +16,7 @@
     padding: 0 20px;
   }
   button {
-    margin: 0 2px;
+    margin: 2px 2px;
     font-size: 20px;
     border: 1px solid #333;
     width: 70px;
@@ -43,6 +43,19 @@
     background: -ms-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
     background: linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
   }
+  
+  #result {
+    background-color: #5BB75B;
+    background-image: linear-gradient(to bottom, #62C462, #51A351);
+    background-repeat: repeat-x;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    color: #FFFFFF;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    font-size: 20px;
+    line-height: 25px;
+    padding: 2px 6px;
+    width: 200px;
+    }
 </style>
 
 <script type="text/javascript">
@@ -282,6 +295,10 @@ $(document).ready(function() {
 Example inspired from <a href="http://en.wikipedia.org/wiki/UML_state_machine">http://en.wikipedia.org/wiki/UML_state_machine</a>
 </p>
 <p>Click on the "On/C" button, then you can do some simple calculations...</p>
+    <section id="infobox">
+    	<h2>Result</h2>
+    	<div id="result"></div>
+    </section>
 	<section id="controlsbuttons">
 	    <h2>Controls</h2>
 	    <button class="onoff on" id="ONC" data-action="seton">On/C</button>
@@ -289,29 +306,25 @@ Example inspired from <a href="http://en.wikipedia.org/wiki/UML_state_machine">h
     </section>
 	<section id="operandbuttons">
 	    <h2>Keyboard</h2>
-	    <button class="onoff on" id="k0">0</button>
-	    <button class="onoff on" id="k1">1</button>
-	    <button class="onoff on" id="k2">2</button>
-	    <button class="onoff on" id="k3">3</button>
-	    <button class="onoff on" id="k4">4</button>
-	    <button class="onoff on" id="k5">5</button>
-	    <button class="onoff on" id="k6">6</button>
 	    <button class="onoff on" id="k7">7</button>
 	    <button class="onoff on" id="k8">8</button>
-	    <button class="onoff on" id="k9">9</button>
-	    <button class="onoff on" id="k0">,</button>
+	    <button class="onoff on" id="k9">9</button><br>
+	    <button class="onoff on" id="k4">4</button>
+	    <button class="onoff on" id="k5">5</button>
+	    <button class="onoff on" id="k6">6</button><br>
+	    <button class="onoff on" id="k1">1</button>
+	    <button class="onoff on" id="k2">2</button>
+	    <button class="onoff on" id="k3">3</button><br>
+	    <button class="onoff on" id="k0">0</button>
+	    <button class="onoff on" id="kcomma">,</button>
     </section>
 	<section id="operatorbuttons">
 	    <h2>Operators</h2>
 	    <button class="onoff on" id="kplus">+</button>
 	    <button class="onoff on" id="kminus">-</button>
 	    <button class="onoff on" id="kdivied">/</button>
-	    <button class="onoff on" id="kmultiply">*</button>
+	    <button class="onoff on" id="kmultiply">*</button><br>
 	    <button class="onoff on" id="kequal">=</button>
-    </section>
-    <section id="infobox">
-    	<h2>Result</h2>
-    	<div id="result"></div>
     </section>
 </body>
 </html>
