@@ -183,7 +183,7 @@ var PocketCalculator = {
 		{
 			enterState : 
 			{
-				init_function					: function (){this.myUIObject.html('allumé');}
+				init_function					: function (){this.myUIObject.html('computer on');}
 			},
 			delegate_machines	: 
 			{
@@ -198,7 +198,7 @@ var PocketCalculator = {
 		{
 			enterState : 
 			{
-				init_function					: function (){this.myUIObject.html('éteint');}
+				init_function					: function (){this.myUIObject.html('computer off');}
 			},
 			seton	:	
 			{
@@ -281,6 +281,7 @@ $(document).ready(function() {
 <p>
 Example inspired from <a href="http://en.wikipedia.org/wiki/UML_state_machine">http://en.wikipedia.org/wiki/UML_state_machine</a>
 </p>
+<p>Click on the "On/C" button, then you can do some simple calculations...</p>
 	<section id="controlsbuttons">
 	    <h2>Controls</h2>
 	    <button class="onoff on" id="ONC" data-action="seton">On/C</button>
