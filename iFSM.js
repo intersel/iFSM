@@ -10,10 +10,11 @@
  * - 2013/10/23 - E.Podvin - V1.0 - Creation
  * - 2013/11/03 - E.Podvin - V1.1 - add
  * - 2013/11/04 - E.Podvin - V1.2 - add process_event_if condition  
+ * - 2013/11/05 - E.Podvin - V1.3 - add sub machine to manage hierarchical state machines (HSM)
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.2
+ * @version : 1.3
  * -----------------------------------------------------------------------------------------
  */
 
@@ -62,6 +63,19 @@
  * { 
  * 	<aStateName1> :
  * 	{
+ * 		delegate_machines	: 
+ * 		{
+ * 			<aSubMachine name 1> : 
+ * 			{
+ * 				submachine : <a State definition>
+ * 			},			
+ * 			<aSubMachine name i> : 
+ * 			{
+ * 				submachine : <a State definition>
+ * 			},			
+ * 			...
+ * 		},	 
+ *  		
  * 		<aEventName1>:
  * 		{
  * 			how_process_event: <immediate||push||{delay:<adelay>,preventcancel:<false(default)|true>}>,
@@ -80,8 +94,8 @@
  * 		{
  * 			....
  * 		},
- * 		'enterState' : ...
- * 		'exitState' :  ...
+ * 		enterState : ...
+ * 		exitState :  ...
  * 	},
  * 	<aStateName...> :
  * 	{
@@ -99,6 +113,8 @@
  * }
  * 
  *   - statename :
+ *   	- delegate_machines : sub machines list to delegate the events on the state
+ *   		- submachine : the variable name of a state definition or a state definition description
  *   	- eventname : 
  *   			the name of an event. may be any event name supported by JQuery.
  *   			define an event we want to be alerted when it occurs on the object
@@ -127,7 +143,7 @@
  *   			Definition of condition test that will be evaluated, and if result is true then event will be processed
  *   			if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
  * 			- propagate_event_on_refused : an event name to trigger if process_event_if is false
- *   		- init_function  : function name
+ *   		- init_function  : function name or a function statement
  *   		- properties_init_function : parameters to send to init_function
  *   		- next_state : next state once init_function done
  *   		- next_state_when : 
@@ -143,24 +159,38 @@
  *   							if it's the name of an event, triggers the event...
  *   
  * @remarks
- *   - state function should return a boulean : true: ok works fine; false: error
- *   - state function should have the following input :
- *   	- parameters : the properties_<init/out>_function
- *   	- event : the event 
- *   	- data : the data sent with the event
- *   - event trigger should be sent at the end of the state function with a return just behind...
- *   - state function should have one argument : data
- *   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
- *   - an event is first search in the current state, then if not found in the 'DefaultState'
- *   - if an event is not found, nothing is done...
- *   - it will be applied if there is no event definition in the current state
- *   - a 'start' event is triggered when the FSM is started with InitManager
- *   - 
+ * - state function should return a boolean : true: ok works fine; false: error
+ * - state function should have the following input :
+ * 		- parameters : the properties_<init/out>_function
+ * 		- event : the event
+ * 		- data : the data sent with the event
+ * - a default statename 'DefaultState' can be defined to define the default behaviour of some events...
+ * - an event is first search in the current state, then if not found in the 'DefaultState'
+ * - if an event is not found, nothing is done...
+ * - a 'start' event is triggered when the FSM is started with InitManager
+ * - when there are sub machines defined for a state :
+ * 		- the events are sent to each defined submachines in the order
+ * 		- once the event is processed by the submachines, it is bubbled to the upper machines
+ * 		- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
+ * 		- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
  *   
- * the public available variables :
- * 	- myFSM.currentState
- *  - myFSM._stateDefinition
- *  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration
+ * The public available variables :
+ * 	- myFSM.currentState : current state name
+ *  - myFSM.myUIObject : the jQuery object associated to the FSM
+ *  - myFSM._stateDefinition : the definition of the states and events
+ *  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
+ *  - myFSM.opts - the defined options. Generally used to store local data
+ *  - myFSM.rootMachine : the root machine
+ *  - myFSM.parentMachine : the parent machine if we're in a sub machine (null if none)
+ *  
+ *  Within the call of FSM function, you can refer to the FSM by 'this' :
+ *  - this.currentState
+ *  - this.myUIObject
+ *  - this._stateDefinition
+ *  - this.opts
+ *  - this.EventIteration : the current event iteration
+ *  - this.rootMachine
+ *  - this.parentMachine
  *  
  * @param anObject - a jquery object on which the FSM applies. 
  * 						should have the property 'id' defined
@@ -210,26 +240,51 @@ var fsm_manager =  function (anObject, aStateDefinition, options)
 	 */
 	this.myUIObject	= anObject;
 
+	/*
+	 * @param listEvents - array of the events subscribed
+	 */
+	this.listEvents	={};
+
+	/*
+	 * @param rootMachine - root FSM machine of this current FSM
+	 */
+	if (this.opts.rootMachine == undefined) this.opts.rootMachine = this;
+	this.rootMachine = this.opts.rootMachine;
+	
+	/*
+	 * @param parentMachine - parent machine of this current one
+	 */
+	if (this.opts.nextParent == undefined) this.parentMachine = null;
+	else this.parentMachine = this.opts.nextParent;
+	this.opts.nextParent = this; //
+
 	var aState;
 	var aEvent;
-	var listEvents	={};
 	var theEvents	='';
 	var space		='';
 	var theTarget=$(document);
 	var attrChangeRequested 		= false;
 	var attrStyleChangeRequested 	= false;
 	var attrChangeEvents 			= new Array();
-
+	
+	
 	//look for all the defined and unique events
-	for(aState in this._stateDefinition) {
-		for(aEvent in this._stateDefinition[aState]) {
-			listEvents[aEvent]=aEvent;
+	for(aState in this._stateDefinition) 
+	{
+		for(aEvent in this._stateDefinition[aState]) 
+		{
+			if (!this.rootMachine.listEvents[aEvent] && aEvent != 'delegate_machines')
+			{
+				this.listEvents[aEvent]=aEvent;
+				if (this != this.rootMachine)
+					this.rootMachine.listEvents[aEvent]=aEvent;
+			}
 		}
 	}
 	
 	//list all defined events in the FSM in a $.on format
 	var splitevent='';
-	for(aEvent in listEvents) 
+	for(aEvent in this.listEvents) 
 	{
 		splitevent = aEvent.split('_');
 		if ( splitevent[0] == 'attrchange' )
@@ -313,7 +368,7 @@ var fsm_manager =  function (anObject, aStateDefinition, options)
 	//if target object not a document one
 	if ($.isWindow(anObject[0])) theTarget = $(window);
 	
-	var myFSM=this;
+	var myFSM=this.rootMachine;
 	if (theEvents!='')
 		theTarget.on(theEvents, anObject.selector, function( event, dataevent )
 		{ 
@@ -364,7 +419,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		var currentEvent = data[0];
 		var EventIteration;
 
-		this._log('processEvent: anEvent (currentState) target ---> '+anEvent+'('+currentState+')-'+$(currentEvent.target).attr('id'),2);
+		this._log('processEvent: anEvent (currentState) currentTarget ---> '+anEvent+'('+currentState+')-'+$(currentEvent.currentTarget).attr('id'),2);
 
 		if (this._stateDefinition[currentState]==undefined)
 		{
@@ -374,15 +429,14 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		
 		if ( ( anEvent == 'enterState' ) || ( anEvent == 'exitState' ) ) doForceProcess = true;
 		
-		currentEventConfiguration = this._stateDefinition[currentState][anEvent];
-		
-		//element is not a right target...
-		if (!this.myUIObject.is(currentEvent.target) && !$.isWindow(currentEvent.target)) 
+		//element is not a right target...?
+		if (!this.myUIObject.is(currentEvent.currentTarget) && (this.myUIObject[0] != document) && !$.isWindow(currentEvent.currentTarget)) 
 		{
-			this._log('processEvent: object not a good target  ---> '+$(currentEvent.target).attr('id'),2);
+			this._log('processEvent: object not a good target  ---> '+$(currentEvent.currentTarget).attr('id'),2);
 			return;
 		}
 		
+		currentEventConfiguration = this._stateDefinition[currentState][anEvent];
 
 		//if we are still processing we push the event, except if explicitly asked otherwise
 		//see if we should push the event
@@ -406,6 +460,44 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			return;
 		}
 
+		// we try to process the event in any sub machines...
+		if ( ( this._stateDefinition[currentState].delegate_machines ) 
+			)
+		{
+			var aSubMachineDefinition;
+			for(aSubMachine in this._stateDefinition[currentState].delegate_machines) 
+			{
+				aSubMachineDefinition = this._stateDefinition[currentState].delegate_machines[aSubMachine];
+				
+				//initialize the sub machines if needed
+				if (aSubMachineDefinition.myFSM == undefined)
+				{
+					this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM = new fsm_manager(this.myUIObject,aSubMachineDefinition.submachine,this.opts); //create the machine
+					this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM.opts.FSMParent=this;
+					this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM.InitManager();
+				}
+				
+				// process event except on the enterState and exitState events that are not to be delegated...
+				if 	( ( anEvent != 'enterState' ) && ( anEvent != 'exitState' ) ) 
+				{
+					aSubMachineDefinition.myFSM.processEvent(anEvent,data,true);
+				
+					if (		
+								(	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
+								&& 	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent].prevent_bubble
+								)
+							||
+								(	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent]
+								&& 	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent].prevent_bubble
+								)
+							|| 	anEvent == 'start'
+						) 
+						return;
+				}
+			}
+		}
+		
+		// we now process the event in the current state
 		if (currentEventConfiguration == undefined)
 		{
 			currentEventConfiguration = this._stateDefinition.DefaultState[anEvent];
@@ -477,13 +569,18 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			this.cancelDelayedProcess();
 			
 			//we alert that we're exiting the state
-			this.myUIObject.trigger('exitState');
+			var anEv = data;
+			anEv[0].type='exitState';
+			this.processEvent('exitState',anEv,true);
+			//this.myUIObject.trigger('exitState');
 
 			//we change the current state
 			this.currentState = currentEventConfiguration.next_state;
 			
 			//and now that we're entering the new state
-			this.myUIObject.trigger('enterState');
+			anEv[0].type='enterState';
+			this.processEvent('enterState',anEv,true);
+			//this.myUIObject.trigger('enterState');
 
 			//propagate event if asked
 			this._log('processEvent: new state ---> '+this.currentState);
@@ -492,7 +589,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			{
 				//on propage que si état différent... attention tout de même aux boucles!
 				this._log('processEvent: trigger event ---> '+anEvent+'-'+currentEventConfiguration.propagate_event);
-				if (currentEventConfiguration.propagate_event == null) 
+				if (currentEventConfiguration.propagate_event === true) 
 					this.myUIObject.trigger( anEvent, data[1]);
 				else
 					this.myUIObject.trigger( currentEventConfiguration.propagate_event, data[1]);
