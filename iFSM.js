@@ -206,7 +206,7 @@
 var fsm_manager =  function (anObject, aStateDefinition, options)
 {
 	var $defaults = {
-			debug				: true,
+			debug				: false,
 			LogLevel			: 3,
 			AlertError			: false
 		}
