@@ -1,7 +1,7 @@
 iFSM
 ====
 
-A  (yet another) powerful and flexible Finite State Machine (FSM) for javascript and JQuery.
+A  (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for javascript and JQuery.
 
 How to use it :
 ===============
@@ -116,7 +116,7 @@ var aStateDefinition =
 ```
 
 - **statename** :
-  - delegate_machines : sub machines list to delegate the events on the state
+  - **delegate_machines** : sub machines list to delegate the events on the state
   	- submachine : the variable name of a state definition or a state definition description
   - **eventname** : <br>
   the name of an event. May be any event name, supported by javascript or not (should be manually triggered).<br>
