@@ -66,6 +66,18 @@ var aStateDefinition =
 { 
 	<aStateName1> :
 	{
+ 		delegate_machines	: 
+ 		{
+	 		<aSubMachine name 1> : 
+	 		{
+	 			submachine : <a State definition>
+	 		},			
+	 		<aSubMachine name i> : 
+	 		{
+	 			submachine : <a State definition>
+			},			
+	 		...
+ 		},	 
 		<aEventName1>:
 		{
 			how_process_event: <immediate||push||{delay:<adelay>,preventcancel:<false(default)|true>}>,
@@ -84,8 +96,8 @@ var aStateDefinition =
 		{
 			....
 		},
-		'enterState' : ...
-		'exitState' :  ...
+		enterState : ...
+		exitState :  ...
 	},
 	<aStateName...> :
 	{
@@ -104,6 +116,8 @@ var aStateDefinition =
 ```
 
 - **statename** :
+  - delegate_machines : sub machines list to delegate the events on the state
+  	- submachine : the variable name of a state definition or a state definition description
   - **eventname** : <br>
   the name of an event. May be any event name, supported by javascript or not (should be manually triggered).<br>
   It defines an event we want to be alerted when it occurs on the object<br>
@@ -159,6 +173,11 @@ Remarks
   - an event is first search in the current state, then if not found in the 'DefaultState'
   - if an event is not found, nothing is done...
   - a 'start' event is triggered when the FSM is started with InitManager
+  - when there are sub machines defined for a state :
+	- the events are sent to each defined submachines in the order
+	- once the event is processed by the submachines, it is bubbled to the upper machines
+	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
+	- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
   
 The public available variables
 ==============================
@@ -167,6 +186,8 @@ The public available variables
  - myFSM._stateDefinition : the definition of the states and events
  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
  - myFSM.opts - the defined options
+ - myFSM.rootMachine : the root machine
+ - myFSM.parentMachine : the parent machine if we're in a sub machine (null if none)
  
 Within the call of FSM function, you can refer to the FSM by 'this' :
  - this.currentState
