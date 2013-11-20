@@ -80,17 +80,20 @@ var aStateDefinition =
  		},	 
 		<aEventName1>:
 		{
-			how_process_event: <immediate||push||{delay:<adelay>,preventcancel:<false(default)|true>}>,
-			process_event_if : <a statement that returns boolean>,
-			propagate_event_on_refused : <anEventName>
-			init_function: <a function(parameters, event, data)>,
-			properties_init_function: <parameters for init_function>,
-			next_state: <aStateName>,
-			next_state_when: <a statement that returns boolean>,
-			out_function: <a function(parameters, event, data)>,
-			properties_out_function: <parameters for out_function>,
-			next_state_if_error: <aStateName to go if init_function returns false>,
-			propagate_event: <void||anEventName>
+ 			how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
+ 			process_on_UItarget: <true|false(default)>
+ 			process_event_if : <a statement that returns boolean>,
+ 			propagate_event_on_refused : <anEventName>
+ 			init_function: <a function(parameters, event, data)>,
+ 			properties_init_function: <parameters for init_function>,
+ 			next_state: <aStateName>,
+ 			next_state_when: <a statement that returns boolean>,
+ 			out_function: <a function(parameters, event, data)>,
+ 			properties_out_function: <parameters for out_function>,
+ 			next_state_if_error: <aStateName to go if init_function returns false>,
+ 			propagate_event: <void||anEventName>
+ 			prevent_bubble: <true|false(default)>
+ 			UI_event_bubble: <true|false(default)>
 		},
 		<aEventName....>:
 		{
@@ -161,6 +164,11 @@ var aStateDefinition =
   - **next_state_if_error** (default: does not change state) : state set if init_function return false
   - **propagate_event** : if defined, the current event is propagated to the next state
   					if it's the name of an event, triggers the event...
+  - **prevent_bubble** : if defined and true, the current event will not bubble to its parent machine
+  - **UI_event_bubble** : if defined and true, the current event will bubble. By default, no UI event bubbling...
+  - **process_on_UItarget** : if defined and true, the current event will be processed only if the event was directly targeting 
+   									the UI jQuery object linked to the machine
+
   
 Remarks
 ========
@@ -172,13 +180,26 @@ Remarks
   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
   - an event is first search in the current state, then if not found in the 'DefaultState'
   - if an event is not found, nothing is done...
+
+SubMachine
+==========
   - a 'start' event is triggered when the FSM is started with InitManager
   - when there are sub machines defined for a state :
 	- the events are sent to each defined submachines in the order
 	- once the event is processed by the submachines, it is bubbled to the upper machines
 	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
 	- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
-  
+  - to trigger an event to the machine itself, use can use the 'trigger' function
+      ex: myFSM.trigger('myevent');
+  - it is possible to trigger any event to a machine with the jquery trigger function :
+  		ex: $('#myButton1').trigger('start',{targetFSM:myFsm});
+ - within a state function, it is possible to trigger event to any machine using its linked jQuery object : myFSM.myUIObject
+    	ex : this.myUIObject.trigger('aEventName')
+ - if multiple machine are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
+    	ex : this.myUIObject.trigger('aEventName',{targetFSM:this})
+ - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
+ - a sub machine can manage its first state by handling the 'start' event in the DefaultState
+
 The public available variables
 ==============================
  - myFSM.currentState : current state name
