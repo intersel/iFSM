@@ -12,6 +12,7 @@
  * - 2013/11/04 - E.Podvin - V1.2 - add process_event_if condition  
  * - 2013/11/05 - E.Podvin - V1.3 - add sub machine to manage hierarchical state machines (HSM)
  * - 2013/11/12 - E.Podvin - V1.4 - debug on submachine management
+ * - 2013/11/22 - E.Podvin - V1.5 - add 'next_state_on_target' to change a state according to the submachine states
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
@@ -68,7 +69,8 @@
  * 		{
  * 			<aSubMachine name 1> : 
  * 			{
- * 				submachine : <a State definition>
+ * 				submachine : <a State definition>,
+ * 				no_reinitialisation : <boolean, default:false>
  * 			},			
  * 			<aSubMachine name i> : 
  * 			{
@@ -87,6 +89,20 @@
  * 			properties_init_function: <parameters for init_function>,
  * 			next_state: <aStateName>,
  * 			next_state_when: <a statement that returns boolean>,
+ * 			next_state_on_target : 
+ * 			{
+ * 				condition 			: <logical_operator : '||' '&&'>
+ * 				submachines			: 
+ * 				{
+ * 					<submachineName1> 	: 
+ * 					{
+ * 						condition	: <'' 'not'>
+ * 						target_list : [<targetState1>,...,<targetStaten>],
+ *					}
+ * 					...
+ * 					<submachineNamen> 	: ...
+ *				}
+ * 			}
  * 			out_function: <a function(parameters, event, data)>,
  * 			properties_out_function: <parameters for out_function>,
  * 			next_state_if_error: <aStateName to go if init_function returns false>,
@@ -157,6 +173,12 @@
  *   			this	: the FSM object
  *   			this.EventIteration : variable that gives the iteration of the number of calls of the current event. 
  *   							 EventIteration is reset when the state changes
+ *   		- next_state_on_target :
+ *   			Definition of condition test based on the current states of the defined submachines
+ *   			the test consist to :
+ *   				- get the current states of each defined sub-machines, 
+ *   				- match the current state to the given array, resulting to true if found 
+ *   				- apply the defined operator between the results
  *   		- out_function	 : function name to do once next_state changed
  *   		- properties_out_function : parameters to send to out_function
  *   		- next_state_if_error (default: does not change state) : state set if init_function return false
@@ -182,14 +204,23 @@
  * 		- the events are sent to each defined submachines in the order
  * 		- once the event is processed by the submachines, it is bubbled to the upper machines
  * 		- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
- * 		- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
+ * 		- a submachine works as the main one : 
+ * 			- if no_reinitialisation == false (default) it is initialised 
+ * 			- then starts once entering in the state 
+ * 			- a start event is triggered to it
  *   
+ * - to trigger an event to the machine itself, use can use the 'trigger' function
+ *      ex: myFSM.trigger('myevent');
  * - it is possible to trigger any event to a machine with the jquery trigger function :
  * 		ex: $('#myButton1').trigger('start',{targetFSM:myFsm});
  * - within a state function, it is possible to trigger event to any machine using its linked jQuery object : myFSM.myUIObject
  *   	ex : this.myUIObject.trigger('aEventName')
  * - if multiple machine are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
  *   	ex : this.myUIObject.trigger('aEventName',{targetFSM:this})
+ * - beware that if the submachine is no more accessible, it won't perhaps receive the message you triggered from it.
+ * 		a workaround is to directly "push" an event in order that it will be processed within the flow of the current event processing.
+ * 		the function to use is myFSM.pushEvent(anEventName, data) (or this.pushEvent in a FSM function)
+ * 		ex: 			init_function : function(){this.pushEvent('setText','I push an event');},
  * - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
  * - a sub machine can manage its first state by handling the 'start' event in the DefaultState
  * - as the structure definition of the states of a machine is a javascript object, 
@@ -202,7 +233,7 @@
  * }
  * var myMachine = {
  * 	aState1 : 
- * 		firstEvent 	: myGenericEvent,
+ * 		firstEvent 	: $.extend(true, {}, myGenericEvent),
  * 		secondEvent	: {...eventdefinition...},
  * 		thirdEvent	: myGenericEvent,
  * ....
@@ -261,7 +292,7 @@ var fsm_manager =  function (anObject, aStateDefinition, options)
 			maxPushEvent		: 10,
 			startEvent			: 'start',
 			prefixFsmName		: 'FSM_',
-			logFSM				: "",
+			logFSM				: "FSM_10",
 		}
 		
 	nb_FSM = nb_FSM+1;
@@ -616,7 +647,15 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				}
 				
 				if 	( anEvent == 'enterState' )
-					aSubMachineDefinition.myFSM.InitManager();//reinit the sub machine
+				{
+					if (	(aSubMachineDefinition.myFSM.currentState =='')//never initialised if ==''
+						||	(aSubMachineDefinition.no_reinitialisation == undefined)
+						||	(aSubMachineDefinition.no_reinitialisation == false)
+						)
+					{
+						aSubMachineDefinition.myFSM.InitManager();//reinit the sub machine
+					}
+				}
 				else if	( anEvent == 'exitState' )
 				{
 					aSubMachineDefinition.myFSM.trigger('exitMachine');//stop the sub machine
@@ -755,8 +794,18 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			&& 	(currentEventConfiguration.next_state) 
 			&& 	(currentState != currentEventConfiguration.next_state) 
 			&&	(
-					(currentEventConfiguration.next_state_when == undefined)
-				|| 	(eval(currentEventConfiguration.next_state_when) == true)					
+					(
+						(currentEventConfiguration.next_state_when 		== undefined)
+					&& 	(currentEventConfiguration.next_state_on_target == undefined)
+					)
+				|| 	(
+						(currentEventConfiguration.next_state_when) 
+					&& 	(eval(currentEventConfiguration.next_state_when) == true)
+					)
+				|| 	(
+						(currentEventConfiguration.next_state_on_target)
+					&& 	(this.subMachinesRespectTargets(anEvent) == true)
+					)
 				)
 			)
 		{
@@ -850,10 +899,11 @@ fsm_manager.prototype.cleanExitProcess	= function(anEvent,data) {
 }
 
 /*
- * pushEvent - push an event
- * private Method 
+ * pushEvent - push an event in the flow of the processing of an event
+ * public Method 
  * @param anEvent 	: an event name 
  * @param data		: {event, data}
+ * if data is not an array, we consider that it is an external pushed event...then create one from anEvent and data.
  */
 fsm_manager.prototype.pushEvent	= function(anEvent,data) {
 	this._log('pushEvent:  ---> '+anEvent);
@@ -861,6 +911,13 @@ fsm_manager.prototype.pushEvent	= function(anEvent,data) {
 	{
 		this._log('pushEvent: too much events...  ---> '+this.pushEventList.length,2);
 		return;
+	}
+	if ( (data == undefined) || (data.length == 0) || data[0].type == undefined ) 
+	{
+		var datatmp = new Array();
+		datatmp[0] = fsm_manager_create_event(this.myUIObject,anEvent);
+		datatmp[1] = data;
+		data = datatmp;
 	}
 	var anEventToPush =  {anEvent:anEvent, data:data};
 	this.pushEventList.push( anEventToPush );
@@ -918,17 +975,6 @@ fsm_manager.prototype.cancelDelayedProcess	= function() {
 	}
 
 };
-/*
- * launchProcess - 
- * private Method 
- * @param anEvent 	: an event name 
- * @param aDelay	: a delay to do the processing
- * @param data		: {event, data}
- */
-fsm_manager_launchProcess	= function(aFsm, anEvent, data) {
-	aFsm._log('launchProcess:  ---> '+anEvent);
-	aFsm.processEvent(anEvent,data,true);
-};
 
 
 /*
@@ -944,6 +990,49 @@ fsm_manager.prototype.trigger = function (aEventName) {
 	this.myUIObject.trigger(aEventName,myArgs);
 };//end of 
 
+/*
+ * subMachinesRespectTargets - verify if the set of submachines respects the target of the current event
+ * @param String anEvent
+ * @return boolean - true if target is respected
+ */
+
+fsm_manager.prototype.subMachinesRespectTargets = function (anEvent) {
+	this._log('subMachinesRespectTargets:');
+	var aStateDefinition 	= this._stateDefinition[this.currentState];
+	var targetConfiguration = aStateDefinition[anEvent].next_state_on_target;
+	var condition 	= targetConfiguration.condition;
+	var aResult 	= (condition == '||') ? false:true;
+	var aSMList 	= targetConfiguration.submachines;
+	
+	var localRes;
+	for(aSubMachine in aSMList) 
+	{
+		localRes = targetConfiguration.submachines[aSubMachine].target_list.indexOf(aStateDefinition.delegate_machines[aSubMachine].myFSM.currentState) > -1 ;
+		if (
+				(targetConfiguration.submachines[aSubMachine].condition != undefined)
+			&&  (targetConfiguration.submachines[aSubMachine].condition == 'not')
+			)
+			localRes = !localRes;
+			
+		if (condition == '||')
+		{
+			aResult = aResult || localRes;
+			if (aResult == true) return aResult;//we can stop as it a && operator 
+		}
+		else if (condition == '&&')
+		{
+			aResult = aResult && localRes;
+			if (aResult == false) return aResult;//we can stop as it a && operator 
+		}
+		else
+		{
+			this._log('operator unknown'+condition);
+			return aResult;
+		}
+		
+	}
+	return aResult;
+}
 /*
  * this._log - log function
  * private function
@@ -1037,3 +1126,14 @@ function fsm_manager_create_event(aTarget,anEventName,data){
 	aDummyEvent.stopPropagation=function(){return true;};
 	return aDummyEvent;
 }
+/*
+ * launchProcess - 
+ * private Method 
+ * @param anEvent 	: an event name 
+ * @param aDelay	: a delay to do the processing
+ * @param data		: {event, data}
+ */
+fsm_manager_launchProcess	= function(aFsm, anEvent, data) {
+	aFsm._log('launchProcess:  ---> '+anEvent);
+	aFsm.processEvent(anEvent,data,true);
+};
