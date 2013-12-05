@@ -185,10 +185,10 @@ Remarks
   - in a state/event function, you can trigger event to the current machine :
     	ex : this.trigger('aEventName')
   - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
+  - a 'start' event is always triggered when the FSM is started with InitManager
 
 SubMachine
 ==========
-  - a 'start' event is triggered when the FSM is started with InitManager
   - when there are sub machines defined for a state :
 	- the events are sent to each defined submachines in the order
 	- once the event is processed by the submachines, it is bubbled to the upper machines
