@@ -180,6 +180,11 @@ Remarks
   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
   - an event is first search in the current state, then if not found in the 'DefaultState'
   - if an event is not found, nothing is done...
+  - it is possible to trigger any event to a machine with the jquery trigger function :
+  		ex: $('#myButton1').trigger('aEventName');
+  - in a state/event function, you can trigger event to the current machine :
+    	ex : this.trigger('aEventName')
+  - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
 
 SubMachine
 ==========
@@ -189,16 +194,7 @@ SubMachine
 	- once the event is processed by the submachines, it is bubbled to the upper machines
 	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
 	- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
-  - to trigger an event to the machine itself, use can use the 'trigger' function
-      ex: myFSM.trigger('myevent');
-  - it is possible to trigger any event to a machine with the jquery trigger function :
-  		ex: $('#myButton1').trigger('start',{targetFSM:myFsm});
- - within a state function, it is possible to trigger event to any machine using its linked jQuery object : myFSM.myUIObject
-    	ex : this.myUIObject.trigger('aEventName')
- - if multiple machine are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
-    	ex : this.myUIObject.trigger('aEventName',{targetFSM:this})
- - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
- - a sub machine can manage its first state by handling the 'start' event in the DefaultState
+  - a sub machine can manage its first state by handling the 'start' event in the DefaultState
 
 The public available variables
 ==============================
@@ -219,5 +215,5 @@ Within the call of FSM function, you can refer to the FSM by 'this' :
  
 Contact
 =======
-If you have any ideas, feedback, requests or bug reports, you can reach me at emmanuel.podvin@intersel.fr, 
+If you have any ideas, feedback, requests or bug reports, you can reach me at github@intersel.org, 
 or via my website: http://www.intersel.fr
