@@ -95,10 +95,7 @@ var aStateDefinitionButton = {
 }
  
 $(document).ready(function() {
-	 $(".onoff").each(function(){
-		 var aFSM = new fsm_manager($(this),aStateDefinitionButton); //create the machine
-		 aFSM.InitManager();	//start it
-	 });
+	 $(".onoff").iFSM(aStateDefinitionButton); //create the machine
 });
  </script>
  </head>

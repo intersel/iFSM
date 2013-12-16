@@ -272,23 +272,13 @@ var OperatorButton = {
 
 
 $(document).ready(function() {
-	var aFSMx = new fsm_manager($("#result"),PocketCalculator); //create the machine
-		aFSMx.InitManager();	//start it
+	$("#result").iFSM(PocketCalculator); 
 
-	$("#controlsbuttons > button").each(function(){
-		 var aFSM = new fsm_manager($(this),ActionButton,{sendto:$("#result")}); //create the machine
-		 aFSM.InitManager();	//start it
-	 });
+	$("#controlsbuttons > button").iFSM(ActionButton,{sendto:$("#result")}); 
 
-	$("#operandbuttons > button").each(function(){
-		 var aFSM = new fsm_manager($(this),OperandButton,{sendto:$("#result")}); //create the machine
-		 aFSM.InitManager();	//start it
-	 });
+	$("#operandbuttons > button").iFSM(OperandButton,{sendto:$("#result")}); 
 
-	$("#operatorbuttons > button").each(function(){
-		 var aFSM = new fsm_manager($(this),OperatorButton,{sendto:$("#result")}); //create the machine
-		 aFSM.InitManager();	//start it
-	 });
+	$("#operatorbuttons > button").iFSM(OperatorButton,{sendto:$("#result")}); 
 	 
 });
  </script>

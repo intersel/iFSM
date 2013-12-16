@@ -51,8 +51,13 @@
  *						}
  *				}
  * }
- * myFsm1 = new fsm_manager($('#myButton1', aStateDefinition); //we create the FSM object
+ * myFsm1 = new fsm_manager($('#myButton1'), aStateDefinition); //we create the FSM object
  * myFsm1->InitManager(); //then we init it 
+ * 
+ * // or with one jQuery Call
+ * $('#myButton1').iFSM(aStateDefinition);
+ * myFSM1 = $('#myButton1').getFSM(aStateDefinition); //get the linked FSM object if needed
+ * 	 
  * </script>
  * </code>
  *

@@ -341,13 +341,8 @@ var AndMachineTest =
 }
  
 $(document).ready(function() {
-	var aFSM5;
-	aFSM5 = new fsm_manager($('#onoff_button5'),AndMachineTest); //create the machine
-	aFSM5.InitManager();	//start it
-	$(".onoff").each(function(){
-		 var aFSM = new fsm_manager($(this),aStateDefinitionButton,{andMachineTest:aFSM5}); //create the machine
-		 aFSM.InitManager();	//start it
-	});
+	$('#onoff_button5').iFSM(AndMachineTest);
+	$(".onoff").iFSM(aStateDefinitionButton,{andMachineTest:$('#onoff_button5').getFSM(AndMachineTest)});
 });
  </script>
  </head>
