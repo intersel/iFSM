@@ -57,6 +57,11 @@
  * </code>
  *
  */
+(function($){
+/*
+ * @param integer nb_FSM - number of active FSM
+ */
+var nb_FSM = 0;
 
 /**
  * 
@@ -264,7 +269,7 @@
  *  - this.actualTarget : the jQuery object that is currently targetted by an event
  *  
  * @param anObject - a jquery object on which the FSM applies. 
- * 						should have the property 'id' defined
+ * 						ATTENTION : the property 'id' needs to be defined to have the machine working properly
  * @param options - an object defining the options:
  * 	- boolean 	debug
  *  - integer 	LogLevel -
@@ -277,13 +282,7 @@
  *  - string	logFSM		- list of FSM names to follow on debug	(ex: "FSM_1 FSM_4"). If void, then displays all machine messages
  */
 
-
-/*
- * @param integer nb_FSM - number of active FSM
- */
-var nb_FSM = 0;
-	
-var fsm_manager =  function (anObject, aStateDefinition, options)
+var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, options)
 {
 	var $defaults = {
 			debug				: true,
@@ -1137,3 +1136,61 @@ fsm_manager_launchProcess	= function(aFsm, anEvent, data) {
 	aFsm._log('launchProcess:  ---> '+anEvent);
 	aFsm.processEvent(anEvent,data,true);
 };
+
+/*
+ * @param iFSMList - array of the created FSM linked with their Objects
+ * iFSMList[aStateDefinition] 
+ */
+var iFSMList = {};
+//jQuery definition
+/*
+ * $.iFSM - iterate over a jQuery object to assign for each matched element a FSM machine
+ * @param  aStateDefinition - a state definition
+ * @param  options - options of the FSM machine
+ * Remark : any DOM object involved with a FSM needs to have its 'id' attribute defined 
+ */
+$.fn.iFSM = function(aStateDefinition, options) {
+	return this.each(function() {
+		var iFSM = new fsm_manager($(this), aStateDefinition, options);
+		if ($(this).attr('id') != undefined)
+		{
+			if (iFSMList[$(this).attr('id')]==undefined) iFSMList[$(this).attr('id')]=[];
+			iFSMList[$(this).attr('id')].push(iFSM) ; 
+		}
+		iFSM.InitManager();	//start it
+	});
+};
+/*
+ * $.getFSM - returns the array of FSM linked to the object
+ * @param aStateDefinition (optional) - if defined
+ * @return an array of the FSMs linked to the object  
+ */
+$.fn.getFSM = function(aStateDefinition) {
+	
+	if ( (this.length != 1) || (this.attr('id') == undefined) )
+		return [];
+	
+	if (aStateDefinition == undefined)
+		return iFSMList[$(this).attr('id')];
+	else
+	{
+		var aFSM = null;
+		for (var i = 0, aFSMItem = null; i < iFSMList[$(this).attr('id')].length ; i++)
+		{
+			aFSMItem = iFSMList[$(this).attr('id')][i];
+			if (aFSMItem._stateDefinition == aStateDefinition)
+			{
+				aFSM = aFSMItem;
+				break;
+			}
+		}
+		return aFSM;
+		
+	}
+		
+			
+}
+
+
+
+})(jQuery);
