@@ -1,7 +1,8 @@
 iFSM
 ====
 
-A  (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for javascript and JQuery.
+A  (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery.
+
 
 How to use it :
 ===============
@@ -41,10 +42,9 @@ How to use it :
             }
         }
     };
-    $(document).ready(function() {
-	    myFsm1 = new fsm_manager($('#myButton'), aStateDefinition,{aDiv:$('#adiv')}); //we create the FSM object
-	    myFsm1.InitManager(); //then we init it 
-    });
+    
+    $('#myButton1').iFSM(aStateDefinition);
+	
 	</script>
 </head>
 <body style="margin:100px;">
@@ -54,7 +54,14 @@ How to use it :
 </html>
 ```
 
+Examples
+========
 
+  - Example_1.html - simple example of independant buttons using the same machine definition
+  - Example_2.html - simple example of submachine delegation. It show how to set condition on state change according to submachine states.
+  - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
+  - Example_HSM_calculator - not really optimized but a working calculator
+  
 
 Machine State Definition
 ========================
@@ -88,6 +95,20 @@ var aStateDefinition =
  			properties_init_function: <parameters for init_function>,
  			next_state: <aStateName>,
  			next_state_when: <a statement that returns boolean>,
+   			next_state_on_target : 
+   			{
+   				condition 			: <logical_operator : '||' '&&'>
+   				submachines			: 
+   				{
+   					<submachineName1> 	: 
+   					{
+   						condition	: <'' 'not'>
+   						target_list : [<targetState1>,...,<targetStaten>],
+  					}
+   					...
+   					<submachineNamen> 	: ...
+  				}
+   			}
  			out_function: <a function(parameters, event, data)>,
  			properties_out_function: <parameters for out_function>,
  			next_state_if_error: <aStateName to go if init_function returns false>,
@@ -122,7 +143,7 @@ var aStateDefinition =
   - **delegate_machines** : sub machines list to delegate the events on the state
   	- submachine : the variable name of a state definition or a state definition description
   - **eventname** : <br>
-  the name of an event. May be any event name, supported by javascript or not (should be manually triggered).<br>
+  the name of an event. It may be any event name, supported by javascript or not (should be manually triggered).<br>
   It defines an event we want to be alerted when it occurs on the object<br>
 	specific events :<br>
 	- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
@@ -154,11 +175,18 @@ var aStateDefinition =
   - **properties_init_function** : parameters to send to init_function
   - **next_state** : next state once init_function done
   - **next_state_when** : <br>
-  	Definition of condition test that will be evaluated, and if result is true then state will change<br>
-  	Following variables may be used for the test:<br>
-  	* EventIteration : variable that gives the iteration of the number of calls of the current event. <br>
-  	* EventIteration is reset when the state changes<br>
-  	* this	: the FSM object<br>
+	Definition of condition test that will be evaluated, and if result is true then state will change
+	Following variables may be used for the test
+	- this	: the FSM object
+	- this.EventIteration : variable that gives the iteration of the number of calls of the current event. 
+	EventIteration is reset when the state changes
+  - **next_state_on_target** :<br>
+	Definition of condition test based on the current states of the defined submachines
+	The test consist to :
+	- get the current states of each defined sub-machines, 
+	- match the current state to the targeted state array, resulting to true if found 
+	- apply the defined operator between the results
+	- if the result is positive, then the next state processing is done
   - **out_function**	 : function name to do once next_state changed
   - **properties_out_function** : parameters to send to out_function
   - **next_state_if_error** (default: does not change state) : state set if init_function return false
@@ -179,7 +207,7 @@ Remarks
   	- data : the data sent with the event
   - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
   - an event is first search in the current state, then if not found in the 'DefaultState'
-  - if an event is not found, nothing is done...
+  - when an event is not found, nothing is done...
   - it is possible to trigger any event to a machine with the jquery trigger function :
   		ex: $('#myButton1').trigger('aEventName');
   - in a state/event function, you can trigger event to the current machine :
@@ -193,7 +221,10 @@ SubMachine
 	- the events are sent to each defined submachines in the order
 	- once the event is processed by the submachines, it is bubbled to the upper machines
 	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
-	- a submachine works as the main one : it is initialised then started once entering in the state and a start event is sent to it
+	- a submachine works as the main one : 
+		- if no_reinitialisation == false (default), it is initialized each time we enter the main state
+		- a start event is triggered to it (if initialized)
+		- once initialized, the submachine is ready to listen to the triggered events
   - a sub machine can manage its first state by handling the 'start' event in the DefaultState
 
 The public available variables
