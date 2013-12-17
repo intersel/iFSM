@@ -11,10 +11,10 @@ How to use it :
 <html>
 <head>
     <title>iFSM in action! a Finite State Machine for jQuery</title>
-    <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="jquery.dotimeout.js"></script>
-    <script type="text/javascript" src="jquery.attrchange.js"></script>
-    <script type="text/javascript" src="ifsm.js"></script>
+	<script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
+	<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
+	<script type="text/javascript" src="ifsm.js"></script>
 
     <script type="text/javascript">
     var aStateDefinition = {
@@ -42,13 +42,15 @@ How to use it :
             }
         }
     };
-    
-    $('#myButton1').iFSM(aStateDefinition);
-	
-	</script>
+
+	$(document).ready(function() {
+		$('#myButton').iFSM(aStateDefinition,{aDiv:$('#adiv')});
+	});
+
+    </script>
 </head>
 <body style="margin:100px;">
-    <button id="myButton">hello</button>
+    <button id="myButton">Show/Hide Text</button>
     <div id="adiv">a nice text to show the FSM capabilities :-)</div>
 </body>
 </html>
