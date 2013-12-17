@@ -106,7 +106,7 @@ var nb_FSM = 0;
  * 				{
  * 					<submachineName1> 	: 
  * 					{
- * 						condition	: <'' 'not'>
+ * 						condition	: <''(default) 'not'>
  * 						target_list : [<targetState1>,...,<targetStaten>],
  *					}
  * 					...

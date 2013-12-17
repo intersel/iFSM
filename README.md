@@ -58,9 +58,9 @@ Examples
 ========
 
   - Example_1.html - simple example of independant buttons using the same machine definition
-  - Example_2.html - simple example of submachine delegation. It show how to set condition on state change according to submachine states.
+  - Example_2.html - simple example of submachine delegation. It shows how to set conditions on state change according to submachine states.
   - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
-  - Example_HSM_calculator - not really optimized but a working calculator
+  - Example_HSM_calculator - a simple working calculator managed with states and events...
   
 
 Machine State Definition
@@ -102,7 +102,7 @@ var aStateDefinition =
    				{
    					<submachineName1> 	: 
    					{
-   						condition	: <'' 'not'>
+   						condition	: <''(default) 'not'>
    						target_list : [<targetState1>,...,<targetStaten>],
   					}
    					...
