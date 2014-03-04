@@ -5,7 +5,8 @@
   "keywords": [
     "FSM",
     "HSM",
-    "Finite State Machine"
+    "Machine",
+    "State"
   ],
   "version": "1.6.0",
   "author": {
