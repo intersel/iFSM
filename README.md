@@ -3,6 +3,10 @@ iFSM
 
 A  (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery.
 
+Demos
+=====
+http://www.intersel.fr/ifsm-jquery-plugin-demos.html
+
 
 How to use it :
 ===============
