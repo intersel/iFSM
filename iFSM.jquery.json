@@ -33,7 +33,7 @@
   "dependencies": 
   {
     "jquery": ">=1.10",
-    "attrchange": >= "1.0.1",
-    "dotimeout": >= 1.0
+    "attrchange": ">= 1.0.1",
+    "dotimeout": ">= 1.0"
   }
 }
