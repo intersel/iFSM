@@ -21,40 +21,39 @@ How to use it :
 	<script type="text/javascript" src="ifsm.js"></script>
 
     <script type="text/javascript">
-    var aStateDefinition = {
-	IsDisplayed     : 
-	{
-	    enterState:
-	    {
-	        init_function: function(){this.opts.aDiv.show();}
-	    },
-	    click   :   
-	    {
-	        next_state      : 'IsNotDisplayed'
-	    }
-	}, 
-	IsNotDisplayed      : 
-	{
-	    enterState:
-	    {
-	        init_function: function(){this.opts.aDiv.hide();}
-	    },
-	    click   :   
-	    {
-	        next_state      : 'IsDisplayed'
-	    }
-	},
-	DefaultState        :
-	{
-	    start   :
-	    {
-	        next_state  : 'IsDisplayed'
-	    }
-	}
+    	var aStateDefinition = {
+		IsDisplayed     : 
+		{
+		     enterState:
+		    {
+		        init_function: function(){this.myUIObject.html("I'm Displayed");}
+		    },
+		    click:   
+		    {
+		        next_state: 'IsNotDisplayed'
+		    }
+		}, 
+		IsNotDisplayed      : 
+		{
+		    enterState:   
+		    {
+		        init_function: function(){this.myUIObject.html("I'm NOT Displayed");}
+		    },
+		    click:   
+		    {
+		        next_state: 'IsDisplayed'
+		    }
+		},
+		DefaultState        :
+		{
+		    start   :
+		    {
+		        next_state  : 'IsDisplayed'
+		    }
+		}
 	};
-
 	$(document).ready(function() {
-		$('#myButton').iFSM(aStateDefinition,{aDiv:$('#adiv')});
+		$('#myButton').iFSM(aStateDefinition);
 	});
 
     </script>
