@@ -22,30 +22,36 @@ How to use it :
 
     <script type="text/javascript">
     var aStateDefinition = {
-        IsDisplayed     : 
-        {
-            click   :   
-            {
-                init_function       : function(){this.opts.aDiv.hide()},
-                next_state      : 'IsNotDisplayed'
-            }
-        }, 
-        IsNotDisplayed      : 
-        {
-            click   :   
-            {
-                init_function       : function(){this.opts.aDiv.show()},
-                next_state      : 'IsDisplayed'
-            }
-        },
-        DefaultState        :
-        {
-            start   :
-            {
-                next_state  : 'IsDisplayed'
-            }
-        }
-    };
+	IsDisplayed     : 
+	{
+	    enterState:
+	    {
+	        init_function: function(){this.opts.aDiv.show();}
+	    },
+	    click   :   
+	    {
+	        next_state      : 'IsNotDisplayed'
+	    }
+	}, 
+	IsNotDisplayed      : 
+	{
+	    enterState:
+	    {
+	        init_function: function(){this.opts.aDiv.hide();}
+	    },
+	    click   :   
+	    {
+	        next_state      : 'IsDisplayed'
+	    }
+	},
+	DefaultState        :
+	{
+	    start   :
+	    {
+	        next_state  : 'IsDisplayed'
+	    }
+	}
+	};
 
 	$(document).ready(function() {
 		$('#myButton').iFSM(aStateDefinition,{aDiv:$('#adiv')});
@@ -63,6 +69,7 @@ How to use it :
 Examples
 ========
 
+  - Example_Basic.html - the above example in action
   - Example_1.html - simple example of independant buttons using the same machine definition
   - Example_2.html - simple example of submachine delegation. It shows how to set conditions on state change according to submachine states.
   - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
