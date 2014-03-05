@@ -60,13 +60,13 @@ How to use it :
 </head>
 <body style="margin:100px;">
     <button id="myButton">Show/Hide Text</button>
-    <div id="adiv">a nice text to show the FSM capabilities :-)</div>
 </body>
 </html>
 ```
 
 Examples
 ========
+See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
 
   - Example_Basic.html - the above example in action
   - Example_1.html - simple example of independant buttons using the same machine definition
