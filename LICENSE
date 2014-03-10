@@ -9,13 +9,22 @@
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013
  * @contributors : 
- *    - Emmanuel Podvin - emmanuel.podvin@intersel.fr
+ *    - Emmanuel Podvin - jquery.ifsm@intersel.org
  * -----------------------------------------------------------------------------------------
  */
 
-This software is free to be used and modified in a 'free' context.
-If sold or included in a sold product or a sold website, 
-authorization should be requested to Intersel at contact@intersel.fr.
+MIT Licence or DonationWare Licence according to the following conditions:
+
+This software is free to be used and modified in a 'free' and open context.
+
+If sold or included in a sold product or a sold website, the software is under a "donationware" licence: 
+  - authorization should be requested to Intersel at jquery.ifsm@intersel.org with any amount you'd like to donate.
+  - a paypal payment request will be issued
+  - you'll then be granted a full lifetime license
+  
+Exception :
+You may modify the source code for your own purposes, then this software is under MIT Licence.
+10 lines (or more) of source code must be new or modified in the library to pretending to the MIT Licence... 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
