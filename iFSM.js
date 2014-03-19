@@ -13,10 +13,12 @@
  * - 2013/11/05 - E.Podvin - V1.3 - add sub machine to manage hierarchical state machines (HSM)
  * - 2013/11/12 - E.Podvin - V1.4 - debug on submachine management
  * - 2013/11/22 - E.Podvin - V1.5 - add 'next_state_on_target' to change a state according to the submachine states
+ * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state 
+ * 
  * -----------------------------------------------------------------------------------------
- * @copyright : Intersel 2013
+ * @copyright : Intersel 2013-2014
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.4
+ * @version : 1.6.1
  * -----------------------------------------------------------------------------------------
  */
 
@@ -1152,17 +1154,20 @@ var iFSMList = {};
  * $.iFSM - iterate over a jQuery object to assign for each matched element a FSM machine
  * @param  aStateDefinition - a state definition
  * @param  options - options of the FSM machine
- * Remark : any DOM object involved with a FSM needs to have its 'id' attribute defined 
+ * Remarks : 
+ * - any DOM object involved with a FSM needs to have its 'id' attribute defined
+ * - the init state may be defined with options.initState 
  */
 $.fn.iFSM = function(aStateDefinition, options) {
-	return this.each(function() {
+		return this.each(function() {
 		var iFSM = new fsm_manager($(this), aStateDefinition, options);
 		if ($(this).attr('id') != undefined)
 		{
 			if (iFSMList[$(this).attr('id')]==undefined) iFSMList[$(this).attr('id')]=[];
 			iFSMList[$(this).attr('id')].push(iFSM) ; 
 		}
-		iFSM.InitManager();	//start it
+		if (options && options.initState  != undefined) iFSM.InitManager(options.initState);	//start it
+		else iFSM.InitManager();	//start it
 	});
 };
 /*
