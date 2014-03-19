@@ -32,33 +32,40 @@
  * <script type="text/javascript" src="ifsm.js"></script>
  * //Example of use :
  * <script type="text/javascript">
- *	var aStateDefinition = {
+ *  	var aStateDefinition = {
+ *		FirstState     : 
+ *		{
+ *		     enterState:
+ *		    {
+ *		        init_function: function(){alert("First State");}
+ *		    },
+ *		    click:   
+ *		    {
+ *		        next_state: 'NextState'
+ *		    }
+ *		}, 
+ *		NextState      : 
+ *		{
+ *		    enterState:   
+ *		    {
+ *		        init_function: function(){alert("Next State");}
+ *		    },
+ *		    click:   
+ *		    {
+ *		        next_state: 'FirstState'
+ *		    }
+ *		},
+ *		DefaultState        :
+ *		{
+ *		    start   :
+ *		    {
+ *		        next_state  : 'FirstState'
+ *		    }
+ *		}
+ *	};
  *
- * 			IsDisplayed			: 
- *				{
- *					click	:	
- * 						{
- *							init_function 				: DisplayMe,
- *							properties_init_function 	: {display:false} 
- *							next_state				: 'IsNotDisplayed'
- *						}
- *				}, 
- *			IsNotDisplayed		: 
- *				{
- *					displayButton	:	
- * 						{
- *							init_function 				: DisplayMe, 
- *							properties_init_function 	: {display:true} 
- *							next_state				: 'IsDisplayed'
- *						}
- *				}
- * }
- * myFsm1 = new fsm_manager($('#myButton1'), aStateDefinition); //we create the FSM object
- * myFsm1->InitManager(); //then we init it 
- * 
- * // or with one jQuery Call
- * $('#myButton1').iFSM(aStateDefinition);
- * myFSM1 = $('#myButton1').getFSM(aStateDefinition); //get the linked FSM object if needed
+ * $('#myButton').iFSM(aStateDefinition);
+ * myFSM = $('#myButton').getFSM(aStateDefinition); //get the linked FSM object if needed
  * 	 
  * </script>
  * </code>
