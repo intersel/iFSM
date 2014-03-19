@@ -1152,17 +1152,20 @@ var iFSMList = {};
  * $.iFSM - iterate over a jQuery object to assign for each matched element a FSM machine
  * @param  aStateDefinition - a state definition
  * @param  options - options of the FSM machine
- * Remark : any DOM object involved with a FSM needs to have its 'id' attribute defined 
+ * Remarks : 
+ * - any DOM object involved with a FSM needs to have its 'id' attribute defined
+ * - the init state may be defined with options.initState 
  */
 $.fn.iFSM = function(aStateDefinition, options) {
-	return this.each(function() {
+		return this.each(function() {
 		var iFSM = new fsm_manager($(this), aStateDefinition, options);
 		if ($(this).attr('id') != undefined)
 		{
 			if (iFSMList[$(this).attr('id')]==undefined) iFSMList[$(this).attr('id')]=[];
 			iFSMList[$(this).attr('id')].push(iFSM) ; 
 		}
-		iFSM.InitManager();	//start it
+		if (options && options.initState  != undefined) iFSM.InitManager(options.initState);	//start it
+		else iFSM.InitManager();	//start it
 	});
 };
 /*
