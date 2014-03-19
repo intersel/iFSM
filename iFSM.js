@@ -227,7 +227,7 @@ var nb_FSM = 0;
  * 		ex: $('#myButton1').trigger('start',{targetFSM:myFsm});
  * - within a state function, it is possible to trigger event to any machine using its linked jQuery object : myFSM.myUIObject
  *   	ex : this.myUIObject.trigger('aEventName')
- * - if multiple machine are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
+ * - if multiple machines are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
  *   	ex : this.myUIObject.trigger('aEventName',{targetFSM:this})
  * - beware that if the submachine is no more accessible, it won't perhaps receive the message you triggered from it.
  * 		a workaround is to directly "push" an event in order that it will be processed within the flow of the current event processing.
