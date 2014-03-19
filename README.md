@@ -64,6 +64,23 @@ How to use it :
 </html>
 ```
 
+.iFSM(aStateDefinition, [options])
+==================================
+  * aStateDefintion : object defining the different states and binded events. See "Machine State Definition" chapter.
+  * options : object definint the options of the FSM :
+    * startEvent : name of the starting event (default: 'start')
+    * initState  : name of the state to set at start of the machine
+    * debug (true|false)
+    * LogLevel
+      * '1' only errors displayed
+      * '2' - errors and warnings
+      * '3' - all  
+    * logFSM :  list of FSM names to follow on debug	(ex: "FSM_1 FSM_4"). If void, then displays all machine messages
+
+
+ $('#myButton1').iFSM(aStateDefinition);
+ * myFSM1 = $('#myButton1').getFSM(aStateDefinition); //get the linked FSM object if needed
+
 Examples
 ========
 See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
@@ -226,6 +243,7 @@ Remarks
     	ex : this.trigger('aEventName')
   - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
   - a 'start' event is always triggered when the FSM is started with InitManager
+  - when the machine starts and sets the 'options.initState' to be the initial state, 'enterState' is not triggered. This event may be triggered manually when 'start' event is received (see 'propagate_event')
 
 SubMachine
 ==========
