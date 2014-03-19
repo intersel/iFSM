@@ -11,17 +11,23 @@
     var aStateDefinition = {
         IsDisplayed     : 
         {
+            enterState:
+            {
+                init_function: function(){this.opts.aDiv.show();}
+            },
             click   :   
             {
-                init_function       : function(){this.opts.aDiv.hide()},
                 next_state      : 'IsNotDisplayed'
             }
         }, 
         IsNotDisplayed      : 
         {
+            enterState:
+            {
+                init_function: function(){this.opts.aDiv.hide();}
+            },
             click   :   
             {
-                init_function       : function(){this.opts.aDiv.show()},
                 next_state      : 'IsDisplayed'
             }
         },

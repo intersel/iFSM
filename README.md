@@ -18,37 +18,37 @@ How to use it :
 	<script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
 	<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
-	<script type="text/javascript" src="ifsm.js"></script>
+	<script type="text/javascript" src="iFSM.js"></script>
 
     <script type="text/javascript">
     	var aStateDefinition = {
-		IsDisplayed     : 
+		FirstState     : 
 		{
 		     enterState:
 		    {
-		        init_function: function(){this.myUIObject.html("I'm Displayed");}
+		        init_function: function(){alert("First State");}
 		    },
 		    click:   
 		    {
-		        next_state: 'IsNotDisplayed'
+		        next_state: 'NextState'
 		    }
 		}, 
-		IsNotDisplayed      : 
+		NextState      : 
 		{
 		    enterState:   
 		    {
-		        init_function: function(){this.myUIObject.html("I'm NOT Displayed");}
+		        init_function: function(){alert("Next State");}
 		    },
 		    click:   
 		    {
-		        next_state: 'IsDisplayed'
+		        next_state: 'FirstState'
 		    }
 		},
 		DefaultState        :
 		{
 		    start   :
 		    {
-		        next_state  : 'IsDisplayed'
+		        next_state  : 'FirstState'
 		    }
 		}
 	};
@@ -59,11 +59,10 @@ How to use it :
     </script>
 </head>
 <body style="margin:100px;">
-    <button id="myButton">Show/Hide Text</button>
+    <button id="myButton">Click Me</button>
 </body>
 </html>
 ```
-
 Examples
 ========
 See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
@@ -73,7 +72,48 @@ See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - Example_2.html - simple example of submachine delegation. It shows how to set conditions on state change according to submachine states.
   - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
   - Example_HSM_calculator - a simple working calculator managed with states and events...
+
+.iFSM(aStateDefinition, [options])
+==================================
+Create a Finite State Machine from the "aStateDefinition" object to bind with the jQuery object.
+
+  * aStateDefinition: object, defines the different states and bound events. See "Machine State Definition" chapter.
+  * options: object, defines the options of the FSM :
+    * startEvent: name of the starting event (default: 'start')
+    * initState: name of the state to set at start of the machine
+    * debug (true|false): show debug message on the console (default true)
+    * LogLevel
+      * '1' only errors displayed 
+      * '2' - errors and warnings (default)
+      * '3' - all  
+    * logFSM:  list of FSM names to follow on debug (ex: "FSM_1 FSM_4"). If void, then displays all machine messages
+
+  Call Examples
+  =============
   
+```html
+  <button id="myButton">Button</button>
+  <script>
+  $('#myButton').iFSM({aState:{click:{init_function:function(){alert('clicked!');}}}},{initState:'aState'});
+  </script>
+```
+
+.getFSM([aStateDefinition])
+===========================
+Get the FSM bound to the jQuery object.
+
+  * aStateDefinition: object, a state definition used to define a FSM. it Allows to find a specific FSM if several are defined on the same jQuery object.
+
+  Call Examples
+  =============
+  
+```html
+  <script>
+  myFSM = $('#myButton').getFSM(); //get the linked FSM objects
+  </script>
+```
+
+
 
 Machine State Definition
 ========================
@@ -226,6 +266,7 @@ Remarks
     	ex : this.trigger('aEventName')
   - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
   - a 'start' event is always triggered when the FSM is started with InitManager
+  - when the machine starts and sets the 'options.initState' to be the initial state, 'enterState' is not triggered. This event may be triggered manually when 'start' event is received (see 'propagate_event')
 
 SubMachine
 ==========

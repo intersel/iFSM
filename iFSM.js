@@ -13,10 +13,12 @@
  * - 2013/11/05 - E.Podvin - V1.3 - add sub machine to manage hierarchical state machines (HSM)
  * - 2013/11/12 - E.Podvin - V1.4 - debug on submachine management
  * - 2013/11/22 - E.Podvin - V1.5 - add 'next_state_on_target' to change a state according to the submachine states
+ * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state 
+ * 
  * -----------------------------------------------------------------------------------------
- * @copyright : Intersel 2013
+ * @copyright : Intersel 2013-2014
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.4
+ * @version : 1.6.1
  * -----------------------------------------------------------------------------------------
  */
 
@@ -225,7 +227,7 @@ var nb_FSM = 0;
  * 		ex: $('#myButton1').trigger('start',{targetFSM:myFsm});
  * - within a state function, it is possible to trigger event to any machine using its linked jQuery object : myFSM.myUIObject
  *   	ex : this.myUIObject.trigger('aEventName')
- * - if multiple machine are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
+ * - if multiple machines are assigned to the same jQuery Object, it also possible to specify the FSM in the parameter :
  *   	ex : this.myUIObject.trigger('aEventName',{targetFSM:this})
  * - beware that if the submachine is no more accessible, it won't perhaps receive the message you triggered from it.
  * 		a workaround is to directly "push" an event in order that it will be processed within the flow of the current event processing.
