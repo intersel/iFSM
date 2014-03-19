@@ -76,6 +76,10 @@ var aStateDefinitionButton = {
 		notReady :
 		{
 			init_function		: function (){this.myUIObject.html(this.opts.counter);this.opts.counter=this.opts.counter-1;}
+		},
+		start :
+		{
+			propagate_event: 'enterState',
 		}
 	},
 	ButtonWait		: 
@@ -109,13 +113,6 @@ var aStateDefinitionButton = {
 			next_state		: 'ButtonCountdown'
 		}
 	},
-	DefaultState			:
-	{
-		start	:	
-		{
-			next_state		: 'ButtonCountdown'
-		}
-	}				
 }
 
 var ManageFirstWaitButton =
@@ -163,10 +160,10 @@ var ButtonWaitEvents =
 var ManageStatusButton1 =
 {
 	NoButtonWait	:{},
-	ButtonWait		: $.extend(true, {}, ButtonWaitEvents),
+	ButtonWait		: $.extend(true, {}, ButtonWaitEvents), 	//a way to use and share a unique definition of a State
 	ButtonOff		:{},
 	ButtonRestart	:{},
-	DefaultState			:
+	DefaultState	:
 	{
 		start	:	
 		{
@@ -323,10 +320,6 @@ var AndMachineTest =
 		},
 		DefaultState	:
 		{
-			start	:	
-			{
-				next_state		: 'WaitForChange',
-			},
 			setText : 
 			{
 				init_function: function(param,event,data){$('#info').html(data)},
@@ -341,8 +334,8 @@ var AndMachineTest =
 }
  
 $(document).ready(function() {
-	$('#onoff_button5').iFSM(AndMachineTest);
-	$(".onoff").iFSM(aStateDefinitionButton,{andMachineTest:$('#onoff_button5').getFSM(AndMachineTest)});
+	$('#onoff_button5').iFSM(AndMachineTest,{initState:'WaitForChange'});
+	$(".onoff").iFSM(aStateDefinitionButton,{initState:'ButtonCountdown',andMachineTest:$('#onoff_button5').getFSM(AndMachineTest)});
 });
  </script>
  </head>
