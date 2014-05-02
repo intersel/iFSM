@@ -195,7 +195,7 @@ var aStateDefinition =
   - **delegate_machines** : sub machines list to delegate the events on the state
   	- submachine : the variable name of a state definition or a state definition description
   - **eventname** : <br>
-  the name of an event. It may be any event name, supported by javascript or not (should be manually triggered).<br>
+  the name of an event. It may be any event name, supported by javascript or manually triggered.<br>
   It defines an event we want to be alerted when it occurs on the object<br>
 	specific events :<br>
 	- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
