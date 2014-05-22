@@ -70,6 +70,7 @@ See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - Example_Basic.html - the above example in action
   - Example_1.html - simple example of independant buttons using the same machine definition
   - Example_2.html - simple example of submachine delegation. It shows how to set conditions on state change according to submachine states.
+  - Example_PushPopState.html - simple example of using the "Push/Pop" capabilities on states.
   - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
   - Example_HSM_calculator - a simple working calculator managed with states and events...
 
@@ -146,6 +147,7 @@ var aStateDefinition =
  			init_function: <a function(parameters, event, data)>,
  			properties_init_function: <parameters for init_function>,
  			next_state: <aStateName>,
+ 			pushpop_state: <'PushState'||'PopState'>,
  			next_state_when: <a statement that returns boolean>,
    			next_state_on_target : 
    			{
@@ -161,9 +163,10 @@ var aStateDefinition =
    					<submachineNamen> 	: ...
   				}
    			}
+ 			next_state_if_error: <aStateName to go if init_function returns false>,
+ 			pushpop_state_if_error: <'PushState'||'PopState'>,
  			out_function: <a function(parameters, event, data)>,
  			properties_out_function: <parameters for out_function>,
- 			next_state_if_error: <aStateName to go if init_function returns false>,
  			propagate_event: <void||anEventName>
  			prevent_bubble: <true|false(default)>
  			UI_event_bubble: <true|false(default)>
@@ -226,6 +229,9 @@ var aStateDefinition =
   - **init_function**  : function name
   - **properties_init_function** : parameters to send to init_function
   - **next_state** : next state once init_function done
+  - **pushpop_state** : <br> 
+	If 'PushState', then current state is pushed in the StateStack then next_state takes place.
+	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
   - **next_state_when** : <br>
 	Definition of condition test that will be evaluated, and if result is true then state will change
 	Following variables may be used for the test
@@ -242,6 +248,9 @@ var aStateDefinition =
   - **out_function**	 : function name to do once next_state changed
   - **properties_out_function** : parameters to send to out_function
   - **next_state_if_error** (default: does not change state) : state set if init_function return false
+  - **pushpop_state_if_error** : 
+	If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
+	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state_if_error is so overwritten... If the stack is void, there is no state change. 
   - **propagate_event** : if defined, the current event is propagated to the next state
   					if it's the name of an event, triggers the event...
   - **prevent_bubble** : if defined and true, the current event will not bubble to its parent machine
@@ -249,7 +258,6 @@ var aStateDefinition =
   - **process_on_UItarget** : if defined and true, the current event will be processed only if the event was directly targeting 
    									the UI jQuery object linked to the machine
 
-  
 Remarks
 ========
   - state function should return a boolean : true: ok works fine; false: error

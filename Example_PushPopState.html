@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iFSM in action! a Finite State Machine for jQuery</title>
+	<script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
+	<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
+	<script type="text/javascript" src="iFSM.js"></script>
+
+    <script type="text/javascript">
+    var aStateDefinition = {
+        IsDisplayed     : 
+        {
+            enterState:
+            {
+                init_function: function(){this.opts.aDiv.show();}
+            },
+            click   :   
+            {
+                next_state      : 'IsNotDisplayed',
+                pushpop_state	: 'PushState',
+            }
+        }, 
+        IsNotDisplayed      : 
+        {
+            enterState:
+            {
+                init_function: function(){this.opts.aDiv.hide();}
+            },
+            click   :   
+            {
+                pushpop_state	: 'PopState',
+            }
+        },
+        DefaultState        :
+        {
+            start   :
+            {
+                next_state  : 'IsDisplayed'
+            }
+        }
+    };
+
+	$(document).ready(function() {
+		$('#myButton').iFSM(aStateDefinition,{aDiv:$('#adiv')});
+	});
+
+    </script>
+</head>
+<body style="margin:100px;">
+    <button id="myButton">Show/Hide Text</button>
+    <div id="adiv">a nice text to show the FSM capabilities with PushPop state feature :-)</div>
+</body>
+</html>

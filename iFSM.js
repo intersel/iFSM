@@ -107,24 +107,26 @@ var nb_FSM = 0;
  * 			init_function: <a function(parameters, event, data)>,
  * 			properties_init_function: <parameters for init_function>,
  * 			next_state: <aStateName>,
+ * 			pushpop_state: <'PushState'||'PopState'>,
  * 			next_state_when: <a statement that returns boolean>,
  * 			next_state_on_target : 
  * 			{
- * 				condition 			: <logical_operator : '||' '&&'>
+ * 				condition 			: <'||'||'&&'>
  * 				submachines			: 
  * 				{
  * 					<submachineName1> 	: 
  * 					{
- * 						condition	: <''(default) 'not'>
+ * 						condition	: <''(default)||'not'>
  * 						target_list : [<targetState1>,...,<targetStaten>],
  *					}
  * 					...
  * 					<submachineNamen> 	: ...
  *				}
  * 			}
+ * 			next_state_if_error: <aStateName>,
+ * 			pushpop_state_if_error: <'PushState'||'PopState'>,
  * 			out_function: <a function(parameters, event, data)>,
  * 			properties_out_function: <parameters for out_function>,
- * 			next_state_if_error: <aStateName to go if init_function returns false>,
  * 			propagate_event: <void||anEventName>
  * 			prevent_bubble: <true|false(default)>
  * 			UI_event_bubble: <true|false(default)>
@@ -185,7 +187,10 @@ var nb_FSM = 0;
  * 			- propagate_event_on_refused : an event name to trigger if process_event_if is false
  *   		- init_function  : function name or a function statement
  *   		- properties_init_function : parameters to send to init_function
- *   		- next_state : next state once init_function done
+ *   		- next_state : next state once init_function done. If not defined, there is no state change.
+ *   		- pushpop_state : 
+ *   			If 'PushState', then current state is pushed in the StateStack then next_state takes place.
+ *   			If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
  *   		- next_state_when : 
  *   			Definition of condition test that will be evaluated, and if result is true then state will change
  *   			Following variables may be used for the test
@@ -198,9 +203,12 @@ var nb_FSM = 0;
  *   				- get the current states of each defined sub-machines, 
  *   				- match the current state to the given array, resulting to true if found 
  *   				- apply the defined operator between the results
+ *   		- next_state_if_error (default: does not change state) : state set if init_function returns false. .
+ *   		- pushpop_state_if_error : 
+ *   			If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
+ *   			If 'PopState', then the next state will be the one on top of the StateStack which is poped. If the stack is void, there is no state change. next_state_if_error is so overwritten...
  *   		- out_function	 : function name to do once next_state changed
  *   		- properties_out_function : parameters to send to out_function
- *   		- next_state_if_error (default: does not change state) : state set if init_function return false
  *   		- propagate_event : if defined, the current event is propagated to the next state
  *   							if it's the name of an event, triggers the event...
  *   		- prevent_bubble : if defined and true, the current event will not bubble to its parent machine
@@ -300,7 +308,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 {
 	var $defaults = {
 			debug				: true,
-			LogLevel			: 2,
+			LogLevel			: 3,
 			AlertError			: false,
 			maxPushEvent		: 10,
 			startEvent			: 'start',
@@ -330,6 +338,12 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	 */
     this.currentState = '';
     
+	/*
+	 * pushStateList array	- a state list pushed that can be poped
+	 * 
+	 */
+	this.pushStateList	= new Array();
+
 	/*
 	 * processEventStatus	- status of the process event execution 
 	 * 		- idle : not working
@@ -718,6 +732,18 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			}
 			currentStateEvent = 'DefaultState';
 		}
+
+		//is this a potential Pop State?
+		if (currentEventConfiguration.pushpop_state 
+				&& (currentEventConfiguration.pushpop_state =='PopState')
+				&& (this.pushStateList.length > 0)
+			)
+			currentEventConfiguration.next_state = this.pushStateList[this.pushStateList.length-1];
+		if (currentEventConfiguration.pushpop_state_if_error 
+				&& (currentEventConfiguration.pushpop_state_if_error =='PopState')
+				&& (this.pushStateList.length > 0)
+			)
+			currentEventConfiguration.next_state_if_error = this.pushStateList[this.pushStateList.length-1];
 		
 		//look if event is processed when coming from any target 
 		if (	!this.myUIObject.is(currentEvent.target) 
@@ -803,6 +829,9 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		 * 
 		 */
 		// do we change state?
+		var anEv = new Array();//dummy event to be used in 'processEvent' function
+		anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
+		
 		if ( 	(funcReturn != false) 
 			&& 	(currentEventConfiguration.next_state) 
 			&& 	(currentState != currentEventConfiguration.next_state) 
@@ -828,18 +857,37 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			//we cancel any waiting events on the state
 			this.cancelDelayedProcess();
 			
-			var anEv = new Array(); 
-			anEv[0] = fsm_manager_create_event(this.myUIObject,'exitState',null)
+			anEv[0].type='exitState';
 			//we alert that we're exiting the state (except if we're starting the machine...
 			if (anEvent !=this.opts.startEvent)
 			{
 				this.processEvent('exitState',anEv,true);
 			}
 
+			//is this a Push/Pop State?
+			if (currentEventConfiguration.pushpop_state)
+			{
+				switch(currentEventConfiguration.pushpop_state)
+				{
+				case 'PushState':
+					this._log('processEvent: Push state');
+					this.pushStateList.push(currentStateEvent);
+					break;
+				case 'PopState':
+					if (this.pushStateList.length > 0)
+					{
+						this._log('processEvent: Pop state');
+						this.pushStateList.pop();
+					}
+					break;
+				}
+			}
+
 			/*
 			 * we change the current state Here!
 			 */
 			this.currentState = currentEventConfiguration.next_state;
+		
 			
 			//and now that we're entering the new state
 			anEv[0].type='enterState';
@@ -873,11 +921,41 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			else if (currentEventConfiguration.propagate_event != anEvent) //to avoid loop
 				this.trigger( currentEventConfiguration.propagate_event, data[1]);
 		}
-		//oups there was an error during the processing of the action
+		/*
+		 * oups there was an error during the processing of the action 
+		 */
 		else if ( (funcReturn == false) && (currentEventConfiguration.next_state_if_error) )
 		{
 			this._log('processEvent: error state ---> '+this.currentState);
+			//is this a Push/Pop State?
+			if (currentEventConfiguration.pushpop_state_if_error)
+			{
+				switch(currentEventConfiguration.pushpop_state_if_error)
+				{
+				case 'PushState':
+					this._log('processEvent: Push state');
+					this.pushStateList.push(currentStateEvent);
+					break;
+				case 'PopState':
+					if (this.pushStateList.length > 0)
+					{
+						this._log('processEvent: Pop state');
+						this.pushStateList.pop();
+					}
+					break;
+				}
+			}
+
+			/*
+			 * we change the current state Here!
+			 */
 			this.currentState = currentEventConfiguration.next_state_if_error;
+
+			this._log('processEvent: new state ---> '+this.currentState);
+
+			//and now that we're entering the new state
+			anEv[0].type='enterState';
+			this.processEvent('enterState',anEv,true);
 		}
 		
 		// do the exit action
