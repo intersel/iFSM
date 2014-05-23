@@ -870,8 +870,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				switch(currentEventConfiguration.pushpop_state)
 				{
 				case 'PushState':
-					this._log('processEvent: Push state');
-					this.pushStateList.push(currentStateEvent);
+					this._log('processEvent: Push state:'+this.currentState);
+					this.pushStateList.push(this.currentState); //do not use currentStateEvent!
 					break;
 				case 'PopState':
 					if (this.pushStateList.length > 0)
@@ -933,8 +933,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				switch(currentEventConfiguration.pushpop_state_if_error)
 				{
 				case 'PushState':
-					this._log('processEvent: Push state');
-					this.pushStateList.push(currentStateEvent);
+					this._log('processEvent: Push state:'+this.currentState);
+					this.pushStateList.push(this.currentState); //do not use currentStateEvent!
 					break;
 				case 'PopState':
 					if (this.pushStateList.length > 0)

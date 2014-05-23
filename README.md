@@ -230,7 +230,7 @@ var aStateDefinition =
   - **properties_init_function** : parameters to send to init_function
   - **next_state** : next state once init_function done
   - **pushpop_state** : <br> 
-	If 'PushState', then current state is pushed in the StateStack then next_state takes place.
+	If 'PushState', then current state is pushed in the StateStack then next_state takes place. If set in an event defined in 'DefaultState', the system will get the actual state.
 	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
   - **next_state_when** : <br>
 	Definition of condition test that will be evaluated, and if result is true then state will change

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iFSM in action! a Finite State Machine for jQuery</title>
+	<meta charset="utf-8">
+    <script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
+    <script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
+    <script type="text/javascript" src="iFSM.js"></script>
+
+    <script type="text/javascript">
+    var aStateDefinition = {
+    	OneB_Algo:
+		{
+    		delegate_machines	: 
+			{
+				AlgoOneB : 
+				{
+					submachine : 
+					{
+				    	Start     : 
+				        {
+				            'a':
+				            {
+				                next_state: 'Leading',
+				            },
+				            'b':   
+				            {
+				                next_state: 'OneB',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        }, 
+				        Leading      : 
+				        {
+				            'b':   
+				            {
+				                next_state: 'OneB',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        },
+				        
+				        OneB      : 
+				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Good',
+				            },
+					        'b':   
+					        {
+					        	propagate_event: 'Reject',
+					        },
+				        },
+				        DefaultState        :
+				        {
+				        	start:
+				            {
+				                next_state  : 'Start',
+				            },
+				        }
+
+					},
+				},			
+			},	 
+            process:
+            {
+                next_state  : 'Process',
+                pushpop_state: 'PushState',
+            },
+    	},		 
+    	AlgoOneA_Algo:
+		{
+    		delegate_machines	: 
+			{
+    			AlgoOneA_Algo : 
+				{
+					submachine : 
+					{
+				    	Start     : 
+				        {
+				            'b':
+				            {
+				                next_state: 'Leading',
+				            },
+				            'a':   
+				            {
+				                next_state: 'OneA',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        }, 
+				        Leading      : 
+				        {
+				            'a':   
+				            {
+				                next_state: 'OneA',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        },
+				        
+				        OneA      : 
+				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Good',
+				            },
+					        'a':   
+					        {
+					        	propagate_event: 'Reject',
+					        },
+				        },
+				        DefaultState        :
+				        {
+				        	start:
+				            {
+				                next_state  : 'Start',
+				            },
+				        }
+
+					},
+				},			
+			},	 
+            process:
+            {
+                next_state  : 'Process',
+                pushpop_state: 'PushState',
+            },
+    	},		 
+        Good      : 
+        {
+            enterState:   
+            {
+                init_function: function()
+                {
+                	$('#result').html($('#result').html()+'> '+$('#aText').val()+':Gooood :-)<br>');
+                },
+                next_state: 'WaitNext',
+            },
+        },
+        Reject      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	$('#result').html($('#result').html()+'> '+$('#aText').val()+':Rejeeect :-(<br>');
+                },
+                next_state: 'WaitNext',
+            },
+        },
+        Process      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	var str=$('#aText').val();
+                	if (str =='') return false;
+                	for(var i=0; i<str.length ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger(res);
+                	    //alert(res);
+                	} 	
+                	this.trigger('$');
+                },
+                pushpop_state: 'PopState',
+	            next_state_if_error: 'Reject',
+            },
+        },
+        WaitNext      : 
+        {
+        	click:
+            {
+        		propagate_event: 'process',
+                pushpop_state: 'PopState',
+            },
+        },
+        
+        DefaultState        :
+        {
+        	click:
+            {
+        		propagate_event: 'process',
+            },
+            SetOneBAlgo:
+            {
+            	next_state: 'OneB_Algo',
+            },
+            SetAlgoOneAAlgo:
+            {
+            	next_state: 'AlgoOneA_Algo',
+            },
+            Reject:
+            {
+            	next_state: 'Reject',
+                pushpop_state: 'PushState',
+            },
+            Good:
+            {
+            	next_state: 'Good',
+                pushpop_state: 'PushState',
+            },
+            start:
+            {
+            	next_state: 'OneB_Algo',
+            },
+        }
+    };
+
+    $(document).ready(function() {
+        $('#myButton').iFSM(aStateDefinition);
+    });
+
+    </script>
+</head>
+<body style="margin:100px;">
+    <h1>Language Analysis with Push/Pop state and subMachine...</h1>
+    <p>Verify if the input string consisting of only two letters “a” and “b” and has exactly one “b” in them.</p> 
+    a Text to analyse: <input type="text" name="aText" id="aText"><br>
+    Algo : Algo "only 1 'b'"<input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetOneBAlgo');" checked><br>
+    Algo : Algo "only 1 'a'"<input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoOneAAlgo');"><br>
+    <button id="myButton">Test</button>
+    <p id="result"></p>
+    
+</body>
+</html>
