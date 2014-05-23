@@ -226,10 +226,13 @@
 </head>
 <body style="margin:100px;">
     <h1>Language Analysis with Push/Pop state and subMachine...</h1>
+    <p> Example inspired from this article : http://continuations.com/post/65432407939/tech-tuesday-finite-state-machines-continued</p>
     <p>Verify if the input string consisting of only two letters “a” and “b” and has exactly one “b” in them.</p> 
     a Text to analyse: <input type="text" name="aText" id="aText"><br>
-    Algo : Algo "only 1 'b'"<input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetOneBAlgo');" checked><br>
-    Algo : Algo "only 1 'a'"<input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoOneAAlgo');"><br>
+    <br>
+    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetOneBAlgo');" checked>Algo "only 1 'b'"<br>
+    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoOneAAlgo');">Algo "only 1 'a'"<br>
+<br>
     <button id="myButton">Test</button>
     <p id="result"></p>
     
