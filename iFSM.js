@@ -131,6 +131,7 @@ var nb_FSM = 0;
  * 			prevent_bubble: <true|false(default)>
  * 			UI_event_bubble: <true|false(default)>
  * 		},
+ * 		<aEventName....>: <anOtherEventName>,
  * 		<aEventName....>:
  * 		{
  * 			....
@@ -157,9 +158,9 @@ var nb_FSM = 0;
  *   	- delegate_machines : sub machines list to delegate the events on the state
  *   		- submachine : the variable name of a state definition or a state definition description
  *   	- eventname : 
- *   			the name of an event. may be any event name supported by JQuery.
- *   			define an event we want to be alerted when it occurs on the object
- *   			specific events :
+ *   			'eventname' is the name of an event. It may be any event name supported by javascript or JQuery.
+ *   			It defines an event we want to be alerted when it occurs on the object
+ *   			Specific events :
  *   				- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
  *   				- 'enterState' : this event is automatically sent and immediatly executed when the FSM enter the state
  *   				- 'exitState' : this event is automatically sent and immediatly executed when the FSM exit the state
@@ -177,6 +178,8 @@ var nb_FSM = 0;
  *   					- data sent :
  *   						* newValue      - New value of the modified attribute
  *   						* oldValue      - Previous value of the modified attribute
+ *   		
+ *   		its description is using an object with the following properties: 
  *   		- how_process_event [default:{push}] : {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
  *   			if delay is defined, the processing of the event is delayed and activated at 'delay'
  *   			by default, any event delayed will be cancelled if the state changes
@@ -215,6 +218,7 @@ var nb_FSM = 0;
  *   		- UI_event_bubble : if defined and true, the current event will bubble. By default, no UI event bubbling...
  *   		- process_on_UItarget : if defined and true, the current event will be processed only if the event was directly targeting 
  *   									the UI jQuery object linked to the machine
+ *   	An event may be synonymous with another event. In this case, we simply give the name of the synonymous event.
  *   
  * @remarks
  * - any FSM is automatically initialised with a 'start' event
@@ -274,7 +278,8 @@ var nb_FSM = 0;
  * 
  * 
  * The public available variables :
- * 	- myFSM.currentState : current state name
+ * 	- myFSM.currentState : current processed state name
+ * 	- myFSM.currentEvent : current processed event name
  *  - myFSM.myUIObject : the jQuery object associated to the FSM
  *  - myFSM._stateDefinition : the definition of the states and events
  *  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
@@ -339,6 +344,12 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
     this.currentState = '';
     
 	/*
+	 * currentEvent - current event processed of the fsm
+	 * 
+	 */
+    this.currentEvent = '';
+
+    /*
 	 * pushStateList array	- a state list pushed that can be poped
 	 * 
 	 */
@@ -421,6 +432,9 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 				this.listEvents[aEvent]=aEvent;
 				if (this != this.rootMachine)
 					this.rootMachine.listEvents[aEvent]=aEvent;
+				//to process synonymous events
+				if (typeof this._stateDefinition[aState][aEvent]  == 'string') 
+					this._stateDefinition[aState][aEvent] =  this._stateDefinition[aState][this._stateDefinition[aState][aEvent]];
 			}
 			else if (aEvent == this.opts.startEvent) setStart= true;
 		}
@@ -583,6 +597,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		var currentState = this.currentState;
 		var currentEvent = this.currentUIEvent = data[0];
 		this.currentDataEvent = data;
+		this.currentEvent	= anEvent;
 		var currentStateEvent = this.currentState;
 		var doForceProcess = (forceProcess==undefined?false:true)
 
