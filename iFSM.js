@@ -13,12 +13,13 @@
  * - 2013/11/05 - E.Podvin - V1.3 - add sub machine to manage hierarchical state machines (HSM)
  * - 2013/11/12 - E.Podvin - V1.4 - debug on submachine management
  * - 2013/11/22 - E.Podvin - V1.5 - add 'next_state_on_target' to change a state according to the submachine states
- * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state 
+ * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state
+ * - 2014/06/06 - E.Podvin - 1.6.2  - add synymous events
  * 
  * -----------------------------------------------------------------------------------------
  * @copyright : Intersel 2013-2014
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.1
+ * @version : 1.6.2
  * -----------------------------------------------------------------------------------------
  */
 
@@ -279,7 +280,7 @@ var nb_FSM = 0;
  * 
  * The public available variables :
  * 	- myFSM.currentState : current processed state name
- * 	- myFSM.currentEvent : current processed event name
+ * 	- myFSM.currentEvent : current processed event
  *  - myFSM.myUIObject : the jQuery object associated to the FSM
  *  - myFSM._stateDefinition : the definition of the states and events
  *  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
@@ -289,6 +290,7 @@ var nb_FSM = 0;
  *  
  *  Within the call of FSM function, you can refer to the FSM by 'this', examples :
  *  - this.currentState
+ *  - this.currentEvent
  *  - this.myUIObject
  *  - ...
  *  plus about event:
@@ -318,7 +320,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 			maxPushEvent		: 10,
 			startEvent			: 'start',
 			prefixFsmName		: 'FSM_',
-			logFSM				: "FSM_10",
+			logFSM				: "",
 		}
 		
 	nb_FSM = nb_FSM+1;
@@ -344,7 +346,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
     this.currentState = '';
     
 	/*
-	 * currentEvent - current event processed of the fsm
+	 * currentEvent - current event processed by the fsm
 	 * 
 	 */
     this.currentEvent = '';
@@ -597,7 +599,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		var currentState = this.currentState;
 		var currentEvent = this.currentUIEvent = data[0];
 		this.currentDataEvent = data;
-		this.currentEvent	= anEvent;
+		this.currentEvent	= currentEvent;
 		var currentStateEvent = this.currentState;
 		var doForceProcess = (forceProcess==undefined?false:true)
 
