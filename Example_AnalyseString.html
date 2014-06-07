@@ -7,7 +7,47 @@
     <script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
     <script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
     <script type="text/javascript" src="iFSM.js"></script>
-
+	<style type="text/css">
+	  html {
+	    font-family: Helvetica, Arial, sans-serif;
+	  }
+	  body {
+	    padding: 0 20px;
+	  }
+	  button {
+	    margin: 0 2px;
+	    font-size: 20px;
+	    border: 1px solid #333;
+	    width: 100px;
+	    text-shadow: 0 -1px 0 #333;
+	    border-radius: 5px;
+	  }
+	  button.on {
+	    color: #dfd;
+	    background: #00aa00;
+	    background: -moz-linear-gradient(top, rgba(0,153,0,1) 0%, rgba(0,119,0,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,153,0,1)), color-stop(100%,rgba(0,119,0,1)));
+	    background: -webkit-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+	    background: -o-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+	    background: linear-gradient(top, rgba(0,153,0,1) 0%,rgba(0,119,0,1) 100%);
+	  }
+	  button.off {
+	    color: #fdd;
+	    background: #CC0000;
+	    background: -moz-linear-gradient(top, rgba(204,0,0,1) 0%, rgba(153,0,0,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(204,0,0,1)), color-stop(100%,rgba(153,0,0,1)));
+	    background: -webkit-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+	    background: -o-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+	    background: linear-gradient(top, rgba(204,0,0,1) 0%,rgba(153,0,0,1) 100%);
+	  }
+	  pre {
+		font-size: 12px;
+		background-color: black;
+		color: green;
+	  }
+	</style>
     <script type="text/javascript">
     var aStateDefinition = {
     	OneB_Algo:
@@ -73,23 +113,256 @@
                 pushpop_state: 'PushState',
             },
     	},		 
-    	AlgoOneA_Algo:
+    	SetAlgoPalindrome:
 		{
     		delegate_machines	: 
 			{
-    			AlgoOneA_Algo : 
+    			AlgoPalindrome : 
 				{
 					submachine : 
 					{
 				    	Start     : 
 				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Good',
+				            },
+				            'pop_b':'pop_a',
+				            'pop_a':   
+				            {
+				            	next_state: 'Reject',
+				            },
+				        }, 
+				        'b'		: 
+				        {
+				            'pop_b':
+				            {
+				                pushpop_state: 'PopState',
+				            },
+				            'pop_a':
+				            {
+				            	next_state: 'Reject',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: '$',
+				            	next_state: 'Reject',
+				            },
+				        },
+				        'a'     : 
+				        {
+				            'pop_a':
+				            {
+				                pushpop_state: 'PopState',
+				            },
+				            'pop_b':
+				            {
+				            	next_state: 'Reject',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: '$',
+				            	next_state: 'Reject',
+				            },
+				        },
+				        'Reject':
+				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        },
+				        DefaultState        :
+				        {
+				        	start:
+				            {
+				                next_state  : 'Start',
+				            },
+				            'a':
+				            {
+				            	next_state: 'a',
+				                pushpop_state: 'PushState',
+				            },
 				            'b':
+				            {
+				            	next_state: 'b',
+				                pushpop_state: 'PushState',
+				            },
+				            process:
+				            {
+				            	propagate_event  : 'ProcessPalindromString',
+				            },
+				        }
+
+					},
+				},			
+			},	 
+    	},		 
+        Good      : 
+        {
+            enterState:   
+            {
+                init_function: function()
+                {
+                	this.opts.outputText.html(this.opts.outputText.html()+'> '+this.opts.inputText.val()+':Gooood :-)<br>');
+                },
+                next_state: 'WaitNext',
+            },
+        },
+        Reject      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	this.opts.outputText.html(this.opts.outputText.html()+'> '+this.opts.inputText.val()+':Rejeeect :-(<br>');
+                },
+                next_state: 'WaitNext',
+            },
+        },
+        Process      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	var str=this.opts.inputText.val();
+                	if (str =='') return false;
+                	for(var i=0; i<str.length ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger(res);
+                	    //alert(res);
+                	} 	
+                	this.trigger('$');
+                },
+                pushpop_state: 'PopState',
+	            next_state_if_error: 'Reject',
+            },
+        },
+        ProcessPalindromString      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	var str=this.opts.inputText.val();
+                	for(var i=0; i<parseInt(str.length/2) ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger(res);
+                	    //alert(res);
+                	} 	
+                	starti=parseInt(str.length/2);
+                	if (str.length % 2 == 1) starti++;
+                	for(var i=starti; i<str.length ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger('pop_'+res);
+                	    //alert(res);
+                	} 	
+                	this.trigger('$');
+                },
+                pushpop_state: 'PopState',
+            },
+        },
+
+        WaitNext      : 
+        {
+        	click:
+            {
+        		propagate_event: 'process',
+                pushpop_state: 'PopState',
+            },
+        },
+        
+        DefaultState        :
+        {
+        	click:
+            {
+        		propagate_event: 'process',
+            },
+            ResetOutput:
+            {
+                init_function: function()
+                {
+                	this.opts.outputText.html('');
+                }
+            },
+            ProcessPalindromString:
+            {
+                next_state  : 'ProcessPalindromString',
+                pushpop_state: 'PushState',
+            },
+            SetOneBAlgo:
+            {
+            	next_state: 'OneB_Algo',
+            },
+            SetAlgoPalindrome:
+            {
+            	next_state: 'SetAlgoPalindrome',
+            },
+            Reject:
+            {
+            	next_state: 'Reject',
+                pushpop_state: 'PushState',
+            },
+            Good:
+            {
+            	next_state: 'Good',
+                pushpop_state: 'PushState',
+            },
+            start:
+            {
+            	next_state: 'OneB_Algo',
+            },
+        }
+    };
+
+    $(document).ready(function() {
+        $('#myButton').iFSM(aStateDefinition,{outputText:$('#result'),inputText:$('#aText')});
+    });
+
+    </script>
+</head>
+<body style="margin:20px;">
+    <h1>Language Analysis with Push/Pop state and subMachine...</h1>
+    <h2>Algo "only 1 'b'" : Has input only an unique "b" letter?</h2>
+    <p> First example is inspired from this article : http://continuations.com/post/65432407939/tech-tuesday-finite-state-machines-continued</p>
+    <p>Verify if the input string consisting of only two letters “a” and “b” and has exactly only one “b” in them.</p>
+	<p>Example: <br> abaa -> ok <br> abbaa -> not ok</p>
+    <h2>Algo "palindrome" : Is input a palindrome of 'a' and 'b' letters ?</h2>
+    <p>Second example tests if the input is a palindrome, as this example, or not : <br>abba -> ok <br>abbaa -> not ok!</p>
+    <h2>Test yourself:</h2>     
+    a Text to analyse: <input type="text" name="aText" id="aText"><br>
+    <br>
+    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetOneBAlgo');" checked>Algo "only 1 'b'"<br>
+    <!-- <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoOneAAlgo');">Algo "only 1 'a'"<br>-->
+    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoPalindrome');">Algo "Palindrom"<br>
+<br>
+    <button id="myButton">Test</button>
+    <button id="Reset" onClick="$('#myButton').trigger('ResetOutput');">Reset Output</button>
+    <p id="result"></p>
+
+<pre>
+    var aStateDefinition = {
+    	OneB_Algo:
+		{
+    		delegate_machines	: 
+			{
+				AlgoOneB : 
+				{
+					submachine : 
+					{
+				    	Start     : 
+				        {
+				            'a':
 				            {
 				                next_state: 'Leading',
 				            },
-				            'a':   
+				            'b':   
 				            {
-				                next_state: 'OneA',
+				                next_state: 'OneB',
 				            },
 				            '$':   
 				            {
@@ -98,9 +371,9 @@
 				        }, 
 				        Leading      : 
 				        {
-				            'a':   
+				            'b':   
 				            {
-				                next_state: 'OneA',
+				                next_state: 'OneB',
 				            },
 				            '$':   
 				            {
@@ -108,13 +381,13 @@
 				            },
 				        },
 				        
-				        OneA      : 
+				        OneB      : 
 				        {
 				            '$':   
 				            {
 				            	propagate_event: 'Good',
 				            },
-					        'a':   
+					        'b':   
 					        {
 					        	propagate_event: 'Reject',
 					        },
@@ -136,13 +409,98 @@
                 pushpop_state: 'PushState',
             },
     	},		 
+    	SetAlgoPalindrome:
+		{
+    		delegate_machines	: 
+			{
+    			AlgoPalindrome : 
+				{
+					submachine : 
+					{
+				    	Start     : 
+				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Good',
+				            },
+				            'pop_b':'pop_a',
+				            'pop_a':   
+				            {
+				            	next_state: 'Reject',
+				            },
+				        }, 
+				        'b'		: 
+				        {
+				            'pop_b':
+				            {
+				                pushpop_state: 'PopState',
+				            },
+				            'pop_a':
+				            {
+				            	next_state: 'Reject',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: '$',
+				            	next_state: 'Reject',
+				            },
+				        },
+				        'a'     : 
+				        {
+				            'pop_a':
+				            {
+				                pushpop_state: 'PopState',
+				            },
+				            'pop_b':
+				            {
+				            	next_state: 'Reject',
+				            },
+				            '$':   
+				            {
+				            	propagate_event: '$',
+				            	next_state: 'Reject',
+				            },
+				        },
+				        'Reject':
+				        {
+				            '$':   
+				            {
+				            	propagate_event: 'Reject',
+				            },
+				        },
+				        DefaultState        :
+				        {
+				        	start:
+				            {
+				                next_state  : 'Start',
+				            },
+				            'a':
+				            {
+				            	next_state: 'a',
+				                pushpop_state: 'PushState',
+				            },
+				            'b':
+				            {
+				            	next_state: 'b',
+				                pushpop_state: 'PushState',
+				            },
+				            process:
+				            {
+				            	propagate_event  : 'ProcessPalindromString',
+				            },
+				        }
+
+					},
+				},			
+			},	 
+    	},		 
         Good      : 
         {
             enterState:   
             {
                 init_function: function()
                 {
-                	$('#result').html($('#result').html()+'> '+$('#aText').val()+':Gooood :-)<br>');
+                	this.opts.outputText.html(this.opts.outputText.html()+'> '+this.opts.inputText.val()+':Gooood :-)&lt;br>');
                 },
                 next_state: 'WaitNext',
             },
@@ -153,7 +511,7 @@
             {
                 init_function: function()
                 {
-                	$('#result').html($('#result').html()+'> '+$('#aText').val()+':Rejeeect :-(<br>');
+                	this.opts.outputText.html(this.opts.outputText.html()+'> '+this.opts.inputText.val()+':Rejeeect :-(&lt;br>');
                 },
                 next_state: 'WaitNext',
             },
@@ -164,9 +522,9 @@
             {
                 init_function: function()
                 {
-                	var str=$('#aText').val();
+                	var str=this.opts.inputText.val();
                 	if (str =='') return false;
-                	for(var i=0; i<str.length ; i++)
+                	for(var i=0; i&lt;str.length ; i++)
                 	{
                 	    res = str.charAt(i)
                 	    this.trigger(res);
@@ -178,6 +536,33 @@
 	            next_state_if_error: 'Reject',
             },
         },
+        ProcessPalindromString      : 
+        {
+        	enterState:   
+            {
+                init_function: function()
+                {
+                	var str=this.opts.inputText.val();
+                	for(var i=0; i&lt;parseInt(str.length/2) ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger(res);
+                	    //alert(res);
+                	} 	
+                	starti=parseInt(str.length/2);
+                	if (str.length % 2 == 1) starti++;
+                	for(var i=starti; i&lt;str.length ; i++)
+                	{
+                	    res = str.charAt(i)
+                	    this.trigger('pop_'+res);
+                	    //alert(res);
+                	} 	
+                	this.trigger('$');
+                },
+                pushpop_state: 'PopState',
+            },
+        },
+
         WaitNext      : 
         {
         	click:
@@ -193,13 +578,25 @@
             {
         		propagate_event: 'process',
             },
+            ResetOutput:
+            {
+                init_function: function()
+                {
+                	this.opts.outputText.html('');
+                }
+            },
+            ProcessPalindromString:
+            {
+                next_state  : 'ProcessPalindromString',
+                pushpop_state: 'PushState',
+            },
             SetOneBAlgo:
             {
             	next_state: 'OneB_Algo',
             },
-            SetAlgoOneAAlgo:
+            SetAlgoPalindrome:
             {
-            	next_state: 'AlgoOneA_Algo',
+            	next_state: 'SetAlgoPalindrome',
             },
             Reject:
             {
@@ -219,22 +616,9 @@
     };
 
     $(document).ready(function() {
-        $('#myButton').iFSM(aStateDefinition);
+        $('#myButton').iFSM(aStateDefinition,{outputText:$('#result'),inputText:$('#aText')});
     });
 
-    </script>
-</head>
-<body style="margin:100px;">
-    <h1>Language Analysis with Push/Pop state and subMachine...</h1>
-    <p> Example inspired from this article : http://continuations.com/post/65432407939/tech-tuesday-finite-state-machines-continued</p>
-    <p>Verify if the input string consisting of only two letters “a” and “b” and has exactly one “b” in them.</p> 
-    a Text to analyse: <input type="text" name="aText" id="aText"><br>
-    <br>
-    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetOneBAlgo');" checked>Algo "only 1 'b'"<br>
-    <input type="radio" name="Algo" id="Algo" onClick="$('#myButton').trigger('SetAlgoOneAAlgo');">Algo "only 1 'a'"<br>
-<br>
-    <button id="myButton">Test</button>
-    <p id="result"></p>
-    
+</pre>    
 </body>
 </html>
