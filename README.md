@@ -6,7 +6,7 @@ A flexible Finite and Hierarchical State Machine ( FSM / HSM ) designed on JQuer
 It has Push/Pop state capabilities and offers different useful features as :
   * complete integration with jQuery
   * automatic javascript event bindings
-  * attribute or css change on jQuery object detected, triggering events to the machine
+  * attribute or css change on jQuery object linked to a machine detected, triggering events to the machine
   * conditional processing of events allowing defining rules
   * conditional state change according to submachines states, allowing to describe promises
   * delayed and asynchronous event processing
