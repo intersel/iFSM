@@ -1,7 +1,18 @@
 iFSM
 ====
 
-A  (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery.
+A flexible Finite and Hierarchical State Machine ( FSM / HSM ) designed on JQuery.
+
+It has Push/Pop state capabilities and offers different useful features as :
+  * complete integration with jQuery
+  * automatic javascript event bindings
+  * attribute or css change on jQuery object detected, triggering events to the machine
+  * conditional processing of events allowing defining rules
+  * conditional state change according to submachines states, allowing to describe promises
+  * delayed and asynchronous event processing
+  * capability to create or change dynamically states and events on the machines
+  * ...
+  
 
 Demos
 =====
@@ -68,9 +79,10 @@ Examples
 See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
 
   - Example_Basic.html - the above example in action
-  - Example_1.html - simple example of independant buttons using the same machine definition
-  - Example_2.html - simple example of submachine delegation. It shows how to set conditions on state change according to submachine states.
+  - Example_1.html - simple example of independent buttons using the same machine definition
+  - Example_2.html - simple example of sub-machine delegation. It shows how to set conditions on state change according to submachine states.
   - Example_PushPopState.html - simple example of using the "Push/Pop" capabilities on states.
+  - Example_AnalyseString.html - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based. 
   - Example_Request - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
   - Example_HSM_calculator - a simple working calculator managed with states and events...
 
@@ -124,73 +136,76 @@ The states are defined with a javascript object with the following organization:
 ```javascript
 var aStateDefinition =
 { 
-	<aStateName1> :
-	{
- 		delegate_machines	: 
+ <aStateName1> :
+ {
+ 	delegate_machines	: 
+ 	{
+ 		<aSubMachine name 1> : 
  		{
-	 		<aSubMachine name 1> : 
-	 		{
-	 			submachine : <a State definition>
-	 		},			
-	 		<aSubMachine name i> : 
-	 		{
-	 			submachine : <a State definition>
-			},			
-	 		...
- 		},	 
-		<aEventName1>:
-		{
- 			how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
- 			process_on_UItarget: <true|false(default)>
- 			process_event_if : <a statement that returns boolean>,
- 			propagate_event_on_refused : <anEventName>
- 			init_function: <a function(parameters, event, data)>,
- 			properties_init_function: <parameters for init_function>,
- 			next_state: <aStateName>,
- 			pushpop_state: <'PushState'||'PopState'>,
- 			next_state_when: <a statement that returns boolean>,
-   			next_state_on_target : 
-   			{
-   				condition 			: <logical_operator : '||' '&&'>
-   				submachines			: 
-   				{
-   					<submachineName1> 	: 
-   					{
-   						condition	: <''(default) 'not'>
-   						target_list : [<targetState1>,...,<targetStaten>],
-  					}
-   					...
-   					<submachineNamen> 	: ...
-  				}
-   			}
- 			next_state_if_error: <aStateName to go if init_function returns false>,
- 			pushpop_state_if_error: <'PushState'||'PopState'>,
- 			out_function: <a function(parameters, event, data)>,
- 			properties_out_function: <parameters for out_function>,
- 			propagate_event: <void||anEventName>
- 			prevent_bubble: <true|false(default)>
- 			UI_event_bubble: <true|false(default)>
-		},
-		<aEventName....>:
-		{
-			....
-		},
-		enterState : ...
-		exitState :  ...
-	},
-	<aStateName...> :
-	{
-		....
-	},
+ 			submachine : <a State definition>,
+ 			no_reinitialisation : <boolean, default:false>
+ 		},			
+ 		<aSubMachine name i> : 
+ 		{
+ 			submachine : <a State definition>
+ 		},			
+ 		...
+ 	},	  		
+ 	<aEventName1>:
+ 	{
+ 		how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
+ 		process_on_UItarget: <true|false(default)>
+ 		process_event_if : <a statement that returns boolean>,
+ 		propagate_event_on_refused : <anEventName>
+ 		init_function: <a function(parameters, event, data)>,
+ 		properties_init_function: <parameters for init_function>,
+ 		next_state: <aStateName>,
+ 		pushpop_state: <'PushState'||'PopState'>,
+ 		next_state_when: <a statement that returns boolean>,
+ 		next_state_on_target : 
+ 		{
+ 			condition 			: <'||'||'&&'>
+ 			submachines			: 
+ 			{
+ 				<submachineName1> 	: 
+ 				{
+ 					condition	: <''(default)||'not'>
+ 					target_list : [<targetState1>,...,<targetStaten>],
+ 					}
+ 				...
+ 				<submachineNamen> 	: ...
+ 			}
+ 		}
+ 		next_state_if_error: <aStateName>,
+ 		pushpop_state_if_error: <'PushState'||'PopState'>,
+ 		out_function: <a function(parameters, event, data)>,
+ 		properties_out_function: <parameters for out_function>,
+ 		propagate_event: <void||anEventName>
+ 		prevent_bubble: <true|false(default)>
+ 		UI_event_bubble: <true|false(default)>
+ 	},
+ 	<aEventName....>: <anOtherEventName>,
+ 	<aEventName....>:
+ 	{
+ 		....
+ 	},
+ 	enterState : ...
+ 	exitState :  ...
+ },
+ <aStateName...> : <anAnotherStateName>,
+ <aStateName...> :
+ {
+ 	....
+ },
  DefaultState :
-	{
-		start: //a default start event received at the FSM start
-		{
-		},
-		<aEventName....>:
-		{
-		}
-	}
+ {
+ 	start: //a default start event received at the FSM start
+ 	{
+ 	},
+ 	<aEventName....>:
+ 	{
+ 	}
+ }
 }
 ```
 
@@ -217,7 +232,7 @@ var aStateDefinition =
 		- data sent :
 		    * newValue      - New value of the modified attribute
 		    * oldValue      - Previous value of the modified attribute
-
+  An event can be the synonymous to an other event. Then give the name of the synomymous event instead of its definition.
   - **how_process_event** [default:{push}] : {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
   	if delay is defined, the processing of the event is delayed and activated at 'delay'
   	by default, any event delayed will be cancelled if the state changes
