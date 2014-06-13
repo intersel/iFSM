@@ -19,7 +19,7 @@
  * 
  * -----------------------------------------------------------------------------------------
  *
- * @copyright : Intersel 2013-2014
+ * @copyright Intersel 2013-2014
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
