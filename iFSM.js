@@ -3,8 +3,9 @@
  * INTERSEL - 4 cité d'Hauteville - 75010 PARIS
  * RCS PARIS 488 379 660 - NAF 721Z
  *
- * File : ifsm.js
- * Abstract : a simple finite state machine
+ * File : iFSM.js
+ * iFSM : a finite state machine with jQuery
+ *
  * -----------------------------------------------------------------------------------------
  * Modifications :
  * - 2013/10/23 - E.Podvin - V1.0 - Creation
@@ -17,9 +18,12 @@
  * - 2014/06/06 - E.Podvin - 1.6.8  - add synonymous events
  * 
  * -----------------------------------------------------------------------------------------
+ *
  * @copyright : Intersel 2013-2014
+ * @fileoverview : iFSM : a finite state machine with jQuery
+ * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.8
+ * @version : 1.6.2
  * -----------------------------------------------------------------------------------------
  */
 
@@ -73,7 +77,7 @@
  *
  */
 (function($){
-/*
+/**
  * @param integer nb_FSM - number of active FSM
  */
 var nb_FSM = 0;
@@ -323,7 +327,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 			maxPushEvent		: 100,
 			startEvent			: 'start',
 			prefixFsmName		: 'FSM_',
-			logFSM				: "",
+			logFSM				: ""
 		}
 		
 	nb_FSM = nb_FSM+1;
@@ -332,82 +336,82 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	if (options == undefined) options=null;
 	this.opts = jQuery.extend( {}, $defaults, options || {});
 	
-	/*
+	/**
 	 * @param string FSMName - name of the FSM
 	 */
 	this.FSMName = this.opts.prefixFsmName+nb_FSM;
 	
-	/*
+	/**
 	 * @param Object _stateDefinition - the definition of the states of the FSM 
 	 */
 	this._stateDefinition = aStateDefinition;
 	
-	/*
+	/**
 	 * currentState - current state of the fsm
 	 * 
 	 */
     this.currentState = '';
     
-	/*
-	 * currentEvent - current event processed by the fsm
+	/**
+	 * @param currentEvent - current event processed by the fsm
 	 * 
 	 */
     this.currentEvent = '';
 
-    /*
-	 * pushStateList array	- a state list pushed that can be poped
+    /**
+	 * @param pushStateList array	- a state list pushed that can be poped
 	 * 
 	 */
 	this.pushStateList	= new Array();
 
-	/*
-	 * processEventStatus	- status of the process event execution 
+	/**
+	 * @param processEventStatus	- status of the process event execution 
 	 * 		- idle : not working
 	 * 		- processing : is processing an event
 	 * 
 	 */
 	this.processEventStatus	= 'idle';
 
-	/*
-	 * pushEventList array	- an event list waiting to be processed
+	/**
+	 * @param pushEventList array	- an event list waiting to be processed
 	 * 
 	 */
 	this.pushEventList	= new Array();
 	
-	/*
-	 * myUIObject		- Target object of the FSM
+	/**
+	 * @param myUIObject		- Target object of the FSM
 	 */
 	this.myUIObject	= anObject;
 
-	/*
+	/**
 	 * @param listEvents - array of the events subscribed
 	 */
 	this.listEvents	={};
 
-	/*
+	/**
 	 * @param currentDataEvent - the data of the event currently processed
 	 */
 	this.currentDataEvent	={};
 	
-	/*
+	/**
 	 * @param returnGeneralEventStatus - status to send back to the event triggering (if false, generally will prevent event propagation)
 	 */
 	this.returnGeneralEventStatus = true;
 	
-	/*
+	/**
 	 * @param rootMachine - root FSM machine of this current FSM
 	 */
 	if (this.opts.rootMachine == undefined) this.opts.rootMachine = this;
 	this.rootMachine = this.opts.rootMachine;
 	
-	/*
+	/**
 	 * @param parentMachine - parent machine of this current one
 	 */
 	if (this.opts.nextParent == undefined) this.parentMachine = null;
 	else this.parentMachine = this.opts.nextParent;
 	this.opts.nextParent = this; //
 	
-	/*
+	/**
 	 * @param childrenMachine - list of children of the current machine
 	 */
 	this.childrenMachine	= new Array();
@@ -559,7 +563,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 }//fsm_manager
 	
 /*available functions*/
-/*
+/**
  * InitManager - init the One Page Fonction State machine
  * 				- a 'start' event is triggered.
  * public method
@@ -589,7 +593,7 @@ fsm_manager.prototype.InitManager	= function(aInitState)
 	
 };//
 
-/*
+/**
  * procesEvent - process an event according to the current state
  * public Method
  * @param string 	anEvent 	: an event name 
@@ -1019,7 +1023,7 @@ fsm_manager.prototype.cleanExitProcess	= function(anEvent,data) {
 	}
 }
 
-/*
+/**
  * pushEvent - push an event in the flow of the processing of an event
  * public Method 
  * @param anEvent 	: an event name 
@@ -1064,7 +1068,7 @@ fsm_manager.prototype.popEvent	= function() {
 	return false;
 };//
 					
-/*
+/**
  * delayProcess - push an event after a delay
  * private Method 
  * @param anEvent 	: an event name 
@@ -1077,7 +1081,7 @@ fsm_manager.prototype.delayProcess	= function(anEvent, aDelay, data) {
 	jQuery.doTimeout(this.myUIObject.attr('id')+this._stateDefinition[this.currentState]+anEvent,aDelay,fsm_manager_launchProcess,this,anEvent,data);
 };
 
-/*
+/**
  * cancelDelayedProcess - delete all delayed events of the current state except those declared as prevented
  * public Method 
  */
@@ -1098,7 +1102,7 @@ fsm_manager.prototype.cancelDelayedProcess	= function() {
 };
 
 
-/*
+/**
  * this.trigger - trigger an event to the machine
  * public function
  * @param aEventName - name of an event
@@ -1111,7 +1115,7 @@ fsm_manager.prototype.trigger = function (aEventName) {
 	this.myUIObject.trigger(aEventName,myArgs);
 };//end of 
 
-/*
+/**
  * subMachinesRespectTargets - verify if the set of submachines respects the target of the current event
  * @param String anEvent
  * @return boolean - true if target is respected
@@ -1154,7 +1158,7 @@ fsm_manager.prototype.subMachinesRespectTargets = function (anEvent) {
 	}
 	return aResult;
 }
-/*
+/**
  * this._log - log function
  * private function
  * @param message - message to log
@@ -1184,7 +1188,7 @@ fsm_manager.prototype._log = function (message) {
  * functions that can be used for the events of a state machine
  */
 
-/* 
+/**
  * triggerMe - trigger an event on an object
  * 				to be used within a state function
  * example :
@@ -1204,7 +1208,7 @@ fsm_manager_triggerMe = function(objectParameters, event, data)
 	$(objectParameters.objectToTrigger).trigger( objectParameters.eventNameToTrigger );
 }
 
-/*
+/**
  * fsm_manager_getcss3prop - 
  * 	pass in an unaltered CSS property, and the function will return the vendor specific JavaScript equivalent property 
  * 	supported by the browser
@@ -1232,7 +1236,7 @@ function fsm_manager_getcss3prop(cssprop){
     return undefined
 }
 
-/*
+/**
  * fsm_manager_create_event - 
  * 	create a dummy event compliant with the FSM processing
  * @param string anEventName - an event name
@@ -1247,7 +1251,7 @@ function fsm_manager_create_event(aTarget,anEventName,data){
 	aDummyEvent.stopPropagation=function(){return true;};
 	return aDummyEvent;
 }
-/*
+/**
  * launchProcess - 
  * private Method 
  * @param anEvent 	: an event name 
@@ -1259,13 +1263,13 @@ fsm_manager_launchProcess	= function(aFsm, anEvent, data) {
 	aFsm.processEvent(anEvent,data,true);
 };
 
-/*
+/**
  * @param iFSMList - array of the created FSM linked with their Objects
  * iFSMList[aStateDefinition] 
  */
 var iFSMList = {};
 //jQuery definition
-/*
+/**
  * $.iFSM - iterate over a jQuery object to assign for each matched element a FSM machine
  * @param  aStateDefinition - a state definition
  * @param  options - options of the FSM machine
@@ -1285,7 +1289,7 @@ $.fn.iFSM = function(aStateDefinition, options) {
 		else iFSM.InitManager();	//start it
 	});
 };
-/*
+/**
  * $.getFSM - returns the array of FSM linked to the object
  * @param aStateDefinition (optional) - if defined
  * @return an array of the FSMs linked to the object  
