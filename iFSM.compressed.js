@@ -3,7 +3,7 @@
  @fileoverview : iFSM : a finite state machine with jQuery
  @see {@link https://github.com/intersel/iFSM}
  @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- @version : 1.6.2
+ @version : 1.6.8
  -----------------------------------------------------------------------------------------
 */
 (function(f){function x(a){function c(a){return a.replace(/\-([a-z])/gi,function(a,b){return b.toUpperCase()})}for(var b=" -moz- -webkit- -o- -ms- -khtml-".split(" "),d=document.documentElement,e=0;e<b.length;e++){var f=c(b[e]+a);"Ms"==f.substr(0,2)&&(f="m"+f.substr(1));if(f in d.style)return f}}function q(a,c,b){var d={};d.data=b;d.target=a;d.currentTarget=a;d.type=c;d.stopPropagation=function(){return!0};return d}var t=0,l=window.fsm_manager=function(a,c,b){t+=1;void 0==b&&(b=null);this.opts=jQuery.extend({},
