@@ -328,7 +328,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 			startEvent			: 'start',
 			prefixFsmName		: 'FSM_',
 			logFSM				: ""
-		}
+		};
 		
 	nb_FSM = nb_FSM+1;
 	
@@ -344,8 +344,8 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	/**
 	 * @param Object _stateDefinition - the definition of the states of the FSM 
 	 */
-	this._stateDefinition = aStateDefinition;
-	
+	this._stateDefinition = jQuery.extend(true, {}, aStateDefinition);
+
 	/**
 	 * currentState - current state of the fsm
 	 * 
