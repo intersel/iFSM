@@ -521,6 +521,7 @@
 <body style="margin:10px;">
 	<h1>iFSM can make game intelligence... Mastermind</h1>
 	<p>Choose the color by click on the cells then do a "Try"...</p>
+	<p>B (black): found but not at correct place | W (white): found and at the correct place</p>
 	<div id="selected_color_bars">
 		<div id="turn_1">
 			<div id="selected_color_bar" style="">
