@@ -345,6 +345,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	 * @param Object _stateDefinition - the definition of the states of the FSM 
 	 */
 	this._stateDefinition = jQuery.extend(true, {}, aStateDefinition);
+	this._originalstateDefinition = aStateDefinition;//keep the original definition here
 
 	/**
 	 * currentState - current state of the fsm
@@ -1307,7 +1308,7 @@ $.fn.getFSM = function(aStateDefinition) {
 		for (var i = 0, aFSMItem = null; i < iFSMList[$(this).attr('id')].length ; i++)
 		{
 			aFSMItem = iFSMList[$(this).attr('id')][i];
-			if (aFSMItem._stateDefinition == aStateDefinition)
+			if (aFSMItem._originalstateDefinition == aStateDefinition)
 			{
 				aFSM = aFSMItem;
 				break;
