@@ -16,7 +16,7 @@
  * - 2013/11/22 - E.Podvin - V1.5 - add 'next_state_on_target' to change a state according to the submachine states
  * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state
  * - 2014/06/06 - E.Podvin - 1.6.8  - add synonymous events
- * 
+ * - 2014/06/16 - E.Podvin - 1.6.9  - patch to correctly process process_on_UItarget option  
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
@@ -106,7 +106,6 @@ var nb_FSM = 0;
  * 		<aEventName1>:
  * 		{
  * 			how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
- * 			process_on_UItarget: <true|false(default)>
  * 			process_event_if : <a statement that returns boolean>,
  * 			propagate_event_on_refused : <anEventName>
  * 			init_function: <a function(parameters, event, data)>,
@@ -134,6 +133,7 @@ var nb_FSM = 0;
  * 			properties_out_function: <parameters for out_function>,
  * 			propagate_event: <void||anEventName>
  * 			prevent_bubble: <true|false(default)>
+ * 			process_on_UItarget: <true|false(default)>
  * 			UI_event_bubble: <true|false(default)>
  * 		},
  * 		<aEventName....>: <anOtherEventName>,
@@ -779,8 +779,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				&& 	(this.myUIObject[0] != document) 
 				&& !$.isWindow(currentEvent.currentTarget)
 				&& !$.isWindow(currentEvent.target)
-				&& (!currentEventConfiguration.process_on_UItarget
-						|| 	currentEventConfiguration.process_on_UItarget == false)
+				&& currentEventConfiguration.process_on_UItarget
+				&& currentEventConfiguration.process_on_UItarget == true
 			)
 		{
 			this.cleanExitProcess();
