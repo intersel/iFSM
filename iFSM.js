@@ -17,6 +17,7 @@
  * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state
  * - 2014/06/06 - E.Podvin - 1.6.8  - add synonymous events
  * - 2014/06/16 - E.Podvin - 1.6.9  - patch to correctly process process_on_UItarget option  
+ * - 2014/06/16 - E.Podvin - 1.6.10  - copy state definition in order to be able to have it dynamic  
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
