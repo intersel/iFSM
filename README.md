@@ -291,6 +291,24 @@ Remarks
   - a 'start' event is always triggered when the FSM is started with InitManager
   - when the machine starts and sets the 'options.initState' to be the initial state, 'enterState' is not triggered. This event may be triggered manually when 'start' event is received (see 'propagate_event')
 
+Event Processing
+================
+
+The "how_process_event" allows to define how the event should be processed by the machine.
+
+By default, when a machine receives an event and is still processing one, it will push it in its next event list to be processed... and gives back the hand...
+
+This way, any function that triggers an event will have immediatly the hand back. It prevents any uncontrolled effects that could arrive with the normal trigger mecanisms that immediatly processes event and all the function calls and then gives back the hand to the caller.
+
+Of course, if you want to have the event immediatly processed, you can ask it with the "immediate" option.
+Or on the contrary, to have the event processed after a delay with the "delay:delay_value" option.
+
+Delayed Events
+==============
+
+By default, any delayed event will be cancelled if the state of the machine change, as it is considered that the event has its context changed... It is possible to keep it even though the state changed with the preventcancel option.
+
+
 SubMachine
 ==========
   - when there are sub machines defined for a state :
