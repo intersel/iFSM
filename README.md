@@ -153,11 +153,8 @@ var aStateDefinition =
  	},	  		
  	<aEventName1>:
  	{
- 		how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
- 		process_on_UItarget: <true|false(default)>
- 		process_event_if : <a statement that returns boolean>,
- 		propagate_event_on_refused : <anEventName>
- 		init_function: <a function(parameters, event, data)>,
+		how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
+		init_function: <a function(parameters, event, data)>,
  		properties_init_function: <parameters for init_function>,
  		next_state: <aStateName>,
  		pushpop_state: <'PushState'||'PopState'>,
@@ -170,18 +167,21 @@ var aStateDefinition =
  				<submachineName1> 	: 
  				{
  					condition	: <''(default)||'not'>
- 					target_list : [<targetState1>,...,<targetStaten>],
- 					}
+					target_list : [<targetState1>,...,<targetStaten>],
+ 				}
  				...
  				<submachineNamen> 	: ...
- 			}
+	 		}
  		}
  		next_state_if_error: <aStateName>,
  		pushpop_state_if_error: <'PushState'||'PopState'>,
+ 		propagate_event: <true||anEventName>
+ 		process_event_if : <a statement that returns boolean>,
+ 		propagate_event_on_refused : <anEventName>
  		out_function: <a function(parameters, event, data)>,
  		properties_out_function: <parameters for out_function>,
- 		propagate_event: <void||anEventName>
  		prevent_bubble: <true|false(default)>
+ 		process_on_UItarget: <true|false(default)>
  		UI_event_bubble: <true|false(default)>
  	},
  	<aEventName....>: <anOtherEventName>,
@@ -266,10 +266,10 @@ var aStateDefinition =
   - **pushpop_state_if_error** : 
 	If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
 	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state_if_error is so overwritten... If the stack is void, there is no state change. 
-  - **propagate_event** : if defined, the current event is propagated to the next state
-  					if it's the name of an event, triggers the event...
-  - **prevent_bubble** : if defined and true, the current event will not bubble to its parent machine
-  - **UI_event_bubble** : if defined and true, the current event will bubble. By default, no UI event bubbling...
+  - **propagate_event** : if defined to true, the current event is propagated to the next state
+  				if it's the name of an event, the event is triggered...
+  - **prevent_bubble** : for submachines use, if defined and true, the current event will not bubble to its parent machine. By default, events bubble from submachines to their parent
+  - **UI_event_bubble** : for graphic events use, if defined and true, the current event will bubble. By default, no UI event bubbling...
   - **process_on_UItarget** : if defined and true, the current event will be processed only if the event was directly targeting 
    									the UI jQuery object linked to the machine
 
