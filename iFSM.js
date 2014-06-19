@@ -24,7 +24,7 @@
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.2
+ * @version : 1.6.10
  * -----------------------------------------------------------------------------------------
  */
 
@@ -107,8 +107,6 @@ var nb_FSM = 0;
  * 		<aEventName1>:
  * 		{
  * 			how_process_event: <immediate||push (default)||{delay:<adelay>,preventcancel:<false(default)|true>}>,
- * 			process_event_if : <a statement that returns boolean>,
- * 			propagate_event_on_refused : <anEventName>
  * 			init_function: <a function(parameters, event, data)>,
  * 			properties_init_function: <parameters for init_function>,
  * 			next_state: <aStateName>,
@@ -130,9 +128,11 @@ var nb_FSM = 0;
  * 			}
  * 			next_state_if_error: <aStateName>,
  * 			pushpop_state_if_error: <'PushState'||'PopState'>,
+ * 			propagate_event: <true||anEventName>
+ * 			process_event_if : <a statement that returns boolean>,
+ * 			propagate_event_on_refused : <anEventName>
  * 			out_function: <a function(parameters, event, data)>,
  * 			properties_out_function: <parameters for out_function>,
- * 			propagate_event: <void||anEventName>
  * 			prevent_bubble: <true|false(default)>
  * 			process_on_UItarget: <true|false(default)>
  * 			UI_event_bubble: <true|false(default)>
