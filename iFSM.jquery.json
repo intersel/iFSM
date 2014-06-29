@@ -1,7 +1,7 @@
 {
   "name": "iFSM",
   "title": "jQuery Finite State Machine",
-  "description": "A (yet another) powerful and flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery.",
+  "description": "a Finite and Hierarchical State Machine (FSM / HSM) to design simulators and games in JQuery",
   "keywords": [
     "FSM",
     "HSM",
