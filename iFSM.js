@@ -17,14 +17,15 @@
  * - 2014/03/19 - E.Podvin - V1.6.1 - add options.initState in the jquery call to be able to define the initial state
  * - 2014/06/06 - E.Podvin - 1.6.8  - add synonymous events
  * - 2014/06/16 - E.Podvin - 1.6.9  - patch to correctly process process_on_UItarget option  
- * - 2014/06/16 - E.Podvin - 1.6.10  - copy state definition in order to be able to have it dynamic  
+ * - 2014/06/16 - E.Podvin - 1.6.10  - copy state definition in order to be able to have it dynamic 
+ * - 2014/07/01 - E.Podvin - 1.6.11 - patch on the reinitialisation of the event iterations when changing state
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.10
+ * @version : 1.6.11
  * -----------------------------------------------------------------------------------------
  */
 
@@ -905,9 +906,14 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				)
 			)
 		{
-			//we reinit the iteration on the event
-			this._stateDefinition[currentStateEvent][anEvent].EventIteration =0;
-
+			//we reinit the iteration on the events
+			var thisFSM=this;
+			$.each(this._stateDefinition[currentStateEvent], 
+					function(aKey,aValue)
+					{
+						thisFSM._stateDefinition[currentStateEvent][aKey].EventIteration = 0;
+					});
+					
 			//we cancel any waiting events on the state
 			this.cancelDelayedProcess();
 			
