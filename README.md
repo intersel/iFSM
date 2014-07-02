@@ -14,8 +14,8 @@ It has Push/Pop state capabilities and offers different useful features as :
   * ...
   
 
-Demos
-=====
+Official website
+================
 http://www.intersel.fr/ifsm-jquery-plugin-demos.html
 
 
