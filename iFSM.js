@@ -911,7 +911,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			$.each(this._stateDefinition[this.currentState], 
 					function(aKey,aValue)
 					{
-						thisFSM._stateDefinition[thisFSM.currentState][aKey].EventIteration =0;
+						if (aKey!='delegate_machines') 
+							thisFSM._stateDefinition[thisFSM.currentState][aKey].EventIteration =0;
 					});
 
 			//we cancel any waiting events on the state
