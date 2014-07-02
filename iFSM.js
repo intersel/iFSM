@@ -908,12 +908,12 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		{
 			//we reinit the iteration on the events
 			var thisFSM=this;
-			$.each(this._stateDefinition[currentStateEvent], 
+			$.each(this._stateDefinition[this.currentState], 
 					function(aKey,aValue)
 					{
-						thisFSM._stateDefinition[currentStateEvent][aKey].EventIteration = 0;
+						thisFSM._stateDefinition[thisFSM.currentState][aKey].EventIteration =0;
 					});
-					
+
 			//we cancel any waiting events on the state
 			this.cancelDelayedProcess();
 			
