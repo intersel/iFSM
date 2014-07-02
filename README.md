@@ -100,6 +100,7 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
       * '2' - errors and warnings (default)
       * '3' - all  
     * logFSM:  list of FSM names to follow on debug (ex: "FSM_1 FSM_4"). If void, then displays all machine messages
+    * <myProperties> : any properties that could be used and accessed by the machine with this.opts as this.opts.<myProperties>
 
   Call Examples
   =============
@@ -107,7 +108,21 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
 ```html
   <button id="myButton">Button</button>
   <script>
-  $('#myButton').iFSM({aState:{click:{init_function:function(){alert('clicked!');}}}},{initState:'aState'});
+  	aFSMDefinition = {
+  		aState:{
+  			click:{
+  				init_function:function(){
+  					alert(this.opts.inputFunction(this.opts.inputData));
+  				}
+  			}
+  		}
+  	};
+	$('#myButton').iFSM(aFSMDefinition,{
+		 initState:'aState'
+		,inputData:'Hello World :-)'
+		,inputFunction:function(aText){return aText;}
+		,LogLevel:1
+		});  
   </script>
 ```
 
