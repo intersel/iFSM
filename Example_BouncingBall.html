@@ -108,6 +108,7 @@
    	    			{
     	    					this.opts.nbFSMObjects = this.opts.gameFSMObjects.length;
     	    					this.opts.counterIteration =0;
+    	    					this.trigger('displayGame');
     				}
     			},
    				StartStop: 
@@ -128,14 +129,7 @@
         		enterState: 
     			{
     				init_function:function(){
-    					this.myUIObject.clearCanvas();
-    					var myFSM=this;
-    					$.each(this.opts.gameFSMObjects,function(index,aFsmGame){
-    						aFsmGame.trigger('doProcess');
-    						aFsmGame.trigger('doDraw',{aFSM:myFSM,aEvent:'EndDoDraw'});
-    					});
-    					this.opts.counterIteration++;
-    					this.opts.counter.html(this.opts.counterIteration);
+    					this.trigger('displayGame');
     				},
     				next_state:'WaitEndProcessing',
     			},
@@ -180,6 +174,19 @@
                 		this.trigger('restartDisplayFPS');
                 	}
                 },
+        		displayGame: 
+    			{
+    				init_function:function(){
+    					this.myUIObject.clearCanvas();
+    					var myFSM=this;
+    					$.each(this.opts.gameFSMObjects,function(index,aFsmGame){
+    						aFsmGame.trigger('doProcess');
+    						aFsmGame.trigger('doDraw',{aFSM:myFSM,aEvent:'EndDoDraw'});
+    					});
+    					this.opts.counterIteration++;
+    					this.opts.counter.html(this.opts.counterIteration);
+    				},
+    			},
                 restartDisplayFPS:
                 {
                 	propagate_event:'displayFPS',
