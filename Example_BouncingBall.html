@@ -106,9 +106,10 @@
     			{
     				init_function:function()
    	    			{
-    	    					this.opts.nbFSMObjects = this.opts.gameFSMObjects.length;
-    	    					this.opts.counterIteration =0;
-    	    					this.trigger('displayGame');
+						this._stateDefinition['NextRound']['doNextRound']['how_process_event'] = {delay: this.opts.speedOfGame};
+	   					this.opts.nbFSMObjects = this.opts.gameFSMObjects.length;
+	   					this.opts.counterIteration =0;
+	   					this.trigger('displayGame');
     				}
     			},
    				StartStop: 
@@ -352,6 +353,7 @@
         	HEIGHT:300,
         	counter:$('#counter'),
         	FPSCounter:$('#FPSCounter'),
+        	speedOfGame:10,
 		});
         
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
