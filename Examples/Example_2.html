@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>iFSM in action! iFSM and submachines and promises...</title>
-<script type="text/javascript" src="../extlib/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
 <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
 <script type="text/javascript" src="../iFSM.js"></script>
@@ -79,7 +79,7 @@ var aStateDefinitionButton = {
 		},
 		start :
 		{
-			propagate_event: 'enterState',
+			propagate_event: ['enterState','click'],
 		}
 	},
 	ButtonWait		: 

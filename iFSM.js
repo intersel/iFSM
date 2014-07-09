@@ -19,13 +19,14 @@
  * - 2014/06/16 - E.Podvin - 1.6.9  - patch to correctly process process_on_UItarget option  
  * - 2014/06/16 - E.Podvin - 1.6.10  - copy state definition in order to be able to have it dynamic 
  * - 2014/07/01 - E.Podvin - 1.6.11 - patch on the reinitialisation of the event iterations when changing state
+ * - 2014/07/08 - E.Podvin - 1.6.13 - propagate_event may be an array of events to propagate
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.11
+ * @version : 1.6.13
  * -----------------------------------------------------------------------------------------
  */
 
@@ -129,7 +130,7 @@ var nb_FSM = 0;
  * 			}
  * 			next_state_if_error: <aStateName>,
  * 			pushpop_state_if_error: <'PushState'||'PopState'>,
- * 			propagate_event: <true||anEventName>
+ * 			propagate_event: <true||anEventName||[aEVN1,aEVN2,...]>
  * 			process_event_if : <a statement that returns boolean>,
  * 			propagate_event_on_refused : <anEventName>
  * 			out_function: <a function(parameters, event, data)>,
@@ -221,8 +222,9 @@ var nb_FSM = 0;
  *   			If 'PopState', then the next state will be the one on top of the StateStack which is poped. If the stack is void, there is no state change. next_state_if_error is so overwritten...
  *   		- out_function	 : function name to do once next_state changed
  *   		- properties_out_function : parameters to send to out_function
- *   		- propagate_event : if defined, the current event is propagated to the next state
+ *   		- propagate_event : if == 'true', the current event is propagated to the next state
  *   							if it's the name of an event, triggers the event...
+ *   							if an array of events, events are triggered in sequence
  *   		- prevent_bubble : if defined and true, the current event will not bubble to its parent machine
  *   		- UI_event_bubble : if defined and true, the current event will bubble. By default, no UI event bubbling...
  *   		- process_on_UItarget : if defined and true, the current event will be processed only if the event was directly targeting 
@@ -273,9 +275,9 @@ var nb_FSM = 0;
  * }
  * var myMachine = {
  * 	aState1 : 
- * 		firstEvent 	: $.extend(true, {}, myGenericEvent),
+ * 		firstEvent 	: $.extend(true, {}, myGenericEvent), //copy of the myGenericEvent object
  * 		secondEvent	: {...eventdefinition...},
- * 		thirdEvent	: myGenericEvent,
+ * 		thirdEvent	: myGenericEvent, 
  * ....
  * }
  * </code>
@@ -609,411 +611,423 @@ fsm_manager.prototype.InitManager	= function(aInitState)
  */
 fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		
-		var currentState = this.currentState;
-		var currentEvent = this.currentUIEvent = data[0];
-		this.currentDataEvent = data;
-		this.currentEvent	= currentEvent;
-		var currentStateEvent = this.currentState;
-		var doForceProcess = (forceProcess==undefined?false:true)
+	var thisFSM = this;
+	var currentState = this.currentState;
+	var currentEvent = this.currentUIEvent = data[0];
+	this.currentDataEvent = data;
+	this.currentEvent	= currentEvent;
+	var currentStateEvent = this.currentState;
+	var doForceProcess = (forceProcess==undefined?false:true);
 
 
-		this._log('processEvent: anEvent (currentState) machine name ---> '+anEvent+'('+currentState+')-'+this.FSMName,2);
+	this._log('processEvent: anEvent (currentState) machine name ---> '+anEvent+'('+currentState+')-'+this.FSMName,2);
 
-		//targetFSM is sent through the this.trigger function
-		//we consider the sub FSMs of a machine as the same machine...
-		if (data.length > 1
-				&& data[data.length-1].targetFSM 
-				&& (data[data.length-1].targetFSM != this)
-				&& (data[data.length-1].targetFSM.rootMachine != this.rootMachine)
-			)
-		{
-			this._log('processEvent: not for the current machine ---> exit',2);
-			return; //not for this machine...
-		}
-		
-		if (this._stateDefinition[currentState]==undefined)
-		{
-			this._log('processEvent: currentState does not exist! ---> ('+currentState+')',1);
-			return;
-		}
-		
-		if ( ( anEvent == 'enterState' ) || ( anEvent == 'exitState' ) ) doForceProcess = true;
-		
-		//element is not a right target...?
-		if (
-					!this.myUIObject.is(currentEvent.currentTarget) 
-				&&	!this.myUIObject.is(currentEvent.target) 
-				&& 	(this.myUIObject[0] != document) 
-				&& !$.isWindow(currentEvent.currentTarget)
-				&& !$.isWindow(currentEvent.target)
-			) 
-		{
-			this._log('processEvent: object not a good target  ---> '+$(currentEvent.currentTarget).attr('id'),2);
-			return;
-		}
-		else
-		{
-			if (this.myUIObject[0] == document) this.actualTarget=$(document);
-			else this.actualTarget = $(currentEvent.currentTarget);
-		}
-		
-		var currentEventConfiguration = null;
-		currentEventConfiguration = this._stateDefinition[currentState][anEvent];
-		
-		//if we are still processing we push the event, except if explicitly asked otherwise
-		//see if we should push the event
-		if (	doForceProcess == false 
-				&& this.processEventStatus != 'idle'
-				&& (
-						currentEventConfiguration == undefined
-						|| ( 	currentEventConfiguration
-								&& 	currentEventConfiguration.how_process_event == undefined
-							)
-						|| ( 	currentEventConfiguration
-								&& 	currentEventConfiguration.how_process_event
-								&& 	currentEventConfiguration.how_process_event.immediate == undefined
-								&& 	currentEventConfiguration.how_process_event.delay == undefined
+	//targetFSM is sent through the this.trigger function
+	//we consider the sub FSMs of a machine as the same machine...
+	if (data.length > 1
+			&& data[data.length-1].targetFSM 
+			&& (data[data.length-1].targetFSM != this)
+			&& (data[data.length-1].targetFSM.rootMachine != this.rootMachine)
+		)
+	{
+		this._log('processEvent: not for the current machine ---> exit',2);
+		return; //not for this machine...
+	}
+	
+	if (this._stateDefinition[currentState]==undefined)
+	{
+		this._log('processEvent: currentState does not exist! ---> ('+currentState+')',1);
+		return;
+	}
+	
+	if ( ( anEvent == 'enterState' ) || ( anEvent == 'exitState' ) ) doForceProcess = true;
+	
+	//element is not a right target...?
+	if (
+				!this.myUIObject.is(currentEvent.currentTarget) 
+			&&	!this.myUIObject.is(currentEvent.target) 
+			&& 	(this.myUIObject[0] != document) 
+			&& !$.isWindow(currentEvent.currentTarget)
+			&& !$.isWindow(currentEvent.target)
+		) 
+	{
+		this._log('processEvent: object not a good target  ---> '+$(currentEvent.currentTarget).attr('id'),2);
+		return;
+	}
+	else
+	{
+		if (this.myUIObject[0] == document) this.actualTarget=$(document);
+		else this.actualTarget = $(currentEvent.currentTarget);
+	}
+	
+	var currentEventConfiguration = null;
+	currentEventConfiguration = this._stateDefinition[currentState][anEvent];
+	
+	//if we are still processing we push the event, except if explicitly asked otherwise
+	//see if we should push the event
+	if (	doForceProcess == false 
+			&& this.processEventStatus != 'idle'
+			&& (
+					currentEventConfiguration == undefined
+					|| ( 	currentEventConfiguration
+							&& 	currentEventConfiguration.how_process_event == undefined
 						)
-					)
-			)
-		{
-			this._log('processEvent: Push anEvent (lastevent)---> '+anEvent+' ('+this.lastevent+')',2);
-			this.pushEvent(anEvent,data);
-			return;
-		}
-
-		this.lastevent=currentState+'-'+anEvent;//unused...mainly for debug...
-		
-		/*
-		 * Processing of the sub machines
-		 */
-		if ( ( this._stateDefinition[currentState].delegate_machines ) 
-			)
-		{
-			var aSubMachineDefinition;
-			for(aSubMachine in this._stateDefinition[currentState].delegate_machines) 
-			{
-				this._log('processEvent: delegate to submachine---> '+aSubMachine);
-				aSubMachineDefinition = this._stateDefinition[currentState].delegate_machines[aSubMachine];
-				
-				//initialize the sub machines if needed
-				if (aSubMachineDefinition.myFSM == undefined)
-				{
-					this._log('processEvent: process submachine ---> create FSM for the submachine '+aSubMachine,2);
-					this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM = new fsm_manager(this.myUIObject,aSubMachineDefinition.submachine,this.opts); //create the machine
-					this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM.opts.FSMParent=this;
-				}
-				
-				if 	( anEvent == 'enterState' )
-				{
-					if (	(aSubMachineDefinition.myFSM.currentState =='')//never initialised if ==''
-						||	(aSubMachineDefinition.no_reinitialisation == undefined)
-						||	(aSubMachineDefinition.no_reinitialisation == false)
-						)
-					{
-						aSubMachineDefinition.myFSM.InitManager();//reinit the sub machine
-					}
-				}
-				else if	( anEvent == 'exitState' )
-				{
-					aSubMachineDefinition.myFSM.trigger('exitMachine');//stop the sub machine
-					//we cancel any waiting events on the state
-					aSubMachineDefinition.myFSM.cancelDelayedProcess();
-				}
-				// process event except on the enterState and exitState events that are not to be delegated...
-				else  
-				{
-					
-					this._log('processEvent: process submachine (event)---> '+aSubMachine+'('+anEvent+')',2);
-					aSubMachineDefinition.myFSM.processEvent(anEvent,data);
-					this._log('processEvent: process submachine (event)---> '+aSubMachine+'('+anEvent+')'+' processed',2);
-				
-					if (		
-								(	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
-								&& 	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent].prevent_bubble
-								)
-							||
-								(	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent]
-								&& 	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent].prevent_bubble
-								)
-							|| 	(anEvent == this.opts.startEvent)
-						)
-					{
-						this._log('processEvent: submachine processed and direct exit ',2);
-
-						this.cleanExitProcess();
-						return;
-					}
-				}
-			}
-		}
-		
-		/*
-		 * Processing of the current event on the current state
-		 */
-		
-		//is the event to be processed?
-		if (currentEventConfiguration == undefined)
-		{
-			currentEventConfiguration = this._stateDefinition.DefaultState[anEvent];
-			if (currentEventConfiguration == undefined) {
-				this._log('processEvent: Event does not exist? '+anEvent+'('+currentStateEvent+')');
-
-				this.cleanExitProcess();
-				return;
-			}
-			currentStateEvent = 'DefaultState';
-		}
-
-		//is this a potential Pop State?
-		if (currentEventConfiguration.pushpop_state 
-				&& (currentEventConfiguration.pushpop_state =='PopState')
-				&& (this.pushStateList.length > 0)
-			)
-			currentEventConfiguration.next_state = this.pushStateList[this.pushStateList.length-1];
-		if (currentEventConfiguration.pushpop_state_if_error 
-				&& (currentEventConfiguration.pushpop_state_if_error =='PopState')
-				&& (this.pushStateList.length > 0)
-			)
-			currentEventConfiguration.next_state_if_error = this.pushStateList[this.pushStateList.length-1];
-		
-		//look if event is processed when coming from any target 
-		if (	!this.myUIObject.is(currentEvent.target) 
-				&& 	(this.myUIObject[0] != document) 
-				&& !$.isWindow(currentEvent.currentTarget)
-				&& !$.isWindow(currentEvent.target)
-				&& currentEventConfiguration.process_on_UItarget
-				&& currentEventConfiguration.process_on_UItarget == true
-			)
-		{
-			this.cleanExitProcess();
-			return;
-		}
-
-		//look if we let the bubbling of UI event on this event
-		// no bubbling by default
-		if (	/*(this.myUIObject[0] != document) 
-				&&*/
-				(!currentEventConfiguration.UI_event_bubble
-						|| 	currentEventConfiguration.UI_event_bubble==false
-					)
-			)
-		{
-			currentEvent.stopPropagation();
-			this.returnGeneralEventStatus=false;
-			this.rootMachine.returnGeneralEventStatus=false;//the UI events always call the root machine
-		}
-
-		//is it a delayed event?
-		if 	( 	doForceProcess == false
-				&& currentEventConfiguration
-				&& 	currentEventConfiguration.how_process_event
-				&& 	currentEventConfiguration.how_process_event.delay
-			)
-		{
-			this._log('processEvent: Event delayed '+anEvent,2);
-			this.delayProcess(anEvent, currentEventConfiguration.how_process_event.delay, data);
-			this.cleanExitProcess();
-			return;
-		}
-
-		//compute EventIteration
-		if (this._stateDefinition[currentStateEvent][anEvent].EventIteration == undefined)
-			this._stateDefinition[currentStateEvent][anEvent].EventIteration =0;
-
-		this._stateDefinition[currentStateEvent][anEvent].EventIteration++;
-		this.EventIteration = this._stateDefinition[currentStateEvent][anEvent].EventIteration;
-		
-		//verify if the event can be processed according to 'enter' condition
-		if 	(		(currentEventConfiguration.process_event_if)
-				&& 	(eval(currentEventConfiguration.process_event_if) == false)					
-			)
-		{
-			this._log('processEvent: event not allowed to process ');
-			if 	(currentEventConfiguration.propagate_event_on_refused)
-			{
-				this._log('processEvent: propagate_event_on_refused ---> '+anEvent+'-'+currentEventConfiguration.propagate_event_on_refused);
-				this.trigger(currentEventConfiguration.propagate_event_on_refused);
-			}
-			//exit as not accepted...
-			this.cleanExitProcess();
-			return;
-		}
-
-		//ok we will really process this event...
-		var lastprocessEventStatus = this.processEventStatus;
-		this.processEventStatus = 'processing';
-		
-		var funcReturn = true;
-		var localdata;
-
-		//call to the action (init_function) before transition state
-		if (currentEventConfiguration.init_function) 
-		{
-			localdata = [].slice.call(data);
-			localdata.unshift(currentEventConfiguration.properties_init_function);
-			funcReturn= currentEventConfiguration.init_function.apply(this,localdata);
-			this._log('processEvent: anEvent / function done ---> '+anEvent);
-		}
-		
-		/*
-		 * Process the transition of state
-		 * 
-		 */
-		// do we change state?
-		var anEv = new Array();//dummy event to be used in 'processEvent' function
-		anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
-		
-		//is this a Push/Pop State?
-		if (funcReturn != false)//it's ok for next_state 
-		{
-			if (currentEventConfiguration.pushpop_state)
-			{
-				switch(currentEventConfiguration.pushpop_state)
-				{
-				case 'PushState':
-					this._log('processEvent: Push state:'+this.currentState);
-					this.pushStateList.push(this.currentState); //do not use currentStateEvent!
-					break;
-				case 'PopState':
-					if (this.pushStateList.length > 0)
-					{
-						this._log('processEvent: Pop state:'+currentEventConfiguration.next_state);
-						this.pushStateList.pop();
-					}
-					break;
-				}
-			}
-		}
-
-		
-		if ( 	(funcReturn != false) 
-			&& 	(currentEventConfiguration.next_state) 
-			&& 	(currentState != currentEventConfiguration.next_state) 
-			&&	(
-					(
-						(currentEventConfiguration.next_state_when 		== undefined)
-					&& 	(currentEventConfiguration.next_state_on_target == undefined)
-					)
-				|| 	(
-						(currentEventConfiguration.next_state_when) 
-					&& 	(eval(currentEventConfiguration.next_state_when) == true)
-					)
-				|| 	(
-						(currentEventConfiguration.next_state_on_target)
-					&& 	(this.subMachinesRespectTargets(anEvent) == true)
+					|| ( 	currentEventConfiguration
+							&& 	currentEventConfiguration.how_process_event
+							&& 	currentEventConfiguration.how_process_event.immediate == undefined
+							&& 	currentEventConfiguration.how_process_event.delay == undefined
 					)
 				)
-			)
-		{
-			//we reinit the iteration on the events
-			var thisFSM=this;
-			$.each(this._stateDefinition[this.currentState], 
-					function(aKey,aValue)
-					{
-						if (aKey!='delegate_machines') 
-							thisFSM._stateDefinition[thisFSM.currentState][aKey].EventIteration =0;
-					});
+		)
+	{
+		this._log('processEvent: Push anEvent (lastevent)---> '+anEvent+' ('+this.lastevent+')',2);
+		this.pushEvent(anEvent,data);
+		return;
+	}
 
-			//we cancel any waiting events on the state
-			this.cancelDelayedProcess();
+	this.lastevent=currentState+'-'+anEvent;//unused...mainly for debug...
+	
+	/*
+	 * Processing of the sub machines
+	 */
+	if ( ( this._stateDefinition[currentState].delegate_machines ) 
+		)
+	{
+		var aSubMachineDefinition;
+		for(aSubMachine in this._stateDefinition[currentState].delegate_machines) 
+		{
+			this._log('processEvent: delegate to submachine---> '+aSubMachine);
+			aSubMachineDefinition = this._stateDefinition[currentState].delegate_machines[aSubMachine];
 			
-			anEv[0].type='exitState';
-			//we alert that we're exiting the state (except if we're starting the machine...
-			if (anEvent !=this.opts.startEvent)
+			//initialize the sub machines if needed
+			if (aSubMachineDefinition.myFSM == undefined)
 			{
-				this.processEvent('exitState',anEv,true);
+				this._log('processEvent: process submachine ---> create FSM for the submachine '+aSubMachine,2);
+				this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM = new fsm_manager(this.myUIObject,aSubMachineDefinition.submachine,this.opts); //create the machine
+				this._stateDefinition[currentState].delegate_machines[aSubMachine].myFSM.opts.FSMParent=this;
 			}
-
-			/*
-			 * we change the current state Here!
-			 */
-			this.currentState = currentEventConfiguration.next_state;
-		
 			
-			//and now that we're entering the new state
-			anEv[0].type='enterState';
-			this.processEvent('enterState',anEv,true);
-
-			//propagate event if asked
-			this._log('processEvent: new state ---> '+this.currentState);
-
-			if 	(currentEventConfiguration.propagate_event != undefined)
+			if 	( anEvent == 'enterState' )
 			{
-				//on propage que si état différent... attention tout de même aux boucles!
-				this._log('processEvent: trigger event ---> '+anEvent+'-'+currentEventConfiguration.propagate_event);
-				if (currentEventConfiguration.propagate_event === true) 
-					this.trigger( anEvent, data[1]);
-				else
-					this.trigger( currentEventConfiguration.propagate_event, data[1]);
-			}
-		}
-		/*
-		 * we stay in the same state?
-		 * so prcess the event propagation
-		 */
-		else if ( 	(funcReturn != false) 
-				&& (currentEventConfiguration.propagate_event != undefined)
-			)
-		{
-			//propagate if the event is different from the current one... but user should take care of loop!
-			this._log('processEvent: trigger event same state ---> '+anEvent+'-'+currentEventConfiguration.propagate_event);
-			if (currentEventConfiguration.propagate_event === true) 
-				this.trigger( anEvent, data[1]);
-			else if (currentEventConfiguration.propagate_event != anEvent) //to avoid loop
-				this.trigger( currentEventConfiguration.propagate_event, data[1]);
-			
-		}
-		/*
-		 * oups there was an error during the processing of the action 
-		 */
-		else if ( (funcReturn == false) && (currentEventConfiguration.next_state_if_error) )
-		{
-			this._log('processEvent: error state ---> '+this.currentState);
-			//is this a Push/Pop State?
-			if (currentEventConfiguration.pushpop_state_if_error)
-			{
-				switch(currentEventConfiguration.pushpop_state_if_error)
+				if (	(aSubMachineDefinition.myFSM.currentState =='')//never initialised if ==''
+					||	(aSubMachineDefinition.no_reinitialisation == undefined)
+					||	(aSubMachineDefinition.no_reinitialisation == false)
+					)
 				{
-				case 'PushState':
-					this._log('processEvent: Push state:'+this.currentState);
-					this.pushStateList.push(this.currentState); //do not use currentStateEvent!
-					break;
-				case 'PopState':
-					if (this.pushStateList.length > 0)
-					{
-						this._log('processEvent: Pop state:'+currentEventConfiguration.next_state_if_error);
-						this.pushStateList.pop();
-					}
-					break;
+					aSubMachineDefinition.myFSM.InitManager();//reinit the sub machine
 				}
 			}
+			else if	( anEvent == 'exitState' )
+			{
+				aSubMachineDefinition.myFSM.trigger('exitMachine');//stop the sub machine
+				//we cancel any waiting events on the state
+				aSubMachineDefinition.myFSM.cancelDelayedProcess();
+			}
+			// process event except on the enterState and exitState events that are not to be delegated...
+			else  
+			{
+				
+				this._log('processEvent: process submachine (event)---> '+aSubMachine+'('+anEvent+')',2);
+				aSubMachineDefinition.myFSM.processEvent(anEvent,data);
+				this._log('processEvent: process submachine (event)---> '+aSubMachine+'('+anEvent+')'+' processed',2);
+			
+				if (		
+							(	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
+							&& 	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent].prevent_bubble
+							)
+						||
+							(	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent]
+							&& 	aSubMachineDefinition.myFSM._stateDefinition.DefaultState[anEvent].prevent_bubble
+							)
+						|| 	(anEvent == this.opts.startEvent)
+					)
+				{
+					this._log('processEvent: submachine processed and direct exit ',2);
 
-			/*
-			 * we change the current state Here!
-			 */
-			this.currentState = currentEventConfiguration.next_state_if_error;
-
-			this._log('processEvent: new state ---> '+this.currentState);
-
-			//and now that we're entering the new state
-			anEv[0].type='enterState';
-			this.processEvent('enterState',anEv,true);
+					this.cleanExitProcess();
+					return;
+				}
+			}
 		}
-		
-		// do the exit action
-		if (currentEventConfiguration.out_function) 
-		{
-			localdata = [].slice.call(data);
-			localdata.unshift(currentEventConfiguration.properties_out_function);
-			funcReturn= currentEventConfiguration.out_function.apply(this,localdata);
-			this._log('processEvent: end out---> '+anEvent);
-		}
+	}
+	
+	/*
+	 * Processing of the current event on the current state
+	 */
+	
+	//is the event to be processed?
+	if (currentEventConfiguration == undefined)
+	{
+		currentEventConfiguration = this._stateDefinition.DefaultState[anEvent];
+		if (currentEventConfiguration == undefined) {
+			this._log('processEvent: Event does not exist? '+anEvent+'('+currentStateEvent+')');
 
-		this.processEventStatus = lastprocessEventStatus; //we globally finished the job...
-		
+			this.cleanExitProcess();
+			return;
+		}
+		currentStateEvent = 'DefaultState';
+	}
+
+	//is this a potential Pop State?
+	if (currentEventConfiguration.pushpop_state 
+			&& (currentEventConfiguration.pushpop_state =='PopState')
+			&& (this.pushStateList.length > 0)
+		)
+		currentEventConfiguration.next_state = this.pushStateList[this.pushStateList.length-1];
+	if (currentEventConfiguration.pushpop_state_if_error 
+			&& (currentEventConfiguration.pushpop_state_if_error =='PopState')
+			&& (this.pushStateList.length > 0)
+		)
+		currentEventConfiguration.next_state_if_error = this.pushStateList[this.pushStateList.length-1];
+	
+	//look if event is processed when coming from any target 
+	if (	!this.myUIObject.is(currentEvent.target) 
+			&& 	(this.myUIObject[0] != document) 
+			&& !$.isWindow(currentEvent.currentTarget)
+			&& !$.isWindow(currentEvent.target)
+			&& currentEventConfiguration.process_on_UItarget
+			&& currentEventConfiguration.process_on_UItarget == true
+		)
+	{
 		this.cleanExitProcess();
-		this._log('processEvent: exit:'+anEvent);
+		return;
+	}
+
+	//look if we let the bubbling of UI event on this event
+	// no bubbling by default
+	if (	/*(this.myUIObject[0] != document) 
+			&&*/
+			(!currentEventConfiguration.UI_event_bubble
+					|| 	currentEventConfiguration.UI_event_bubble==false
+				)
+		)
+	{
+		currentEvent.stopPropagation();
+		this.returnGeneralEventStatus=false;
+		this.rootMachine.returnGeneralEventStatus=false;//the UI events always call the root machine
+	}
+
+	//is it a delayed event?
+	if 	( 	doForceProcess == false
+			&& currentEventConfiguration
+			&& 	currentEventConfiguration.how_process_event
+			&& 	currentEventConfiguration.how_process_event.delay
+		)
+	{
+		this._log('processEvent: Event delayed '+anEvent,2);
+		this.delayProcess(anEvent, currentEventConfiguration.how_process_event.delay, data);
+		this.cleanExitProcess();
+		return;
+	}
+
+	//compute EventIteration
+	if (this._stateDefinition[currentStateEvent][anEvent].EventIteration == undefined)
+		this._stateDefinition[currentStateEvent][anEvent].EventIteration =0;
+
+	this._stateDefinition[currentStateEvent][anEvent].EventIteration++;
+	this.EventIteration = this._stateDefinition[currentStateEvent][anEvent].EventIteration;
+	
+	//verify if the event can be processed according to 'enter' condition
+	if 	(		(currentEventConfiguration.process_event_if)
+			&& 	(eval(currentEventConfiguration.process_event_if) == false)					
+		)
+	{
+		this._log('processEvent: event not allowed to process ');
+		if 	(currentEventConfiguration.propagate_event_on_refused)
+		{
+			this._log('processEvent: propagate_event_on_refused ---> '+anEvent+'-'+currentEventConfiguration.propagate_event_on_refused);
+			this.trigger(currentEventConfiguration.propagate_event_on_refused);
+		}
+		//exit as not accepted...
+		this.cleanExitProcess();
+		return;
+	}
+
+	//ok we will really process this event...
+	var lastprocessEventStatus = this.processEventStatus;
+	this.processEventStatus = 'processing';
+	
+	var funcReturn = true;
+	var localdata;
+
+	//call to the action (init_function) before transition state
+	if (currentEventConfiguration.init_function) 
+	{
+		localdata = [].slice.call(data);
+		localdata.unshift(currentEventConfiguration.properties_init_function);
+		funcReturn= currentEventConfiguration.init_function.apply(this,localdata);
+		this._log('processEvent: anEvent / function done ---> '+anEvent);
+	}
+	
+	/*
+	 * Process the transition of state
+	 * 
+	 */
+	// do we change state?
+	var anEv = new Array();//dummy event to be used in 'processEvent' function
+	anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
+	
+	//is this a Push/Pop State?
+	if (funcReturn != false)//it's ok for next_state 
+	{
+		if (currentEventConfiguration.pushpop_state)
+		{
+			switch(currentEventConfiguration.pushpop_state)
+			{
+			case 'PushState':
+				this._log('processEvent: Push state:'+this.currentState);
+				this.pushStateList.push(this.currentState); //do not use currentStateEvent!
+				break;
+			case 'PopState':
+				if (this.pushStateList.length > 0)
+				{
+					this._log('processEvent: Pop state:'+currentEventConfiguration.next_state);
+					this.pushStateList.pop();
+				}
+				break;
+			}
+		}
+	}
+
+	//do we change of state?
+	if ( 	(funcReturn != false) 
+		&& 	(currentEventConfiguration.next_state) 
+		&& 	(currentState != currentEventConfiguration.next_state) 
+		&&	(
+				(
+					(currentEventConfiguration.next_state_when 		== undefined)
+				&& 	(currentEventConfiguration.next_state_on_target == undefined)
+				)
+			|| 	(
+					(currentEventConfiguration.next_state_when) 
+				&& 	(eval(currentEventConfiguration.next_state_when) == true)
+				)
+			|| 	(
+					(currentEventConfiguration.next_state_on_target)
+				&& 	(this.subMachinesRespectTargets(anEvent) == true)
+				)
+			)
+		)
+	{
+		//we reinit the iteration on the events
+		var thisFSM=this;
+		$.each(this._stateDefinition[this.currentState], 
+				function(aKey,aValue)
+				{
+					if (aKey!='delegate_machines') 
+						thisFSM._stateDefinition[thisFSM.currentState][aKey].EventIteration =0;
+				});
+
+		//we cancel any waiting events on the state
+		this.cancelDelayedProcess();
+		
+		anEv[0].type='exitState';
+		//we alert that we're exiting the state (except if we're starting the machine...
+		if (anEvent !=this.opts.startEvent)
+		{
+			this.processEvent('exitState',anEv,true);
+		}
+
+		/*
+		 * we change the current state Here!
+		 */
+		this.currentState = currentEventConfiguration.next_state;
+	
+		
+		//and now that we're entering the new state
+		anEv[0].type='enterState';
+		this.processEvent('enterState',anEv,true);
+
+		//propagate event if asked
+		this._log('processEvent: new state ---> '+this.currentState);
+
+		//propagate event(s)
+		if 	(currentEventConfiguration.propagate_event != undefined)
+		{
+			if (!(currentEventConfiguration.propagate_event instanceof Array))
+				currentEventConfiguration.propagate_event=[currentEventConfiguration.propagate_event];
+			$.each(currentEventConfiguration.propagate_event, 
+				function(aKey,aPropagateEvent)
+				{
+					thisFSM._log('processEvent: trigger event ---> '+anEvent+'-'+aPropagateEvent);
+					if (aPropagateEvent === true) 
+						thisFSM.trigger( anEvent, data[1]);
+					else
+						thisFSM.trigger( aPropagateEvent, data[1]);
+			});
+		}
+	}
+	/*
+	 * we stay in the same state?
+	 * so process the event propagation
+	 */
+	else if ( 	(funcReturn != false) 
+			&& (currentEventConfiguration.propagate_event != undefined)
+		)
+	{
+		if (!(currentEventConfiguration.propagate_event instanceof Array))
+			currentEventConfiguration.propagate_event=[currentEventConfiguration.propagate_event];
+		//propagate event(s)
+		$.each(currentEventConfiguration.propagate_event, 
+			function(aKey,aPropagateEvent)
+			{
+				thisFSM._log('processEvent: trigger event ---> '+anEvent+'-'+aPropagateEvent);
+				if (aPropagateEvent === true) 
+					thisFSM.trigger( anEvent, data[1]);
+				else
+					thisFSM.trigger( aPropagateEvent, data[1]);
+		});
+	}
+	/*
+	 * oups there was an error during the processing of the action 
+	 */
+	else if ( (funcReturn == false) && (currentEventConfiguration.next_state_if_error) )
+	{
+		this._log('processEvent: error state ---> '+this.currentState);
+		//is this a Push/Pop State?
+		if (currentEventConfiguration.pushpop_state_if_error)
+		{
+			switch(currentEventConfiguration.pushpop_state_if_error)
+			{
+			case 'PushState':
+				this._log('processEvent: Push state:'+this.currentState);
+				this.pushStateList.push(this.currentState); //do not use currentStateEvent!
+				break;
+			case 'PopState':
+				if (this.pushStateList.length > 0)
+				{
+					this._log('processEvent: Pop state:'+currentEventConfiguration.next_state_if_error);
+					this.pushStateList.pop();
+				}
+				break;
+			}
+		}
+
+		/*
+		 * we change the current state Here!
+		 */
+		this.currentState = currentEventConfiguration.next_state_if_error;
+
+		this._log('processEvent: new state ---> '+this.currentState);
+
+		//and now that we're entering the new state
+		anEv[0].type='enterState';
+		this.processEvent('enterState',anEv,true);
+	}
+	
+	// do the exit action
+	if (currentEventConfiguration.out_function) 
+	{
+		localdata = [].slice.call(data);
+		localdata.unshift(currentEventConfiguration.properties_out_function);
+		funcReturn= currentEventConfiguration.out_function.apply(this,localdata);
+		this._log('processEvent: end out---> '+anEvent);
+	}
+
+	this.processEventStatus = lastprocessEventStatus; //we globally finished the job...
+	
+	this.cleanExitProcess();
+	this._log('processEvent: exit:'+anEvent);
 
 };//end of processEvent
 
