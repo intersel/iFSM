@@ -62,17 +62,36 @@
 							
 						},
 					},
+					MoveRacket: 
+					{
+						init_function:function(){
+							if (CurrentMouseX==undefined) return;
+							var target = new Vector2(CurrentMouseX,this.rootMachine.opts.Position.y);
+							var desired_velocity = target.minusNew(this.rootMachine.opts.Position);
+							var distance = desired_velocity.magnitude();
+							desired_velocity.normalise();
+							desired_velocity.multiplyEq(this.rootMachine.opts.MaxVelocity);
+							if (distance >this.rootMachine.opts.MaxSpeed) this.rootMachine.opts.SteeringForce.plusEq(desired_velocity);
+							else {
+								this.rootMachine.opts.SteeringForce.reset(-this.rootMachine.opts.Velocity.x,0);
+								
+							}
+							
+						},
+					},
 					BallElasticity : 
 					{
 						init_function:function(){
-							var aRatio=.95;
+							var aRatio = this.rootMachine.opts.DampingRatio;
 							if (this.rootMachine.opts.Mass>1) aRatio = aRatio / Math.sqrt(this.rootMachine.opts.Mass);
-							if (this.rootMachine.opts.Position.x + this.rootMachine.opts.Velocity.x > this.rootMachine.opts.widthScreen || this.rootMachine.opts.Position.x + this.rootMachine.opts.Velocity.x < 0)
+							if (this.rootMachine.opts.Position.x  + this.rootMachine.opts.width/2 + 1 >= this.rootMachine.opts.widthScreen 
+									|| this.rootMachine.opts.Position.x - this.rootMachine.opts.width/2 - 1  <= 0)
 							{
 								//this.rootMachine.opts.SteeringForce.x = -this.rootMachine.opts.SteeringForce.x;
 								this.rootMachine.opts.Velocity.x=-this.rootMachine.opts.Velocity.x*aRatio;
 							}
-							if (this.rootMachine.opts.Position.y + this.rootMachine.opts.Velocity.y > this.rootMachine.opts.heightScreen || this.rootMachine.opts.Position.y + this.rootMachine.opts.Velocity.y < 0)
+							if (this.rootMachine.opts.Position.y + this.rootMachine.opts.height/2 + 1 >= this.rootMachine.opts.heightScreen 
+									|| this.rootMachine.opts.Position.y - this.rootMachine.opts.height/2 - 1 <= 0)
 							{
 								//this.rootMachine.opts.SteeringForce.y = -this.rootMachine.opts.SteeringForce.y;
 								this.rootMachine.opts.Velocity.y=-this.rootMachine.opts.Velocity.y*aRatio;
@@ -96,25 +115,31 @@
 							//compute the new position of the object
 							this.rootMachine.opts.Position.plusEq(this.rootMachine.opts.Velocity);
 							//this.rootMachine.opts.SteeringForce.reset(0,0);
-							if (this.rootMachine.opts.Position.x >= this.rootMachine.opts.widthScreen) 
-								this.rootMachine.opts.Position.x=this.rootMachine.opts.widthScreen;
-							else if (this.rootMachine.opts.Position.x < 0) 
-								this.rootMachine.opts.Position.x=0;
-							if (this.rootMachine.opts.Position.y >= this.rootMachine.opts.heightScreen)
-								this.rootMachine.opts.Position.y=this.rootMachine.opts.heightScreen;
-							else if (this.rootMachine.opts.Position.y<0 ) 
-								this.rootMachine.opts.Position.y=0;
+							if (this.rootMachine.opts.Position.x+this.rootMachine.opts.width/2 >= this.rootMachine.opts.widthScreen) 
+								this.rootMachine.opts.Position.x=this.rootMachine.opts.widthScreen-this.rootMachine.opts.width/2;
+							else if (this.rootMachine.opts.Position.x - this.rootMachine.opts.width/2 <= 0) 
+								this.rootMachine.opts.Position.x=0+this.rootMachine.opts.width/2;
+							if (this.rootMachine.opts.Position.y + this.rootMachine.opts.height/2 >= this.rootMachine.opts.heightScreen)
+								this.rootMachine.opts.Position.y=this.rootMachine.opts.heightScreen-this.rootMachine.opts.height/2;
+							else if (this.rootMachine.opts.Position.y - this.rootMachine.opts.height/2 <= 0 ) 
+								this.rootMachine.opts.Position.y=0+this.rootMachine.opts.height/2;
 
 						},
 					},			
 				},
 				DefaultState:
 				{
+					start:
+					{
+						init_function:function(){
+							if (this.parentMachine.opts.ForcesToProcess)
+								this._stateDefinition['DefaultState']['doProcess']['propagate_event'] = this.parentMachine.opts.ForcesToProcess;
+						},
+					},
 		    		doProcess: 
 					{
 						next_state:'doProcessForces',
-//						propagate_event:['GroundAttraction','FleeBalls','ComputePosition','processed'],
-						propagate_event:['GroundAttraction','FleeBalls','BallElasticity','ComputePosition','processed'],
+						propagate_event:['GroundAttraction','BallElasticity','ComputePosition','processed'],
 					},
 				},
 			},
@@ -245,7 +270,8 @@
 			doBounce : 
 			{
 				init_function:function(p,e){
-					var aRatio=.45;
+					if (!this.opts.Bounce) return;
+					var aRatio = this.rootMachine.opts.DampingRatio;
 					if (this.opts.Mass>1) aRatio = aRatio / Math.sqrt(this.opts.Mass);
 					this.opts.Velocity.x=-this.opts.Velocity.x*aRatio;
 					this.opts.Velocity.y=-this.opts.Velocity.y*aRatio;
@@ -396,8 +422,8 @@
                 mousemove:
                 {
     				init_function:function(p,e){
-                		CurrentMouseX = e.offsetX;
-                		CurrentMouseY = e.offsetY;
+                		CurrentMouseX = e.pageX - this.myUIObject.offset().left;
+                		CurrentMouseY = e.pageY - this.myUIObject.offset().top;
 					  	$('#status').html('mouse position: '+CurrentMouseX+'/'+CurrentMouseY);
     				}
 
@@ -493,9 +519,9 @@
     	
         aBackGroundGame = $('#aBackground').iFSM(aGameObject,{
 										canvas:$('#canvas'),
-        								color: '#FAF7F8',
-        								width: 400,
-        								height: 300,
+        								color: '#EAE7E8',
+        								width:$('#canvas').width(),
+        								height:$('#canvas').height(),
         								noAnimation:true,
         								initdraw:function(aFSM){
         									aFSM.opts.canvas.drawRect({
@@ -534,63 +560,73 @@
 					  	aFSM.trigger('click',aLayer);
 					  	},				  });
 		}
+		function doDrawRacket(aFSM){
+			aFSM.opts.canvas
+			.setLayer(aFSM.FSMName+'_racket',{
+				x: aFSM.opts.Position.x, 
+				y: aFSM.opts.Position.y,
+				}
+			);
+		};
+		
+		function doInitDrawRacket(aFSM)
+		{
+			aFSM.opts.canvas.drawRect({
+				  fillStyle: aFSM.opts.color,
+				  x: aFSM.opts.Position.x, 
+				  y: aFSM.opts.Position.y,
+				  width: aFSM.opts.width,
+				  height: aFSM.opts.height,
+				  layer: true,
+				  name: aFSM.FSMName+'_racket',
+				  click:
+					  function(aLayer){
+					  	aFSM.trigger('click',aLayer);
+					  	},				  
+			});
+		}
 		
         aBallGame = $('#aBall').iFSM(aGameObject,{
 			canvas:$('#canvas'),
 			color: '#770000',
 			width: 20,
 			height: 20,
-			widthScreen:400,
-			heightScreen:300,
+			widthScreen:$('#canvas').width(),
+			heightScreen:$('#canvas').height(),
 			Position: new Vector2(100,20),//starting Position
-			Velocity: new Vector2(5,-1), // starting Velocity
+			Velocity: new Vector2(10,10), // starting Velocity
 			SteeringForce:new Vector2(0,0), // 
-			MaxVelocity:50, // maximum of velocity to flee in pixels
-			MaxVelocityGA:1, // velocity to the ground 
-			MaxSteeringForce:1, // maximum of general steering force in pixels
-			MaxSpeed:100, // maximum of object speed in pixels
+			MaxVelocity:10, // maximum of velocity to flee in pixels
+			MaxVelocityGA:0.002, // velocity to the ground 
+			MaxSteeringForce:10, // maximum of general steering force in pixels
+			MaxSpeed:20, // maximum of object speed in pixels
 			Mass:1, // 
+			Bounce:true,
 			initdraw:doInitDrawBall,
 			draw:doDrawBall,
+			DampingRatio:1,// damping when colliding
+			ForcesToProcess:['BallElasticity','ComputePosition','processed'],
 		});
-      
-        a2ndBallGame = $('#aSecondBall').iFSM(aGameObject,{
+        aRacketGame = $('#aRacket').iFSM(aGameObject,{
 			canvas:$('#canvas'),
-			color: '#007777',
-			width: 30,
-			height: 30,
-			widthScreen:400,
-			heightScreen:300,
-			Position: new Vector2(20,50),
-			Velocity: new Vector2(0,1),
-			SteeringForce:new Vector2(0,0),
-			MaxVelocity:50,
-			MaxVelocityGA:1,
-			MaxSteeringForce:.3,
-			MaxSpeed:100,
-			Mass:2,
-			initdraw:doInitDrawBall,
-			draw:doDrawBall,
-		});
-        a3rdBallGame = $('#aThirdBall').iFSM(aGameObject,{
-			canvas:$('#canvas'),
-			color: '#007700',
-			width: 10,
+			color: '#AA0077',
+			width: 50,
 			height: 10,
-			widthScreen:400,
-			heightScreen:300,
-			Position: new Vector2(250,10),
-			Velocity: new Vector2(2,0),
-			SteeringForce:new Vector2(0,0),
-			MaxVelocity:10,
-			MaxVelocityGA:2,
-			MaxSteeringForce:0.8,
-			MaxSpeed:100,
-			Mass:1,
-			initdraw:doInitDrawBall,
-			draw:doDrawBall,
+			widthScreen:$('#canvas').width(),
+			heightScreen:$('#canvas').height(),
+			Position: new Vector2($('#canvas').width()/2-25,$('#canvas').height()-20),//starting Position
+			Velocity: new Vector2(0,0), // starting Velocity
+			SteeringForce:new Vector2(0,0), // 
+			MaxVelocity:10, // maximum of velocity to move racket in pixels
+			MaxSteeringForce:20, // maximum of general steering force in pixels
+			MaxSpeed:30, // maximum of object speed in pixels
+			Mass:1, 
+			Bounce:false,
+			initdraw:doInitDrawRacket,
+			draw:doDrawRacket,
+			ForcesToProcess:['MoveRacket','ComputePosition','processed'],
 		});
-	   	var aObjectList=[aBackGroundGame,aBallGame,a2ndBallGame,a3rdBallGame];
+	   	var aObjectList=[aBackGroundGame,aBallGame,aRacketGame];
 	       
 //   		var aObjectList=[aBackGroundGame,aBallGame];
         
@@ -598,7 +634,7 @@
 			gameFSMObjects:aObjectList,
         	counter:$('#counter'),
         	FPSCounter:$('#FPSCounter'),
-        	speedOfGame:20,
+        	speedOfGame:30,
 		});
         
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
@@ -629,13 +665,8 @@
 				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
 				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
 			</div>
-			<div class="ball" id='aSecondBall'>
+			<div class="ball" id='aRacket'>
 				<br>object 'aSecondBall'<br>
-				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
-				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
-			</div>
-			<div class="ball" id='aThirdBall'>
-				<br>object 'aThirdBall'<br>
 				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
 				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
 			</div>
