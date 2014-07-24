@@ -120,7 +120,10 @@
 							else if (this.rootMachine.opts.Position.x - this.rootMachine.opts.width/2 <= 0) 
 								this.rootMachine.opts.Position.x=0+this.rootMachine.opts.width/2;
 							if (this.rootMachine.opts.Position.y + this.rootMachine.opts.height/2 >= this.rootMachine.opts.heightScreen)
+							{
 								this.rootMachine.opts.Position.y=this.rootMachine.opts.heightScreen-this.rootMachine.opts.height/2;
+								this.rootMachine.opts.canvas.trigger('touchBottom');
+							}
 							else if (this.rootMachine.opts.Position.y - this.rootMachine.opts.height/2 <= 0 ) 
 								this.rootMachine.opts.Position.y=0+this.rootMachine.opts.height/2;
 
@@ -261,20 +264,20 @@
 				init_function:function(p,e,aFSM){
 					if (!this.opts.Position) return;
 					if (!aFSM.opts.Position) return;
-					if (	(Math.abs(this.opts.Position.x - aFSM.opts.Position.x + aFSM.opts.Velocity.x/2) < (this.opts.width + aFSM.opts.width)/2)
-						&&	(Math.abs(this.opts.Position.y - aFSM.opts.Position.y + aFSM.opts.Velocity.y/2) < (this.opts.height + aFSM.opts.height)/2)
+					if (	(Math.abs(this.opts.Position.x - aFSM.opts.Position.x) < (this.opts.width + aFSM.opts.width)/2)
+						&&	(Math.abs(this.opts.Position.y - aFSM.opts.Position.y) < (this.opts.height + aFSM.opts.height)/2)
 						)
-						aFSM.trigger('doBounce');
+						aFSM.trigger('doBounce',{distX:this.opts.Position.x - aFSM.opts.Position.x,distY:this.opts.Position.y - aFSM.opts.Position.y});
 				},
 			},
 			doBounce : 
 			{
-				init_function:function(p,e){
+				init_function:function(p,e,data){
 					if (!this.opts.Bounce) return;
 					var aRatio = this.rootMachine.opts.DampingRatio;
 					if (this.opts.Mass>1) aRatio = aRatio / Math.sqrt(this.opts.Mass);
-					this.opts.Velocity.x=-this.opts.Velocity.x*aRatio;
-					this.opts.Velocity.y=-this.opts.Velocity.y*aRatio;
+					if (data.distX * this.opts.Velocity.x > 0) this.opts.Velocity.x=-this.opts.Velocity.x*aRatio;
+					if (data.distY>0) this.opts.Velocity.y=-this.opts.Velocity.y*aRatio;
 					var aVect=this.opts.Velocity.clone().normalise().multiplyEq(this.opts.width+1);
 					this.opts.Position.plusEq(aVect);
 					
@@ -294,6 +297,7 @@
 						this._stateDefinition['NextRound']['doNextRound']['how_process_event'] = {delay: this.opts.speedOfGame};
 	   					this.opts.nbFSMObjects = this.opts.gameFSMObjects.length;
 	   					this.opts.counterIteration =0;
+       					this.opts.BottomTouch=this.opts.MaxBottomTouch;
 	   					this.trigger('displayGame');
     				}
     			},
@@ -302,6 +306,8 @@
        				next_state:'PlayGame',
        				init_function:function(){
        					this.opts.lastcounterIteration=0;
+                		$("#groundtouch").html(this.opts.BottomTouch);
+                		$('#result').html('What will be your score...');
     					this.trigger('displayFPS');
        				}
        			},
@@ -368,6 +374,16 @@
        				next_state:'PlayGame',
     			},
     		},
+    		LooseGame:
+    		{
+    			enterState:
+    			{
+                	init_function:function(){
+                		$('#result').html('<div style="font-size:20px;color:green;">You have touched '+this.opts.MaxBottomTouch+' times the ground...<br>Your score is '+this.opts.counterIteration)+'</div>';
+                	},
+    				next_state:'WaitStart',
+    			},
+    		},
             DefaultState        :
             {
                 start:
@@ -383,6 +399,15 @@
                 StartStop:
                 {
                 	next_state:'WaitStart',
+                },
+                touchBottom:
+                {
+                	init_function:function(){
+                		this.opts.BottomTouch--;
+                		$("#groundtouch").html(this.opts.BottomTouch);
+                	},
+                	next_state_when:'this.opts.BottomTouch<=0',
+                	next_state:'LooseGame',
                 },
                 displayFPS:
                 {
@@ -594,7 +619,7 @@
 			widthScreen:$('#canvas').width(),
 			heightScreen:$('#canvas').height(),
 			Position: new Vector2(100,20),//starting Position
-			Velocity: new Vector2(10,10), // starting Velocity
+			Velocity: new Vector2(10,8), // starting Velocity
 			SteeringForce:new Vector2(0,0), // 
 			MaxVelocity:10, // maximum of velocity to flee in pixels
 			MaxVelocityGA:0.002, // velocity to the ground 
@@ -607,10 +632,31 @@
 			DampingRatio:1,// damping when colliding
 			ForcesToProcess:['BallElasticity','ComputePosition','processed'],
 		});
+        a2ndBallGame = $('#a2ndBall').iFSM(aGameObject,{
+			canvas:$('#canvas'),
+			color: '#770077',
+			width: 25,
+			height: 25,
+			widthScreen:$('#canvas').width(),
+			heightScreen:$('#canvas').height(),
+			Position: new Vector2(150,30),//starting Position
+			Velocity: new Vector2(-8,-5), // starting Velocity
+			SteeringForce:new Vector2(0,0), // 
+			MaxVelocity:12, // maximum of velocity to flee in pixels
+			MaxVelocityGA:0.002, // velocity to the ground 
+			MaxSteeringForce:12, // maximum of general steering force in pixels
+			MaxSpeed:25, // maximum of object speed in pixels
+			Mass:1, // 
+			Bounce:true,
+			initdraw:doInitDrawBall,
+			draw:doDrawBall,
+			DampingRatio:1,// damping when colliding
+			ForcesToProcess:['BallElasticity','ComputePosition','processed'],
+		});
         aRacketGame = $('#aRacket').iFSM(aGameObject,{
 			canvas:$('#canvas'),
 			color: '#AA0077',
-			width: 50,
+			width: 100,
 			height: 10,
 			widthScreen:$('#canvas').width(),
 			heightScreen:$('#canvas').height(),
@@ -626,7 +672,7 @@
 			draw:doDrawRacket,
 			ForcesToProcess:['MoveRacket','ComputePosition','processed'],
 		});
-	   	var aObjectList=[aBackGroundGame,aBallGame,aRacketGame];
+	   	var aObjectList=[aBackGroundGame,aBallGame,a2ndBallGame,aRacketGame];
 	       
 //   		var aObjectList=[aBackGroundGame,aBallGame];
         
@@ -634,7 +680,8 @@
 			gameFSMObjects:aObjectList,
         	counter:$('#counter'),
         	FPSCounter:$('#FPSCounter'),
-        	speedOfGame:30,
+        	speedOfGame:20,
+        	MaxBottomTouch:10,
 		});
         
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
@@ -645,17 +692,21 @@
 </head>
 <body style="margin:20px;">
     <h1>The bouncing ball ....</h1>
-    <p>this example shows a game loop, with bouncing balls as objects using canvas (jCanvas) with layers to display them</p>
-    <p>The mouse makes the objects flee from it</p>
+    <p>this example shows a game loop, with bouncing balls and a racket as objects using canvas (jCanvas) with layers to display them</p>
+    <p>The mouse moves the racket</p>
+    <p>The game ends when you have touched 10 times the ground</p>
+    <p>The score is then displayed using the number of frames to give the score...</p>
  	<section>
 	    <div>
-	        <canvas id="canvas" width="400" height="300">
+	        <canvas id="canvas" width="400" height="300" style="float:left">
 	         This text is displayed if your browser 
 	         does not support HTML5 Canvas.
 	        </canvas>
+	        <div style="font-size:20px">Ground touch left: <span id='groundtouch'></span></div>
+			<div style="font-size:20px"><span id='result'>What score will you obtain?</span></div>
 			<button class="onoff" id="StartStop">Start/Stop Game</button>
 			<button class="reset" id="Reset">Reset Game</button>
-			<hr>
+			<hr style="clear:both;">
 			<div>FrameCounter: <span id='counter'></span></div>	  
 			<div>FPS: <span id='FPSCounter'></span></div>
 			<div>Status: <span id='status'></span></div>
@@ -665,8 +716,13 @@
 				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
 				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
 			</div>
+			<div class="ball" id='a2ndBall'>
+				<br>object 'a2ndBall'<br>
+				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
+				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
+			</div>
 			<div class="ball" id='aRacket'>
-				<br>object 'aSecondBall'<br>
+				<br>object 'Racket'<br>
 				Force:<span id="ForceX"></span> -	<span id="ForceY"></span><br>	
 				Velocity:<span id="VelocityX"></span> -	<span id="VelocityY"></span>	
 			</div>
