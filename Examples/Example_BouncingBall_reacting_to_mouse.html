@@ -31,6 +31,8 @@
 	  }
 	</style>
     <script type="text/javascript">
+    var CurrentMouseX=0;
+    var CurrentMouseY=0;
     
     var behaviourSubMachines = 
 	{
@@ -44,7 +46,7 @@
 						init_function:function(){
 							var target = new Vector2(this.opts.rootMachine.opts.Position.x,this.opts.rootMachine.opts.heightScreen);
 							var desired_velocity = target.minusNew(this.opts.rootMachine.opts.Position).normalise();
-							desired_velocity.multiplyEq(this.opts.rootMachine.opts.MaxVelocity).multiplyEq(this.opts.rootMachine.opts.Mass);
+							desired_velocity.multiplyEq(this.opts.rootMachine.opts.MaxVelocityGA).multiplyEq(this.opts.rootMachine.opts.Mass);
 							this.opts.rootMachine.opts.SteeringForce.plusEq(desired_velocity.minusEq(this.opts.rootMachine.opts.Velocity));
 							
 						},
@@ -52,8 +54,9 @@
 					FleeBalls: 
 					{
 						init_function:function(){
-							var target = new Vector2(this.opts.rootMachine.opts.Position.widthScreen,this.opts.rootMachine.opts.Position.y);
-							var desired_velocity = target.minusNew(this.opts.rootMachine.opts.Position).normalise();
+							if (CurrentMouseX==undefined) return;
+							var target = new Vector2(CurrentMouseX,CurrentMouseY);
+							var desired_velocity = this.opts.rootMachine.opts.Position.minusNew(target).normalise();
 							desired_velocity.multiplyEq(this.opts.rootMachine.opts.MaxVelocity).multiplyEq(this.opts.rootMachine.opts.Mass);
 							this.opts.rootMachine.opts.SteeringForce.plusEq(desired_velocity.minusEq(this.opts.rootMachine.opts.Velocity));
 							
@@ -64,11 +67,9 @@
 						init_function:function(){
 							if (this.opts.rootMachine.opts.Position.x + this.opts.rootMachine.opts.Velocity.x > this.opts.rootMachine.opts.widthScreen || this.opts.rootMachine.opts.Position.x + this.opts.rootMachine.opts.Velocity.x < 0)
 								this.opts.rootMachine.opts.Velocity.x = -this.opts.rootMachine.opts.Velocity.x*.95;
-								if (this.opts.rootMachine.opts.Position.y + this.opts.rootMachine.opts.Velocity.y > this.opts.rootMachine.opts.heightScreen || this.opts.rootMachine.opts.Position.y + this.opts.rootMachine.opts.Velocity.y < 0)
-									this.opts.rootMachine.opts.Velocity.y = -this.opts.rootMachine.opts.Velocity.y*.9;
+							if (this.opts.rootMachine.opts.Position.y + this.opts.rootMachine.opts.Velocity.y > this.opts.rootMachine.opts.heightScreen || this.opts.rootMachine.opts.Position.y + this.opts.rootMachine.opts.Velocity.y < 0)
+								this.opts.rootMachine.opts.Velocity.y = -this.opts.rootMachine.opts.Velocity.y*.9;
 								
-								this.opts.rootMachine.opts.Position.plusEq(this.opts.rootMachine.opts.Velocity);
-
 						},
 					},			
 					ComputePosition : 
@@ -163,8 +164,7 @@
 			{
 				init_function:function(){
 					if (this.opts.draw) this.opts.draw(this);
-					else; 
-						this.trigger('drawDone');
+					this.trigger('drawDone');
 					},
 				next_state:'WaitEndOfDrawing',
 			},
@@ -184,7 +184,20 @@
         {
             start:
             {
+				init_function:function(){
+					this.opts.Position_original 	= $.extend(true, {},this.opts.Position);
+					this.opts.Velocity_original		= $.extend(true, {},this.opts.Velocity);
+					this.opts.SteeringForce_original= $.extend(true, {},this.opts.SteeringForce);
+				},
             	next_state: 'WaitProcess',
+            },
+            reset:
+            {
+            	init_function:function(){
+					this.opts.Position 		= $.extend(true, {},this.opts.Position_original);
+					this.opts.Velocity		= $.extend(true, {},this.opts.Velocity_original);
+					this.opts.SteeringForce	= $.extend(true, {},this.opts.SteeringForce_original);
+            	}
             },
             click:
             {
@@ -192,10 +205,20 @@
             		alert('object clicked!');
             	}
             },
+            mouseout:
+            {
+            	init_function:function(p,e,layer){
+            		CurrentMouseX = undefined;
+            		CurrentMouseY = undefined;
+            		$('#status').html('object over: '+CurrentMouseX+'/'+CurrentMouseY);
+            	},
+            },
             mousemove:
             {
             	init_function:function(p,e,layer){
-            		$('#status').html('object over: '+layer.eventX+'/'+layer.eventY);
+            		CurrentMouseX = layer.eventX;
+            		CurrentMouseY = layer.eventY;
+            		$('#status').html('object over: '+CurrentMouseX+'/'+CurrentMouseY);
             	},
             },
             	
@@ -227,6 +250,11 @@
                 restartDisplayFPS:
                 {
                 },
+                reset:
+                {
+					next_state:'Reset',
+					pushpop_state: 'PushState'
+				},
                 click:
                 {
                 	init_function:function(){
@@ -235,6 +263,29 @@
                 }
 
         	},
+        	Reset:
+        	{
+        		enterState:
+        		{
+	   				init_function:function(){
+						var myFSM=this;
+						$.each(this.opts.gameFSMObjects,function(index,aFsmGame){
+							aFsmGame.trigger('reset');
+    						aFsmGame.trigger('doProcess');
+    						aFsmGame.trigger('doDraw',{aFSM:myFSM,aEvent:'EndDoDraw'});
+						});
+	   				}
+   				},
+    			EndDoDraw:
+    			{
+    				next_state_when:'this.EventIteration>=this.opts.nbFSMObjects',
+        			pushpop_state: 'PopState',
+    			},
+    			exitState:
+    			{
+    				propagate_event:'updateCanvas',
+    			},
+    		},
         	PlayGame:
     		{
         		enterState: 
@@ -257,10 +308,7 @@
    			{
     			enterState:
     			{
-    				init_function:function(){
-    					this.myUIObject.drawLayers();
-    				},
-       				propagate_event:'doNextRound',
+       				propagate_event:['updateCanvas','doNextRound'],
     			},
     			doNextRound:
     			{
@@ -297,7 +345,6 @@
         		displayGame: 
     			{
     				init_function:function(){
-    					//this.myUIObject.clearCanvas();
     					var myFSM=this;
     					$.each(this.opts.gameFSMObjects,function(index,aFsmGame){
     						aFsmGame.trigger('doProcess');
@@ -307,6 +354,12 @@
     					this.opts.counter.html(this.opts.counterIteration);
     				},
     			},
+                updateCanvas:
+                {
+    				init_function:function(){
+    					this.myUIObject.drawLayers();
+    				},
+                },
                 restartDisplayFPS:
                 {
                 	propagate_event:'displayFPS',
@@ -409,18 +462,14 @@
         									  mousemove:
         										  function(aLayer){
         										  	aFSM.trigger('mousemove',aLayer);
-        										  	}
+        										  	},
+	      									  mouseout:
+	    										  function(aLayer){
+	    										  	aFSM.trigger('mouseout',aLayer);
+	    										  	}
         									});},
         });
         
-        function doProcessBall(aFSM){
-			if (aFSM.opts.Position.x + aFSM.opts.Velocity.x > aFSM.opts.widthScreen || aFSM.opts.Position.x + aFSM.opts.Velocity.x < 0)
-				aFSM.opts.Velocity.x = -aFSM.opts.Velocity.x;
-				if (aFSM.opts.Position.y + aFSM.opts.Velocity.y > aFSM.opts.heightScreen || aFSM.opts.Position.y + aFSM.opts.Velocity.y < 0)
-					aFSM.opts.Velocity.y = -aFSM.opts.Velocity.y;
-				
-				aFSM.opts.Position.plusEq(aFSM.opts.Velocity);
-		};
 		function doDrawBall(aFSM){
 			aFSM.opts.canvas
 			.setLayer(aFSM.FSMName+'_ball',{
@@ -449,15 +498,15 @@
 			height: 20,
 			widthScreen:400,
 			heightScreen:300,
-			Position: new Vector2(200,100),
-			Velocity: new Vector2(11,5),
+			Position: new Vector2(200,150),
+			Velocity: new Vector2(0,0),
 			SteeringForce:new Vector2(0,0),
-			MaxVelocity:4,
+			MaxVelocity:7,
+			MaxVelocityGA:4,
 			MaxSteeringForce:0.1,
 			MaxSpeed:30,
 			Mass:1,
 			initdraw:doInitDrawBall,
-			process:doProcessBall,
 			draw:doDrawBall,
 		});
         
@@ -469,14 +518,14 @@
 			widthScreen:400,
 			heightScreen:300,
 			Position: new Vector2(50,50),
-			Velocity: new Vector2(30,15),
+			Velocity: new Vector2(10,5),
 			SteeringForce:new Vector2(0,0),
-			MaxVelocity:4,
+			MaxVelocity:7,
+			MaxVelocityGA:4,
 			MaxSteeringForce:0.02,
 			MaxSpeed:30,
 			Mass:1,
 			initdraw:doInitDrawBall,
-			process:doProcessBall,
 			draw:doDrawBall,
 		});
         a3rdBallGame = $('#aThirdBall').iFSM(aGameObject,{
@@ -487,18 +536,19 @@
 			widthScreen:400,
 			heightScreen:300,
 			Position: new Vector2(250,250),
-			Velocity: new Vector2(20,5),
+			Velocity: new Vector2(30,15),
 			SteeringForce:new Vector2(0,0),
-			MaxVelocity:4,
+			MaxVelocity:7,
+			MaxVelocityGA:4,
 			MaxSteeringForce:0.07,
 			MaxSpeed:30,
 			Mass:1,
 			initdraw:doInitDrawBall,
-			process:doProcessBall,
 			draw:doDrawBall,
 		});
-        
-        var aObjectList=[aBackGroundGame,aBallGame,a2ndBallGame,a3rdBallGame];
+	   	var aObjectList=[aBackGroundGame,aBallGame,a2ndBallGame,a3rdBallGame];
+	       
+   		//var aObjectList=[aBackGroundGame,aBallGame];
         
         aGameFSM = $('#canvas').iFSM(aGameRound,{
 			gameFSMObjects:aObjectList,
@@ -508,6 +558,7 @@
 		});
         
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
+        $('#Reset').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'reset'}});
     });
 
     </script>
@@ -522,6 +573,7 @@
 	         does not support HTML5 Canvas.
 	        </canvas>
 			<button class="onoff" id="StartStop">Start/Stop Game</button>
+			<button class="reset" id="Reset">Reset Game</button>
 			<hr>
 			<div>FrameCounter: <span id='counter'></span></div>	  
 			<div>FPS: <span id='FPSCounter'></span></div>
