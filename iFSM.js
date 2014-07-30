@@ -20,13 +20,14 @@
  * - 2014/06/16 - E.Podvin - 1.6.10  - copy state definition in order to be able to have it dynamic 
  * - 2014/07/01 - E.Podvin - 1.6.11 - patch on the reinitialisation of the event iterations when changing state
  * - 2014/07/08 - E.Podvin - 1.6.13 - propagate_event may be an array of events to propagate
+ * - 2014/07/14 - E.Podvin - 1.6.14 - improve performance
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.13
+ * @version : 1.6.14
  * -----------------------------------------------------------------------------------------
  */
 
@@ -325,7 +326,7 @@ var nb_FSM = 0;
 var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, options)
 {
 	var $defaults = {
-			debug				: true,
+			debug				: false,
 			LogLevel			: 2,
 			AlertError			: false,
 			maxPushEvent		: 100,
@@ -565,7 +566,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	
 	this._log('new fsm_manager:'+this.FSMName+'-'+anObject.selector,2);
 
-}//fsm_manager
+};//fsm_manager
 	
 /*available functions*/
 /**
@@ -592,7 +593,7 @@ fsm_manager.prototype.InitManager	= function(aInitState)
 	else //directly talk to the sub machine to process the start
 	{
 		var anEv = new Array(); 
-		anEv[0] = fsm_manager_create_event(this.myUIObject,this.opts.startEvent,null)
+		anEv[0] = fsm_manager_create_event(this.myUIObject,this.opts.startEvent,null);
 		this.processEvent(this.opts.startEvent,anEv,true);
 	}
 	
@@ -1131,11 +1132,13 @@ fsm_manager.prototype.cancelDelayedProcess	= function() {
  * @param aEventName - name of an event
  * @param data parameters linked to the event
  */
-fsm_manager.prototype.trigger = function (aEventName) {
-	var myArgs = Array.prototype.slice.call(arguments);
-	myArgs.push({targetFSM:this});
-	myArgs.shift();
-	this.myUIObject.trigger(aEventName,myArgs);
+fsm_manager.prototype.trigger = function (aEventName,data) {
+	var anEv = new Array(); 
+	anEv[0] = fsm_manager_create_event(this.myUIObject,aEventName,null);
+	anEv[1] = data;
+	anEv[2] = {targetFSM:this};
+	this.rootMachine.processEvent(aEventName,anEv);
+
 };//end of 
 
 /**
@@ -1223,13 +1226,14 @@ fsm_manager.prototype._log = function (message) {
  * @param data - the FSM event data
  * 
  * @param this - the FSM object (well... if called in a state function)
+ * @deprecated
  */
 fsm_manager_triggerMe = function(objectParameters, event, data)
 {
 	this._log('[fsm_manager_triggerMe]'+$(objectParameters.objectToTrigger).attr('id')+'-'+objectParameters.eventNameToTrigger);
 	
 	$(objectParameters.objectToTrigger).trigger( objectParameters.eventNameToTrigger );
-}
+};
 
 /**
  * fsm_manager_getcss3prop - 
@@ -1242,21 +1246,21 @@ fsm_manager_triggerMe = function(objectParameters, event, data)
  * </code>
  */
 function fsm_manager_getcss3prop(cssprop){
-    var css3vendors = ['', '-moz-','-webkit-','-o-','-ms-','-khtml-']
-    var root = document.documentElement
+    var css3vendors = ['', '-moz-','-webkit-','-o-','-ms-','-khtml-'];
+    var root = document.documentElement;
     function camelCase(str){
         return str.replace(/\-([a-z])/gi, function (match, p1){ // p1 references submatch in parentheses
-            return p1.toUpperCase() // convert first letter after "-" to uppercase
-        })
+            return p1.toUpperCase(); // convert first letter after "-" to uppercase
+        });
     }
     for (var i=0; i<css3vendors.length; i++){
-        var css3propcamel = camelCase( css3vendors[i] + cssprop )
+        var css3propcamel = camelCase( css3vendors[i] + cssprop );
         if (css3propcamel.substr(0,2) == 'Ms') // if property starts with 'Ms'
-            css3propcamel = 'm' + css3propcamel.substr(1) // Convert 'M' to lowercase
+            css3propcamel = 'm' + css3propcamel.substr(1); // Convert 'M' to lowercase
         if (css3propcamel in root.style)
-            return css3propcamel
-    }
-    return undefined
+            return css3propcamel;
+    };
+    return undefined;
 }
 
 /**
@@ -1341,7 +1345,7 @@ $.fn.getFSM = function(aStateDefinition) {
 	}
 		
 			
-}
+};
 
 
 
