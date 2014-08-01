@@ -4,7 +4,7 @@
  @see {@link https://github.com/intersel/iFSM}
  @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
  @version : 1.6.14
- -----------------------------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------
 */
 (function(f){function x(b){function c(a){return a.replace(/\-([a-z])/gi,function(a,b){return b.toUpperCase()})}for(var a=" -moz- -webkit- -o- -ms- -khtml-".split(" "),e=document.documentElement,d=0;d<a.length;d++){var f=c(a[d]+b);"Ms"==f.substr(0,2)&&(f="m"+f.substr(1));if(f in e.style)return f}}function p(b,c,a){var e={};e.data=a;e.target=b;e.currentTarget=b;e.type=c;e.stopPropagation=function(){return!0};return e}var u=0,l=window.fsm_manager=function(b,c,a){u+=1;void 0==a&&(a=null);this.opts=jQuery.extend({},
 {debug:!1,LogLevel:2,AlertError:!1,maxPushEvent:100,startEvent:"start",prefixFsmName:"FSM_",logFSM:""},a||{});this.FSMName=this.opts.prefixFsmName+u;this._stateDefinition=jQuery.extend(!0,{},c);this._originalstateDefinition=c;this.currentEvent=this.currentState="";this.pushStateList=[];this.processEventStatus="idle";this.pushEventList=[];this.myUIObject=b;this.listEvents={};this.currentDataEvent={};this.returnGeneralEventStatus=!0;void 0==this.opts.rootMachine&&(this.opts.rootMachine=this);this.rootMachine=
