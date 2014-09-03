@@ -78,16 +78,16 @@ Examples
 ========
 See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
 
-  - [Example_Basic.html](http://www.intersel.fr/assets/gitdemos/iFSM/Example_Basic.html) - the above example in action
-  - [Example_1.html](http://www.intersel.fr/assets/gitdemos/iFSM/Example_1.html) - simple example of independent buttons using the same machine definition
-  - [Example_2.html](http://www.intersel.fr/assets/gitdemos/iFSM/Example_2.html) - simple example of sub-machine delegation. It shows how to set conditions on state change according to submachine states.
-  - [Example_PushPopState.html](http://www.intersel.fr/assets/gitdemos/iFSM/Example_PushPopState.html) - simple example of using the "Push/Pop" capabilities on states.
-  - [Example_AnalyseString.html](http://www.intersel.fr/assets/gitdemos/iFSM/Example_AnalyseString.html)  - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based. 
-  - [Example_Rulers](http://www.intersel.fr/assets/gitdemos/iFSM/Example_Rulers.html) - showing how to use iFSM to validate input data according to rules, with an example of the management of the keyboard input filtering only number input
-  - [Example_Request](http://www.intersel.fr/assets/gitdemos/iFSM/Example_Request.html) - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
-  - [Example_HSM_calculator](http://www.intersel.fr/assets/gitdemos/iFSM/Example_HSM_calculator.html) - a simple working calculator managed with states and events...
-  - The [Mastermind game](http://www.intersel.fr/assets/gitdemos/iFSM/Mastermind.html)...
-  - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example...
+  - [Example_Basic.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Basic.html) - the above example in action
+  - [Example_1.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_1.html) - simple example of independent buttons using the same machine definition
+  - [Example_2.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_2.html) - simple example of sub-machine delegation. It shows how to set conditions on state change according to submachine states.
+  - [Example_PushPopState.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_PushPopState.html) - simple example of using the "Push/Pop" capabilities on states.
+  - [Example_AnalyseString.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_AnalyseString.html)  - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based. 
+  - [Example_Rulers](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Rulers.html) - showing how to use iFSM to validate input data according to rules, with an example of the management of the keyboard input filtering only number input
+  - [Example_Request](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Request.html) - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
+  - [Example_HSM_calculator](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_HSM_calculator.html) - a simple working calculator managed with states and events...
+  - The [Mastermind game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Mastermind.html)...
+  - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example...
 
 .iFSM(aStateDefinition, [options])
 ==================================
