@@ -1,67 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>iFSM in action! Basic Example</title>
-    <script type="text/javascript" src="../extlib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
-    <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
-    <script type="text/javascript" src="../iFSM.js"></script>
-	<style type="text/css">
-	  html {
-	    font-family: Helvetica, Arial, sans-serif;
-	  }
-	  body {
-	    padding: 0 10px;
-	  }
-	  pre {
-		font-size: 12px;
-		background-color: black;
-		color: green;
-	  }
-	</style>
-    <script type="text/javascript">
-    var aStateDefinition = {
-        IsDisplayed     : 
-        {
-             enterState:
-            {
-                init_function: function(){this.myUIObject.html("I'm Displayed");}
-            },
-            click:   
-            {
-                next_state: 'IsNotDisplayed'
-            }
-        }, 
-        IsNotDisplayed      : 
-        {
-            enterState:   
-            {
-                init_function: function(){this.myUIObject.html("I'm NOT Displayed");}
-            },
-            click:   
-            {
-                next_state: 'IsDisplayed'
-            }
-        },
-        DefaultState        :
-        {
-            start   :
-            {
-                next_state  : 'IsDisplayed'
-            }
-        }
-    };
+<title>iFSM in action! Basic Example</title>
+<script type="text/javascript" src="../extlib/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+<script type="text/javascript" src="../iFSM.js"></script>
+<style type="text/css">
+html {
+	font-family: Helvetica, Arial, sans-serif;
+}
 
-    $(document).ready(function() {
-        $('#myButton').iFSM(aStateDefinition);
-    });
+body {
+	padding: 0 10px;
+}
 
-    </script>
+pre {
+	font-size: 12px;
+	background-color: black;
+	color: green;
+}
+</style>
+<script type="text/javascript" id="iFSMscript">
+	var aStateDefinition = {
+		FirstState : {
+			enterState : {
+				init_function : function() {
+					alert("First State");
+				}
+			},
+			click : {
+				next_state : 'NextState'
+			}
+		},
+		NextState : {
+			enterState : {
+				init_function : function() {
+					alert("Next State");
+				}
+			},
+			click : {
+				next_state : 'FirstState'
+			}
+		},
+		DefaultState : {
+			start : {
+				next_state : 'FirstState'
+			}
+		}
+	};
+	$(document).ready(function() {
+		$('#myButton').iFSM(aStateDefinition);
+	});
+</script>
 </head>
-<body style="margin:20px;">
-    <button id="myButton">I'm Displayed</button>
-    <br><br>
-    <pre>
+<body style="margin: 20px;">
+	<button id="myButton">Button</button>
+	<br>
+	<br>
+	<pre>
+	<script>document.write($('#iFSMscript').html())</script>
 var aStateDefinition = {
     IsDisplayed     : 
     {
@@ -69,7 +67,7 @@ var aStateDefinition = {
         {
             init_function: function()
             {
-            	this.myUIObject.html("I'm Displayed");
+				this.myUIObject.html("I'm Displayed");
             }
         },
         click:   
@@ -83,7 +81,7 @@ var aStateDefinition = {
         {
             init_function: function()
             {
-            	this.myUIObject.html("I'm NOT Displayed");
+				this.myUIObject.html("I'm NOT Displayed");
             }
         },
         click:   

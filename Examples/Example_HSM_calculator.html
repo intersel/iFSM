@@ -60,7 +60,7 @@
     }
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" id="iFSMscript">
 
  
 var PC_OnBehaviour = {
@@ -319,5 +319,21 @@ Example inspired from <a href="http://en.wikipedia.org/wiki/UML_state_machine">h
 	    <button class="onoff on" id="kmultiply">*</button><br>
 	    <button class="onoff on" id="kequal">=</button>
     </section>
+        <br><br>
+	<script>
+	function escapeHtml(text) {
+		  var map = {
+		    '&': '&amp;',
+		    '<': '&lt;',
+		    '>': '&gt;',
+		    '"': '&quot;',
+		    "'": '&#039;'
+		  };
+
+		  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		document.write(escapeHtml($('#iFSMscript').html()))</script>
+    </pre>
+    <p>provided by <a href="http://www.intersel.fr">Intersel</a></p>
 </body>
 </html>

@@ -57,7 +57,7 @@
   }
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" id="iFSMscript">
 
 var aRequestStates = {
 		Start:
@@ -199,106 +199,21 @@ $(document).ready(function() {
     <button class="onoff" id="Duplicate">Duplicate</button>
     <button class="onoff" id="Close">Close</button>
     <h2>the State Definition</h2>
-    <pre>
-		Start:
-		{
-			enterState :
-			{
-				init_function : function(){$('#original').animate({'opacity':'1'},500)},
-			},
-			Submit :
-			{
-				next_state : 'Submitted',
-			},
-			exitState :
-			{
-				init_function : function(){$('#original').animate({'opacity':'0'},500)},
-			}
-		},
-		Submitted:
-		{
-			enterState :
-			{
-				init_function : function(){$('#submitted').animate({'opacity':'1'},500)},
-			},
-			Duplicate:
-			{
-				next_state : 'Duplicate',
-			},
-			Open:
-			{
-				next_state : 'Opened',
-			},
-			Close:
-			{
-				next_state : 'Closed',
-			},
-			exitState :
-			{
-				init_function : function(){$('#submitted').animate({'opacity':'0'},500)},
-			}
-		},
-		Duplicate:
-		{
-			enterState :
-			{
-				init_function : function(){$('#duplicate').animate({'opacity':'1'},500)},
-			},
-			Open:
-			{
-				next_state : 'Opened',
-			},
-			Close:
-			{
-				next_state : 'Closed',
-			},
-			exitState :
-			{
-				init_function : function(){$('#duplicate').animate({'opacity':'0'},500)},
-			}
-		},
-		Opened:
-		{
-			enterState :
-			{
-				init_function : function(){$('#opened').animate({'opacity':'1'},500)},
-			},
-			Close:
-			{
-				next_state : 'Closed',
-			},
-			
-			exitState :
-			{
-				init_function : function(){$('#opened').animate({'opacity':'0'},500)},
-			}
-		},
-		Closed:
-		{
-			enterState :
-			{
-				init_function : function(){$('#closed').animate({'opacity':'1'},500)},
-			},
-			Reopen:
-			{
-				next_state : 'Opened',
-			},
-			exitState :
-			{
-				init_function : function(){$('#closed').animate({'opacity':'0'},500)},
-			}
-		},
-		DefaultState			:
-		{
-			start	:	
-			{
-				next_state	: 'Start'
-			},
-			Reset	:	
-			{
-				next_state	: 'Start'
-			}
-		}	
+        <br><br>
+	<script>
+	function escapeHtml(text) {
+		  var map = {
+		    '&': '&amp;',
+		    '<': '&lt;',
+		    '>': '&gt;',
+		    '"': '&quot;',
+		    "'": '&#039;'
+		  };
+
+		  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		document.write(escapeHtml($('#iFSMscript').html()))</script>
     </pre>
+    <p>provided by <a href="http://www.intersel.fr">Intersel</a></p>
 </body>
 </html>

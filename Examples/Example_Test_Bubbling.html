@@ -21,7 +21,7 @@
 		color: green;
 	  }
 	</style>
-    <script type="text/javascript">
+    <script type="text/javascript" id="iFSMscript">
     var StateButton = {
         IsOn     : 
         {
@@ -108,83 +108,11 @@
 	    </div>
 	   	<div id="status"></div>
     </div>
-    <pre>
-    var StateButton = {
-        IsOn     : 
-        {
-             enterState:
-            {
-                init_function: function(){this.myUIObject.html("I'm On");},
-	         	UI_event_bubble:true,
-            },
-            click:   
-            {
-            	UI_event_bubble:true,
-                next_state: 'IsOff'
-            }
-        }, 
-        IsOff      : 
-        {
-            enterState:   
-            {
-                init_function: function(){this.myUIObject.html("I'm Off");},
-	         	UI_event_bubble:true,
-            },
-            click:   
-            {
-            	UI_event_bubble:true,
-                next_state: 'IsOn'
-            }
-        },
-        DefaultState        :
-        {
-            start   :
-            {
-                next_state  : 'IsOn'
-            }
-        }
-    };
-    var StateBContainerBubble = {
-            WaitClick      : 
-            {
-                click:   
-                {
-                    init_function: function(){this.opts.status.html(this.opts.status.html()+"<br>click on ButtonContainerBubble!");},
-                    process_on_UItarget: false,
-                }
-            },
-            DefaultState        :
-            {
-                start   :
-                {
-                    next_state  : 'WaitClick'
-                }
-            }
-        };
-    var StateBContainerNoBubble = {
-            WaitClick      : 
-            {
-                click:   
-                {
-                    init_function: function(){this.opts.status.html(this.opts.status.html()+"<br>click on ButtonContainerNoBubble!");},
-                    process_on_UItarget: true,
-                }
-            },
-            DefaultState        :
-            {
-                start   :
-                {
-                    next_state  : 'WaitClick'
-                }
-            }
-        };
-
-    $(document).ready(function() {
-        $('.button').iFSM(StateButton);
-        $('#ButtonContainerNoBubble').iFSM(StateBContainerNoBubble,{status:$('#status')});
-        $('#ButtonContainerBubble').iFSM(StateBContainerBubble,{status:$('#status')});
-    });
-
+        <br><br>
+	<pre>
+	<script>document.write($('#iFSMscript').html())</script>
     </pre>
+    <p>provided by <a href="http://www.intersel.fr">Intersel</a></p>
+
 </body>
 </html>

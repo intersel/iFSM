@@ -57,7 +57,7 @@
   }
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" id="iFSMscript">
     var aRuleDefinition = {
 
  		WaitToTestAge: 
@@ -168,104 +168,23 @@
     <p id="result"></p>
     
         <h2>the State Definition</h2>
-    <pre>
-   var aRuleDefinition = {
+        <br><br>
+	<script>
+	function escapeHtml(text) {
+		  var map = {
+		    '&': '&amp;',
+		    '<': '&lt;',
+		    '>': '&gt;',
+		    '"': '&quot;',
+		    "'": '&#039;'
+		  };
 
-		WaitToTestAge: 
-       {
-           click:
-           {
-           	next_state: 'TestMinAge',
-           },
-       }, 
-   	TestMinAge: 
-       {
-           enterState:
-           {
-           	process_event_if: 'this.opts.Age() >= this.opts.minAge',
-           	propagate_event_on_refused:'ageNotOk',
-           	next_state: 'TestMaxAge',
-           },
-       }, 
-       TestMaxAge: 
-       {
-           enterState:
-           {
-           	process_event_if: 'this.opts.Age() <= this.opts.maxAge',
-           	propagate_event_on_refused:'ageNotOk',
-           	next_state: 'AgeOk',
-           },
-       }, 
-       AgeOk: 
-       {
-           enterState:
-           {
-           	init_function: function(){this.opts.outputRes.html('Congratulations! You are between the ages of '+this.opts.minAge+' and '+this.opts.maxAge+'!');},
-           	next_state: 'WaitToTestAge',
-           },
-       }, 
-       AgeNotOk: 
-       {
-           enterState:
-           {
-           	init_function: function(){
-           		this.opts.outputRes.html('Your age ('+this.opts.Age()+') is not valid! You are NOT between the ages of '+this.opts.minAge+' and '+this.opts.maxAge+'!');
-           	},
-           	next_state: 'WaitToTestAge',
-           },
-       }, 
-       DefaultState:
-       {
-           start:
-           {
-               next_state  : 'WaitToTestAge',
-           },
-           ageNotOk:
-           {
-               next_state  : 'AgeNotOk',
-           }
-       }
-   };
-   
-   KeyboardHandling =
-{
-	DefaultState:
-	{
-		'key_13':
-		{
-			init_function:function()
-			{
-				this.opts.aButton.trigger('click');
-			},
-		},
-		keypress:
-		{
-			process_event_if : '(this.currentEvent.which>47 && this.currentEvent.which<58)||(this.currentEvent.which == 13)||(this.currentEvent.which == 8)||(this.currentEvent.which == 127)',
-			propagate_event_on_refused : 'notAuthorizedKey',
-			init_function:function(p,e)
-			{
-				this.trigger('key_'+e.which);
-			},
-			UI_event_bubble: true,
-		},
-		notAuthorizedKey://in order to cancel the event bubbling
-		{
-		},
-	},
-};
-
-$(document).ready(function() {
-	$('#myButton').iFSM(aRuleDefinition,{
-		minAge:18,
-		maxAge:25,
-		Age:function(){
-			return $('#Age').val();
-		},
-		outputRes:$('#result'),
-	});
-	$('#Age').iFSM(KeyboardHandling,{aButton:$('#myButton')});
-});
+		  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		document.write(escapeHtml($('#iFSMscript').html()))</script>
     </pre>
+    <p>provided by <a href="http://www.intersel.fr">Intersel</a></p>
+
     
     
 </body>

@@ -21,7 +21,7 @@
   }
 </style>
 
-    <script type="text/javascript">
+    <script type="text/javascript" id="iFSMscript">
     var aStateDefinition = {
         IsDisplayed     : 
         {
@@ -65,42 +65,7 @@
     <button id="myButton">Show/Hide Text</button>
     <div id="adiv">a nice text to show the FSM capabilities :-)</div>
     <br><br>
-    <pre>
-    var aStateDefinition = {
-        IsDisplayed     : 
-        {
-            enterState:
-            {
-                init_function: function(){this.opts.aDiv.show();}
-            },
-            click   :   
-            {
-                next_state      : 'IsNotDisplayed'
-            }
-        }, 
-        IsNotDisplayed      : 
-        {
-            enterState:
-            {
-                init_function: function(){this.opts.aDiv.hide();}
-            },
-            click   :   
-            {
-                next_state      : 'IsDisplayed'
-            }
-        },
-        DefaultState        :
-        {
-            start   :
-            {
-                next_state  : 'IsDisplayed'
-            }
-        }
-    };
-
-	$(document).ready(function() {
-		$('#myButton').iFSM(aStateDefinition,{aDiv:$('#adiv')});
-	});
-    </pre>
-</body>
+	<pre>
+	<script>document.write($('#iFSMscript').html())</script>
+    </pre></body>
 </html>

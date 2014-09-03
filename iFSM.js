@@ -21,6 +21,7 @@
  * - 2014/07/01 - E.Podvin - 1.6.11 - patch on the reinitialisation of the event iterations when changing state
  * - 2014/07/08 - E.Podvin - 1.6.13 - propagate_event may be an array of events to propagate
  * - 2014/07/14 - E.Podvin - 1.6.14 - improve performance
+ * - 2014/09/04 - E.Podvin - 1.6.15 - fix on the 'exitMachine' message when it was sent
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
@@ -619,6 +620,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	this.currentEvent	= currentEvent;
 	var currentStateEvent = this.currentState;
 	var doForceProcess = (forceProcess==undefined?false:true);
+	var anEv = new Array();//dummy event to be used in 'processEvent' function
+	anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
 
 
 	this._log('processEvent: anEvent (currentState) machine name ---> '+anEvent+'('+currentState+')-'+this.FSMName,2);
@@ -720,7 +723,9 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 			}
 			else if	( anEvent == 'exitState' )
 			{
-				aSubMachineDefinition.myFSM.trigger('exitMachine');//stop the sub machine
+				anEv[0].type='exitMachine';
+				aSubMachineDefinition.myFSM.processEvent('exitMachine',anEv,true);//stop the sub machine
+				
 				//we cancel any waiting events on the state
 				aSubMachineDefinition.myFSM.cancelDelayedProcess();
 			}
@@ -865,8 +870,6 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	 * 
 	 */
 	// do we change state?
-	var anEv = new Array();//dummy event to be used in 'processEvent' function
-	anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
 	
 	//is this a Push/Pop State?
 	if (funcReturn != false)//it's ok for next_state 
