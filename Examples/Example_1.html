@@ -48,7 +48,7 @@
 
 var aStateDefinitionButton = {
 
-	ButtonDisplayed		: 
+	ButtonDoCountdown		: 
 	{
 		enterState : 
 		{
@@ -62,34 +62,34 @@ var aStateDefinitionButton = {
 		{
 			process_event_if		: '(this.opts.counter<=0)',
 			propagate_event_on_refused	: 'notReady',
-			next_state			: 'ButtonUnDisplayed'
+			next_state			: 'ButtonWaitNextCountdown'
 		},
 		notReady :
 		{
 			init_function		: function (){this.myUIObject.html(this.opts.counter);this.opts.counter=this.opts.counter-1;}
 		}
 	},
-	ButtonUnDisplayed		: 
+	ButtonWaitNextCountdown		: 
 	{
 		enterState : 
 		{
-			init_function		: function (){this.myUIObject.trigger('setText');}
+			init_function		: function (){this.trigger('setButtonOff');}
 		},
-		setText :
+		setButtonOff :
 		{
 			init_function		: function (){this.myUIObject.html("off").attr({'class':'off'});},
 			how_process_event	: {delay:1000}
 		},
 		click	:	
 		{
-			next_state		: 'ButtonDisplayed'
+			next_state		: 'ButtonDoCountdown'
 		}
 	},
 	DefaultState			:
 	{
 		start	:	
 		{
-			next_state		: 'ButtonDisplayed'
+			next_state		: 'ButtonDoCountdown'
 		}
 	}				
 }
@@ -101,6 +101,7 @@ $(document).ready(function() {
  </head>
 <body style="margin:100px;">
     <h2>On-Off Buttons:</h2>
+   
     <button class="onoff" id="onoff_button1"></button>
     <button class="onoff" id="onoff_button2"></button>
     <button class="onoff" id="onoff_button3"></button>
