@@ -23,6 +23,11 @@ pre {
 </style>
 <script type="text/javascript" id="iFSMscript">
 	var aStateDefinition = {
+		StartState : {
+			click : {
+				next_state : 'FirstState'
+			}
+		},
 		FirstState : {
 			enterState : {
 				init_function : function() {
@@ -45,7 +50,7 @@ pre {
 		},
 		DefaultState : {
 			start : {
-				next_state : 'FirstState'
+				next_state : 'StartState'
 			}
 		}
 	};
