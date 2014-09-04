@@ -59,48 +59,20 @@ pre {
 	<br>
 	<br>
 	<pre>
-	<script>document.write($('#iFSMscript').html())</script>
-var aStateDefinition = {
-    IsDisplayed     : 
-    {
-		enterState:
-        {
-            init_function: function()
-            {
-				this.myUIObject.html("I'm Displayed");
-            }
-        },
-        click:   
-        {
-            next_state: 'IsNotDisplayed'
-        }
-    }, 
-    IsNotDisplayed      : 
-    {
-        enterState:   
-        {
-            init_function: function()
-            {
-				this.myUIObject.html("I'm NOT Displayed");
-            }
-        },
-        click:   
-        {
-            next_state: 'IsDisplayed'
-        }
-    },
-    DefaultState        :
-    {
-        start   :
-        {
-            next_state  : 'IsDisplayed'
-        }
-    }
-};
+	<script>
+	function escapeHtml(text) {
+		  var map = {
+		    '&': '&amp;',
+		    '<': '&lt;',
+		    '>': '&gt;',
+		    '"': '&quot;',
+		    "'": '&#039;'
+		  };
 
-$(document).ready(function() {
-    $('#myButton').iFSM(aStateDefinition);
-});
+		  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		document.write(escapeHtml($('#iFSMscript').html()))</script>
     </pre>
+    <p>provided by <a href="http://www.intersel.fr">Intersel</a></p>
 </body>
 </html>
