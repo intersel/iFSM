@@ -1,11 +1,11 @@
 iFSM - a Flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery Objects
 ========================================================================================
 
-This package can animate and manage HTML elements with their dynamic behaviours using Finite State Machines.
+Designed to help the complexity of graphic user interface behaviours, this javascript/jQuery package can animate and manage HTML elements with their dynamic behaviours using Finite State Machines.
 
-It takes jQuery objects that define the states of Web page elements.
+It takes jQuery objects to define the states of the Web page elements and the events the page elements should react on.
 
-Each state may be defined with the code that is executed when the element enters or leaves a state.
+Each state may be defined with the code that has to be executed when the element enters or leaves a state.
 
 The state definition may also define what is the next state when a given event happens on that element, like for instance the user clicks on the element. All jQuery events are supported to trigger the change of state. An autobinding mecanism automatically binds the events defined in the states.
 
@@ -49,7 +49,7 @@ This example shows a really simple example implementing the following state diag
 		{
 		     enterState:
 		    {
-		        init_function: function(){alert("First State");}
+		        init_function: function(){alert("Hello! First State");}
 		    },
 		    click:   
 		    {
@@ -60,7 +60,7 @@ This example shows a really simple example implementing the following state diag
 		{
 		    enterState:   
 		    {
-		        init_function: function(){alert("Next State");}
+		        init_function: function(){alert("Please to meet you! Next State");}
 		    },
 		    click:   
 		    {
@@ -369,6 +369,18 @@ Within the call of FSM function, you can refer to the FSM by 'this' :
  - this.opts
  - this.EventIteration : the current event iteration
  
+
+LIBRARY DEPENDENCIES
+====================
+
+To work properly, you need to include the following javascript library :
+* jQuery (>= 1.10) `<script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>`
+* doTimeout by ["Cowboy" Ben Alman](http://benalman.com/projects/jquery-dotimeout-plugin/)
+	* this library brings some very usefull feature on the usual javascript setTimeout function like Debouncing, Delays & Polling Loops, Hover Intent...
+	* `<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>`
+* attrchange by Selvakumar Arumugam](http://meetselva.github.io/attrchange/) 
+	* a simple jQuery function to bind a listener function to any HTML element on attribute change
+	* `<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>`
 
 FAQ
 ===
