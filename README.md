@@ -27,8 +27,8 @@ Official website
 http://www.intersel.fr/ifsm-jquery-plugin-demos.html
 
 
-How to use it :
-===============
+The "Hello world" example
+=========================
 ```html
 <!DOCTYPE html>
 <html>
