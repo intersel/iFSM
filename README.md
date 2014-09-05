@@ -1,9 +1,17 @@
-iFSM
-====
+iFSM - a Flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery Objects
+========================================================================================
 
-A flexible Finite and Hierarchical State Machine ( FSM / HSM ) designed on JQuery.
+This package can animate and manage page elements with their dynamic behaviours using Finite State Machines.
 
-It has Push/Pop state capabilities and offers different useful features as :
+It takes jQuery objects that define the states of Web page elements.
+
+Each state may be defined with the code that is executed when the element enters or leaves a state.
+
+The state definition may also define what is the next state when a given event happens on that element, like for instance the user clicks on the element. All jQuery events are supported to trigger the change of state. An autobinding mecanism automatically binds thee events defined in the states.
+
+It also supports conditional processing of events and state changes using sub-machine states, as well creating new states and events dynamically.
+
+The FSM has Push/Pop state capabilities and offers different useful features as :
   * complete integration with jQuery
   * automatic javascript event bindings
   * attribute or css change on jQuery object linked to a machine detected, triggering events to the machine
