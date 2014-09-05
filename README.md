@@ -365,6 +365,14 @@ Within the call of FSM function, you can refer to the FSM by 'this' :
  - this.opts
  - this.EventIteration : the current event iteration
  
+
+FAQ
+===
+
+If you have questions or unsolved problems, you can have a look on the our [FAQs]https://github.com/intersel/iFSM/wiki 
+or leave a message on the [Issue board](https://github.com/intersel/iFSM/issues).
+
+
 Contact
 =======
 If you have any ideas, feedback, requests or bug reports, you can reach me at github@intersel.org, 
