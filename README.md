@@ -29,6 +29,10 @@ http://www.intersel.fr/ifsm-jquery-plugin-demos.html
 
 The "Hello world" example
 =========================
+
+This example shows a really simple example implementing the following state diagram:
+![](http://www.intersel.fr/assets/gitdemos/wiki_images/helloexample.png)
+
 ```html
 <!DOCTYPE html>
 <html>
