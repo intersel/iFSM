@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>iFSM in action! Checkbox example</title>
+	<script type="text/javascript" src="../extlib/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+	<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+	<script type="text/javascript" src="../iFSM.js"></script>
+
+<style type="text/css">
+  html {
+	font-family: Helvetica, Arial, sans-serif;
+  }
+  body {
+	padding: 0 10px;
+  }
+  pre {
+	font-size: 12px;
+	background-color: black;
+	color: green;
+  }
+</style>
+
+	<script type="text/javascript">
+	var aStateDefinition = {
+		allOff: 
+		{
+			enterState:
+			{
+				propagate_event: 'isNotValid',
+			},
+			check1 :   
+			{
+				next_state: 'OnlyCheck1Checked'
+			},
+			check2 :   
+			{
+				next_state: 'OnlyCheck2Checked',
+				propagate_event: 'setcheck1',
+			}
+		}, 
+		OnlyCheck1Checked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isValid',
+			},
+			check1 :   
+			{
+				next_state: 'allOff'
+			},
+			check2 :   
+			{
+				next_state: 'AllChecked'
+			}
+		},
+		OnlyCheck2Checked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isNotValid',
+			},
+			check1 :   
+			{
+				next_state: 'AllChecked'
+			},
+			check2 :   
+			{
+				next_state: 'allOff',
+			}
+		},
+		AllChecked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isValid',
+			},
+			check1 :   
+			{
+				next_state: 'OnlyCheck2Checked'
+			},
+			check2 :   
+			{
+				next_state: 'OnlyCheck1Checked',
+			},
+		},
+		DefaultState:
+		{
+			start :
+			{
+				next_state: 'allOff'
+			},
+			setcheck1:
+			{
+				init_function: function(){
+					this.opts.checkbox1.prop('checked', true);
+					this.trigger('check1');
+				},
+			},
+			setcheck2:
+			{
+				init_function: function(){
+					this.opts.checkbox2.prop('checked', true);
+					this.trigger('check2');
+				},
+			},
+			isValid:
+			{
+				init_function: function(){
+					this.opts.status.html('checkbox configuration is valid :-)');
+				},
+			},
+			isNotValid:
+			{
+				init_function: function(){
+					this.opts.status.html('checkbox configuration is NOT valid :-(');
+				},
+			},
+		}
+	};
+	
+	var myFSM=null;
+	$(document).ready(function() {
+		myFSM = $('#checkbox_list').iFSM(aStateDefinition,{status:$('#status'),checkbox1:$('#Checkbox1'),checkbox2:$('#Checkbox2')});
+	});
+
+	</script>
+</head>
+<body style="margin:10px;">
+<h1>Checkbox Example with iFSM... </h1>
+	<div id="checkbox_list">
+		a possible answer to <a href="http://stackoverflow.com/questions/23154231/small-fsm-like-code-in-javascript">question asked on StackOverFlow</a><br>
+		<INPUT type="checkbox" id="Checkbox1" onChange="myFSM.trigger('check1');"> Checkbox1<br>
+		<INPUT type="checkbox" id="Checkbox2" onChange="myFSM.trigger('check2');"> Checkbox2<br>
+		<div id="status"></div>
+	</div>
+	<br><br>
+	Propulsed by <a href="http://www.intersel.fr">Intersel</a>, iFSM is available on <a href="https://github.com/intersel/iFSM">Github (https://github.com/intersel/iFSM)</a>
+	<pre>
+	var aStateDefinition = {
+		allOff: 
+		{
+			enterState:
+			{
+				propagate_event: 'isNotValid',
+			},
+			check1 :   
+			{
+				next_state: 'OnlyCheck1Checked'
+			},
+			check2 :   
+			{
+				next_state: 'OnlyCheck2Checked',
+				propagate_event: 'setcheck1',
+			}
+		}, 
+		OnlyCheck1Checked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isValid',
+			},
+			check1 :   
+			{
+				next_state: 'allOff'
+			},
+			check2 :   
+			{
+				next_state: 'AllChecked'
+			}
+		},
+		OnlyCheck2Checked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isNotValid',
+			},
+			check1 :   
+			{
+				next_state: 'AllChecked'
+			},
+			check2 :   
+			{
+				next_state: 'allOff',
+			}
+		},
+		AllChecked: 
+		{
+			enterState:
+			{
+				propagate_event: 'isValid',
+			},
+			check1 :   
+			{
+				next_state: 'OnlyCheck2Checked'
+			},
+			check2 :   
+			{
+				next_state: 'OnlyCheck1Checked',
+			},
+		},
+		DefaultState:
+		{
+			start :
+			{
+				next_state: 'allOff'
+			},
+			setcheck1:
+			{
+				init_function: function(){
+					this.opts.checkbox1.prop('checked', true);
+					this.trigger('check1');
+				},
+			},
+			setcheck2:
+			{
+				init_function: function(){
+					this.opts.checkbox2.prop('checked', true);
+					this.trigger('check2');
+				},
+			},
+			isValid:
+			{
+				init_function: function(){
+					this.opts.status.html('checkbox configuration is valid :-)');
+				},
+			},
+			isNotValid:
+			{
+				init_function: function(){
+					this.opts.status.html('checkbox configuration is NOT valid :-(');
+				},
+			},
+		}
+	};
+	
+	var myFSM=null;
+	$(document).ready(function() {
+		myFSM = $('#checkbox_list').iFSM(aStateDefinition,{status:$('#status'),checkbox1:$('#Checkbox1'),checkbox2:$('#Checkbox2')});
+	});
+	
+	
+	.......
+	&#60;div id="checkbox_list"&#62;
+		a possible answer to &#60;a href="http://stackoverflow.com/questions/23154231/small-fsm-like-code-in-javascript"&#62;question asked on StackOverFlow&#60;/a&#62;&#60;br&#62;
+		&#60;INPUT type="checkbox" id="Checkbox1" value="check1" onChange="myFSM.trigger('check1');"&#62; Checkbox1&#60;br&#62;
+		&#60;INPUT type="checkbox" id="Checkbox2" value="check2" onChange="myFSM.trigger('check2');"&#62; Checkbox2&#60;br&#62;
+		&#60;div id="status"&#62;&#60;/div&#62;
+	&#60;/div&#62;
+	
+	</pre>
+</body>
+</html>
