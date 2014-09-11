@@ -22,13 +22,14 @@
  * - 2014/07/08 - E.Podvin - 1.6.13 - propagate_event may be an array of events to propagate
  * - 2014/07/14 - E.Podvin - 1.6.14 - improve performance
  * - 2014/09/04 - E.Podvin - 1.6.15 - fix on the 'exitMachine' message when it was sent
+ * - 2014/09/11 - E.Podvin - 1.6.16 - fix on synonymous event that was not set when still defined in a previous state
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.14
+ * @version : 1.6.16
  * -----------------------------------------------------------------------------------------
  */
 
@@ -443,6 +444,10 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 			this._stateDefinition[aState]=this._stateDefinition[this._stateDefinition[aState]];
 		for(aEvent in this._stateDefinition[aState]) 
 		{
+			//to process synonymous events
+			if (typeof this._stateDefinition[aState][aEvent]  == 'string') 
+				this._stateDefinition[aState][aEvent] =  this._stateDefinition[aState][this._stateDefinition[aState][aEvent]];
+
 			// filter to the events list not subscribed by the root machine
 			// start is always sent to the current machine
 			if (!this.rootMachine.listEvents[aEvent] 	&& aEvent != 'delegate_machines'
@@ -451,9 +456,6 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 				this.listEvents[aEvent]=aEvent;
 				if (this != this.rootMachine)
 					this.rootMachine.listEvents[aEvent]=aEvent;
-				//to process synonymous events
-				if (typeof this._stateDefinition[aState][aEvent]  == 'string') 
-					this._stateDefinition[aState][aEvent] =  this._stateDefinition[aState][this._stateDefinition[aState][aEvent]];
 			}
 			else if (aEvent == this.opts.startEvent) setStart= true;
 		}
