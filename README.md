@@ -93,7 +93,7 @@ See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - [Example_Basic.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Basic.html) - the above example in action
   - [Example_1.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_1.html) - simple example of independent buttons using the same machine definition
   - [Example_2.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_2.html) - simple example of sub-machine delegation. It shows how to set conditions on state change according to submachine states.
-  - [http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_DropdownMenu.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_DropdownMenu.html) - a dropdown menu example.
+  - [Example_DropdownMenu.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_DropdownMenu.html) - a dropdown menu example.
   - [Example_PushPopState.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_PushPopState.html) - simple example of using the "Push/Pop" capabilities on states.
   - [Example_AnalyseString.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_AnalyseString.html)  - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based. 
   - [Example_Rulers](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Rulers.html) - showing how to use iFSM to validate input data according to rules, with an example of the management of the keyboard input filtering only number input
