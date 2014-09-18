@@ -4,7 +4,7 @@
     <title>iFSM in action! Bouncing Balls... </title>
 	<meta charset="utf-8">
     <script type="text/javascript" src="../extlib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+    <script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
     <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
     <script type="text/javascript" src="../extlib/jcanvas.min.js"></script>
     <script type="text/javascript" src="../iFSM.compressed.js"></script>
@@ -360,7 +360,7 @@
         	HEIGHT:300,
         	counter:$('#counter'),
         	FPSCounter:$('#FPSCounter'),
-        	speedOfGame:10,
+        	speedOfGame:20,
 		});
         
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
@@ -370,7 +370,7 @@
 </head>
 <body style="margin:20px;">
     <h1>The bouncing ball ....</h1>
-    <p>this example shows a game loop, with bouncing balls as objects using canvas (jCanvas) to display them</p>
+    <p>this example shows a game loop managed with iFsm, with bouncing balls as objects using canvas (jCanvas) to display them, using requestAnimationFrame calls instead of setTimeout</p>
  	<section>
 	    <div>
 	        <canvas id="canvas" width="400" height="300">

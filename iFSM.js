@@ -1048,7 +1048,7 @@ fsm_manager.prototype.cleanExitProcess	= function(anEvent,data) {
 	{
 		this.popEvent();
 	}
-}
+};
 
 /**
  * pushEvent - push an event in the flow of the processing of an event
@@ -1186,7 +1186,7 @@ fsm_manager.prototype.subMachinesRespectTargets = function (anEvent) {
 		
 	}
 	return aResult;
-}
+};
 /**
  * this._log - log function
  * private function

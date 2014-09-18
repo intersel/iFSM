@@ -4,7 +4,7 @@
     <title>iFSM in action! Bouncing Balls... </title>
 	<meta charset="utf-8">
     <script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+    <script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
     <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
     <script type="text/javascript" src="../extlib/jcanvas.min.js"></script>
     <script type="text/javascript" src="../extlib/Vector2.js"></script>
@@ -692,7 +692,7 @@
 </head>
 <body style="margin:20px;">
     <h1>The bouncing ball ....</h1>
-    <p>this example shows a game loop, with bouncing balls and a racket as objects using canvas (jCanvas) with layers to display them</p>
+    <p>this example shows a game loop managed with iFsm, with bouncing balls and a racket as objects using canvas (jCanvas) with layers to display them and with behaviours handled by iFSM (bouncing), using requestAnimationFrame calls instead of setTimeout</p>
     <p>The mouse moves the racket</p>
     <p>The game ends when you have touched 10 times the ground</p>
     <p>The score is then displayed using the number of frames to give the score...</p>
