@@ -89,6 +89,10 @@ button.off {
 				next_state : 'Operand1Filled',
 				propagate_event : true,
 			},
+			setCommaOperand : {
+				next_state : 'Operand1WithCommaFilled',
+				propagate_event : 'setOperand',
+			},
 			setOperator : {
 				init_function : function() {
 					this.opts.operand1 = this.opts.result
@@ -98,6 +102,27 @@ button.off {
 			},
 		},
 		Operand1Filled : {
+			setOperand : {
+				init_function : function(p, e, operand) {
+					this.opts.operand1 = this.opts.operand1 + operand;
+					this.myUIObject
+							.trigger('displayResult', this.opts.operand1);
+				},
+			},
+			setCommaOperand : {
+				init_function : function(p, e, operand) {
+					this.opts.operand1 = this.opts.operand1 + operand;
+					this.myUIObject
+							.trigger('displayResult', this.opts.operand1);
+				},
+				next_state : 'Operand1WithCommaFilled',
+			},
+			setOperator : {
+				next_state : 'Operator',
+				propagate_event : true,
+			},
+		},
+		Operand1WithCommaFilled : {
 			setOperand : {
 				init_function : function(p, e, operand) {
 					this.opts.operand1 = this.opts.operand1 + operand;
@@ -129,12 +154,37 @@ button.off {
 					this.opts.operand2 = '';
 				},
 			},
+			setCommaOperand : {
+				next_state : 'Operand2WithCommaFilled',
+				propagate_event : 'setOperand',
+			},
 			setOperand : {
 				next_state : 'Operand2Filled',
 				propagate_event : true,
 			},
 		},
 		Operand2Filled : {
+			setOperand : {
+				init_function : function(p, e, operand) {
+					this.opts.operand2 = this.opts.operand2 + operand;
+					this.myUIObject
+							.trigger('displayResult', this.opts.operand2);
+				},
+			},
+			setCommaOperand : {
+				init_function : function(p, e, operand) {
+					this.opts.operand2 = this.opts.operand2 + operand;
+					this.myUIObject
+							.trigger('displayResult', this.opts.operand2);
+				},
+				next_state : 'Operand2WithCommaFilled',
+			},
+			setOperator : {
+				next_state : 'Result',
+				propagate_event : true,
+			},
+		},
+		Operand2WithCommaFilled : {
 			setOperand : {
 				init_function : function(p, e, operand) {
 					this.opts.operand2 = this.opts.operand2 + operand;
@@ -170,6 +220,7 @@ button.off {
 				next_state : 'Operand2',
 				propagate_event : true,
 			},
+			setCommaOperand : 'setOperand',
 		},
 		DefaultState : {
 			start : {
@@ -251,6 +302,18 @@ button.off {
 		}
 	};
 
+	var OperandCommaButton = {
+
+			DefaultState : {
+				click : {
+					init_function : function() {
+						this.opts.sendto.trigger('setCommaOperand', this.myUIObject
+								.html());
+					},
+				}
+			}
+		};
+
 	var OperatorButton = {
 
 		DefaultState : {
@@ -271,6 +334,10 @@ button.off {
 		});
 
 		$("#operandbuttons > button").iFSM(OperandButton, {
+			sendto : $("#result")
+		});
+
+		$("#operandcommabutton > button").iFSM(OperandCommaButton, {
 			sendto : $("#result")
 		});
 
@@ -312,7 +379,9 @@ button.off {
 		<button class="onoff on" id="k3">3</button>
 		<br>
 		<button class="onoff on" id="k0">0</button>
-		<button class="onoff on" id="kcomma">,</button>
+	</section>
+	<section id="operandcommabutton">
+		<button class="onoff on" id="kcomma">.</button>
 	</section>
 	<section id="operatorbuttons">
 		<h2>Operators</h2>
@@ -339,7 +408,7 @@ button.off {
 				return map[m];
 			});
 		}
-		document.write(escapeHtml($('#iFSMscript').html()))
+		document.write(escapeHtml($('#iFSMscript').html()));
 	</script>
     </pre>
 	<p>
