@@ -8,7 +8,9 @@
     <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
     <script type="text/javascript" src="../extlib/jcanvas.min.js"></script>
     <script type="text/javascript" src="../extlib/Vector2.js"></script>
+    <script type="text/javascript" src="../extlib/jquery.touchSwipe.js"></script>
     <script type="text/javascript" src="../iFSM.compressed.js"></script>
+   
 	<style type="text/css">
 	  html {
 	    font-family: Helvetica, Arial, sans-serif;
@@ -453,6 +455,16 @@
     				}
 
                 },
+                swipe:
+                {
+    				init_function:function(p,e,data){
+    					if (!data || !data.fingerData || !data.fingerData[0].end) return;
+    					CurrentMouseX = data.fingerData[0].end.x - this.myUIObject.offset().left;
+    			 		CurrentMouseY = data.fingerData[0].end.y - this.myUIObject.offset().top;
+					  	$('#status').html('mouse position: '+CurrentMouseX+'/'+CurrentMouseY+'<br>swipe: '+data.direction+'/'+data.distance);
+    				}
+
+                },
                 mouseout:'mouseenter',
                 mouseenter:
                 {
@@ -683,7 +695,14 @@
         	speedOfGame:20,
         	MaxBottomTouch:10,
 		});
-        
+        $("#canvas").swipe( {
+			//Generic swipe handler for all directions
+			swipeStatus:function(event, phase, direction, distance, duration, fingerCount, fingerData) {
+				$(this).trigger('swipe',{phase:phase, direction:direction, distance:distance, duration:duration, fingerCount:fingerCount, fingerData:fingerData});
+			},
+			//Default is 75px, set to 0 for demo so any distance triggers swipe
+		   threshold:0
+		});
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
         $('#Reset').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'reset'}});
     });
