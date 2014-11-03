@@ -1,7 +1,7 @@
 iFSM - a Flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery Objects
 ========================================================================================
 
-Designed to help to manage the complexity of graphic user interface behaviours with javascript, this jQuery package can animate and manage HTML elements with their dynamic behaviours using Finite State Machines.
+Designed to manage the complexity of graphic user interface behaviours with javascript, this jQuery package can animate and manage HTML elements with their dynamic behaviours using Finite State Machines.
 
 It takes jQuery objects to define the states of the Web page elements and the events the page elements should react on.
 
