@@ -9,31 +9,6 @@
 
 <script type="text/javascript">
 
-function DisplayMainOff(parameters, event, data)
-{
-	this.myUIObject.hide();
-	this.myUIObject.trigger('display');
-}
-function ToggleDisplayMain(parameters, event, data)
-{
-	if (this.myUIObject.is(':visible')) this.myUIObject.trigger('undisplay');
-	else this.myUIObject.trigger('display');
-}
-function DisplayMainOn(parameters, event, data)
-{
-	this.myUIObject.show('slow');
-}
-
-function DisplayMeOn(parameters, event, data)
-{
-	this.myUIObject.show('slow');
-}
-	
-function DisplayMeOff(parameters, event, data)
-{
-	this.myUIObject.hide();
-	
-}
 
 var aButtonActionStates = {
 
@@ -177,9 +152,12 @@ var aStateAutomateSlideShow = {
 			{
 				how_process_event			: {delay:5000},
 				next_state					: 'Automatic',
-				propagate_event				: 'NextSlide'
+				propagate_event				: 'NextSlide',
 			},
-			stopAutomatic	: 'prepareAutomatic',	
+			stopAutomatic	: 
+			{
+				propagate_event	: 'prepareAutomatic',	
+			},	
 		},
 		Automatic		: 
 		{
@@ -195,7 +173,6 @@ var aStateAutomateSlideShow = {
 			},
 			stopAutomatic	:	
 			{
-				how_process_event			: {immediate:true},
 				next_state					: 'NotAutomatic',
 				propagate_event				: 'prepareAutomatic'
 			}
