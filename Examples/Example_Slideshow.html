@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>iFSM in action! a Finite State Machine for jQuery</title>
+<script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+<script type="text/javascript" src="../iFSM.js"></script>
+
+<script type="text/javascript">
+
+function DisplayMainOff(parameters, event, data)
+{
+	this.myUIObject.hide();
+	this.myUIObject.trigger('display');
+}
+function ToggleDisplayMain(parameters, event, data)
+{
+	if (this.myUIObject.is(':visible')) this.myUIObject.trigger('undisplay');
+	else this.myUIObject.trigger('display');
+}
+function DisplayMainOn(parameters, event, data)
+{
+	this.myUIObject.show('slow');
+}
+
+function DisplayMeOn(parameters, event, data)
+{
+	this.myUIObject.show('slow');
+}
+	
+function DisplayMeOff(parameters, event, data)
+{
+	this.myUIObject.hide();
+	
+}
+
+var aButtonActionStates = {
+
+		DefaultState:
+		{
+			click:	
+			{
+				init_function 	: function(){this.opts.sliderObj.trigger('stopAutomatic')},
+				out_function 	: function(){this.opts.sliderObj.trigger(this.opts.action)},
+			}
+		}				
+}
+var aStateDefinitionSlider = {
+
+		DefaultState:
+		{
+			goRight:	
+			{
+				init_function	: function() {
+					this.myUIObject.animate({left: "-="+this.opts.offset}, 500);
+				}
+			},
+			goLeft:	
+			{
+				init_function	: function() {
+					this.myUIObject.animate({left: "+="+this.opts.offset}, 500);
+				}
+			},
+			goBegin	:	
+			{
+				init_function	: function() {
+					this.myUIObject.animate({left: "0"}, 500);
+				}
+			}
+		}				
+}
+var aStateDefinitionSlideShow = {
+
+		BeginSlide		: 
+		{
+			goRight	:	
+			{
+				init_function 	: function(){
+					this.opts.sliderObj.trigger('goRight');
+				},
+				next_state		: 'AddRight'
+			}
+		},
+		MiddleSlide: 
+		{
+			goRight:	
+			{
+				init_function 	: function(){
+					this.opts.sliderObj.trigger('goRight');
+				},
+				next_state		: 'AddRight'
+			},
+			goLeft:	
+			{
+				init_function 	: function(){
+					this.opts.sliderObj.trigger('goLeft');
+				},
+				next_state		: 'AddLeft'
+			}
+		},
+		EndSlide: 
+		{
+			goLeft:	
+			{
+				init_function 	: function(){
+					this.opts.sliderObj.trigger('goLeft');
+				},
+				propagate_event	: 'AddLeft'
+			},
+			goRight	:	
+			{
+				init_function 	: function(){
+					this.opts.sliderObj.trigger('goBegin');
+				},
+				propagate_event	: 'ResetSlide'
+			}
+		},
+		AddLeft: 
+		{
+			enterState:	
+			{
+				init_function 	: function() {
+					this.opts.current_Slide -= 1;
+				},
+				next_state_when	: '(this.opts.current_Slide != 0)',
+				next_state		: 'MiddleSlide',
+				propagate_event : 'beginSlide',
+			},
+			beginSlide :
+			{
+				next_state		: 'BeginSlide',
+			},
+		},
+		AddRight: 
+		{
+			enterState:	
+			{
+				init_function 	: function() {
+					this.opts.current_Slide += 1;
+				},
+				next_state_when	: '(this.opts.current_Slide != this.opts.nb_Slides-1)',
+				next_state		: 'MiddleSlide',
+				propagate_event : 'endSlide',
+			},
+			endSlide :
+			{
+				next_state		: 'EndSlide',
+			},
+		},
+		DefaultState: 
+		{
+			start:	
+			{
+				init_function 	: function() {
+					this.opts.nb_Slides=this.opts.sliderObj.find('div').length;
+					this.opts.current_Slide = 0;
+				},
+				next_state		: 'BeginSlide'
+			},
+			ResetSlide:	
+			{
+				init_function 	: function() {
+					this.opts.current_Slide=0;
+				},
+				next_state		: 'BeginSlide',
+			},
+			
+		}
+}
+
+var aStateAutomateSlideShow = {
+
+		NotAutomatic		: 
+		{
+			prepareAutomatic	:	
+			{
+				how_process_event			: {delay:5000},
+				next_state					: 'Automatic',
+				propagate_event				: 'NextSlide'
+			},
+			stopAutomatic	: 'prepareAutomatic',	
+		},
+		Automatic		: 
+		{
+			NextSlide	:	
+			{
+				init_function 				: function(){this.myUIObject.trigger('goRight');},
+				propagate_event				: 'prepareNext'
+			},
+			prepareNext	:	
+			{
+				how_process_event			: {delay:3000},
+				propagate_event				: 'NextSlide'
+			},
+			stopAutomatic	:	
+			{
+				how_process_event			: {immediate:true},
+				next_state					: 'NotAutomatic',
+				propagate_event				: 'prepareAutomatic'
+			}
+		},
+		DefaultState	:
+		{
+			start	:
+			{
+				next_state					: 'NotAutomatic',
+				propagate_event				: 'prepareAutomatic'
+			}
+		}
+}
+
+$(document).ready(function() {
+	$('#myButton1'			).iFSM(aButtonActionStates,		{sliderObj:$('#slider_container'),action:'goLeft'}); 
+	$('#myButton2'			).iFSM(aButtonActionStates,		{sliderObj:$('#slider_container'),action:'goRight'}); 
+	$('#inner_slides'		).iFSM(aStateDefinitionSlider,	{offset:'600'}); 
+	$('#slider_container'	).iFSM(aStateAutomateSlideShow,	{sliderObj:$('#inner_slides')}); 
+	$('#slider_container'	).iFSM(aStateDefinitionSlideShow, {sliderObj:$('#inner_slides')}); 
+});
+ </script>
+ </head>
+<body style="margin:100px;">
+
+<div id="slider_container" class="slider1" style="position: relative;
+top: 0px; left: 0px; width: 600px; height: 300px;">
+    <!-- Slides Container -->
+    <div id="slides" style="position: absolute; overflow: hidden;
+    left: 0px; top: 0px; width: 600px; height: 300px;">
+    	<div id="inner_slides" style="position:relative;width:3600px">
+	        <div style="float:left"><img src="../img/image1.jpg" /></div>
+	        <div style="float:left"><img src="../img/image2.jpg" /></div>
+	        <div style="float:left"><img src="../img/image3.jpg" /></div>
+	        <div style="float:left"><img src="../img/image1.jpg" /></div>
+	        <div style="float:left"><img src="../img/image2.jpg" /></div>
+	        <div style="float:left"><img src="../img/image3.jpg" /></div>
+	    </div>
+    </div>
+</div>
+<button id="myButton1">gauche</button>
+<button id="myButton2">droite</button>
+</body>
+</html>
