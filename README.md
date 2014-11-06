@@ -11,7 +11,7 @@ The state definition may also define what is the next state when a given event h
 
 It also supports conditional processing of events and state changes using sub-machine states, as well creating new states and events dynamically.
 
-The FSM has Push/Pop state capabilities and offers different useful features as :
+The FSM has Push/Pop state capabilities and offers different useful features as:
   * complete integration with jQuery
   * automatic javascript event bindings
   * attribute or css change on jQuery object linked to a machine detected, triggering events to the machine
@@ -45,7 +45,7 @@ This example shows a really simple example implementing the following state diag
 
     <script type="text/javascript">
     	var aStateDefinition = {
-		FirstState     : 
+		FirstState: 
 		{
 		     enterState:
 		    {
@@ -56,7 +56,7 @@ This example shows a really simple example implementing the following state diag
 		        next_state: 'NextState'
 		    }
 		}, 
-		NextState      : 
+		NextState: 
 		{
 		    enterState:   
 		    {
@@ -67,11 +67,11 @@ This example shows a really simple example implementing the following state diag
 		        next_state: 'FirstState'
 		    }
 		},
-		DefaultState        :
+		DefaultState:
 		{
-		    start   :
+		    start:
 		    {
-		        next_state  : 'FirstState'
+		        next_state: 'FirstState'
 		    }
 		}
 	};
@@ -88,7 +88,7 @@ This example shows a really simple example implementing the following state diag
 ```
 Examples
 ========
-See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
+See them live: http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
 
   - [Example_Basic.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Basic.html) - the above example in action
   - [Example_1.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_1.html) - simple example of independent buttons using the same machine definition
@@ -107,7 +107,7 @@ See them live : http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
 Create a Finite State Machine from the "aStateDefinition" object to bind with the jQuery object.
 
   * aStateDefinition: object, defines the different states and bound events. See "Machine State Definition" chapter.
-  * options: object, defines the options of the FSM :
+  * options: object, defines the options of the FSM:
     * startEvent: name of the starting event (default: 'start')
     * initState: name of the state to set at start of the machine
     * debug (true|false): show debug message on the console (default true)
@@ -116,7 +116,7 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
       * '2' - errors and warnings (default)
       * '3' - all  
     * logFSM:  list of FSM names to follow on debug (ex: "FSM_1 FSM_4"). If void, then displays all machine messages
-    * <myProperties> : any properties that could be used and accessed by the machine with this.opts as this.opts.<myProperties>
+    * <myProperties>: any properties that could be used and accessed by the machine with this.opts as this.opts.<myProperties>
 
   Call Examples
   =============
@@ -167,18 +167,18 @@ The states are defined with a javascript object with the following organization:
 ```javascript
 var aStateDefinition =
 { 
- <aStateName1> :
+ <aStateName1>:
  {
  	delegate_machines	: 
  	{
- 		<aSubMachine name 1> : 
+ 		<aSubMachine name 1>: 
  		{
- 			submachine : <a State definition>,
- 			no_reinitialisation : <boolean, default:false>
+ 			submachine: <a State definition>,
+ 			no_reinitialisation: <boolean, default:false>
  		},			
- 		<aSubMachine name i> : 
+ 		<aSubMachine name i>: 
  		{
- 			submachine : <a State definition>
+ 			submachine: <a State definition>
  		},			
  		...
  	},	  		
@@ -190,7 +190,7 @@ var aStateDefinition =
  		next_state: <aStateName>,
  		pushpop_state: <'PushState'||'PopState'>,
  		next_state_when: <a statement that returns boolean>,
- 		next_state_on_target : 
+ 		next_state_on_target: 
  		{
  			condition 			: <'||'||'&&'>
  			submachines			: 
@@ -198,7 +198,7 @@ var aStateDefinition =
  				<submachineName1> 	: 
  				{
  					condition	: <''(default)||'not'>
-					target_list : [<targetState1>,...,<targetStaten>],
+					target_list: [<targetState1>,...,<targetStaten>],
  				}
  				...
  				<submachineNamen> 	: ...
@@ -207,8 +207,8 @@ var aStateDefinition =
  		next_state_if_error: <aStateName>,
  		pushpop_state_if_error: <'PushState'||'PopState'>,
  		propagate_event: <true||anEventName||[anEventName1,anEventName2,...]>
- 		process_event_if : <a statement that returns boolean>,
- 		propagate_event_on_refused : <anEventName>
+ 		process_event_if: <a statement that returns boolean>,
+ 		propagate_event_on_refused: <anEventName>
  		out_function: <a function(parameters, event, data)>,
  		properties_out_function: <parameters for out_function>,
  		prevent_bubble: <true|false(default)>
@@ -220,15 +220,15 @@ var aStateDefinition =
  	{
  		....
  	},
- 	enterState : ...
- 	exitState :  ...
+ 	enterState: ...
+ 	exitState:  ...
  },
- <aStateName...> : <anAnotherStateName>,
- <aStateName...> :
+ <aStateName...>: <anAnotherStateName>,
+ <aStateName...>:
  {
  	....
  },
- DefaultState :
+ DefaultState:
  {
  	start: //a default start event received at the FSM start
  	{
@@ -240,78 +240,80 @@ var aStateDefinition =
 }
 ```
 
-- **statename** :
-  - **delegate_machines** : sub machines list to delegate the events on the state
-  	- submachine : the variable name of a state definition or a state definition description
-  - **eventname** : <br>
+- **statename**:
+  - **delegate_machines**: sub machines list to delegate the events on the state
+  	- submachine: the variable name of a state definition or a state definition description
+  - **eventname**: <br>
   the name of an event. It may be any event name, supported by javascript or manually triggered.<br>
   It defines an event we want to be alerted when it occurs on the object<br>
-	specific events :<br>
-	- 'start' : this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
-	- 'enterState' : this event is automatically sent and immediatly executed when the FSM enter the state
-	- 'exitState' : this event is automatically sent and immediatly executed when the FSM exit the state
-	- 'attrchange' : received if any attribute of the jquery object (myUIObject) changed
-		- data sent : event - event object
+	specific events:<br>
+	- 'start': this event is automatically sent when the FSM starts. should be defined in the initial state (or 'DefaultState')
+	- 'enterState': this event is automatically sent and immediatly executed when the FSM enter the state
+	- 'exitState': this event is automatically sent and immediatly executed when the FSM exit the state
+	- 'attrchange': received if any attribute of the jquery object (myUIObject) changed
+		- data sent: event - event object
 			* event.attributeName - Name of the attribute modified
 			* event.oldValue      - Previous value of the modified attribute
 			* event.newValue      - New value of the modified attribute
-	- 'attrchange_<attributename>' (ex: 'attrchange_class') : received if the attribute of the jquery object changed
-		- data sent :
+	- 'attrchange_<attributename>' (ex: 'attrchange_class'): received if the attribute of the jquery object changed
+		- data sent:
 			* newValue      - New value of the modified attribute
 			* oldValue      - Previous value of the modified attribute
-	- 'attrchange_style_<cssattributename_in_camelcase>' (ex:'attrchange_style_width') : received if the css attribute of the jquery object changed
-		- data sent :
+	- 'attrchange_style_<cssattributename_in_camelcase>' (ex:'attrchange_style_width'): received if the css attribute of the jquery object changed
+		- data sent:
 		    * newValue      - New value of the modified attribute
 		    * oldValue      - Previous value of the modified attribute
   An event can be the synonymous to an other event. Then give the name of the synomymous event instead of its definition.
-  - **how_process_event** [default:{push}] : {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
+  - **how_process_event** [default:{push}]: {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
   	if delay is defined, the processing of the event is delayed and activated at 'delay'
   	by default, any event delayed will be cancelled if the state changes
   	if preventcancel is defined, the delayed event won't be cancelled
-  - **process_event_if** :
+  - **process_event_if**:
   	Definition of condition test that will be evaluated, and if result is true then event will be processed
   	if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
-  - **propagate_event_on_refused** : an event name to trigger if process_event_if is false
-  - **init_function(properties_init_function,event,data)**  : function name or anonymous function, called before the state change when processing the event
-  - **properties_init_function** : optional parameters to send to init_function
-  - **next_state** : next state to go once init_function done and change conditions are fullfiled
-  - **pushpop_state** : <br> 
+  - **propagate_event_on_refused**: an event name to trigger if process_event_if is false
+  - **init_function(parameters,event,data)**: function name or anonymous function, called before the state change when processing the event
+    - function should return a boolean: true: ok works fine; false: error
+    - function has the following input:
+  	  * parameters: the properties_init_function
+  	  * event: the event 
+  	  * data: the data sent with the event
+  - **properties_init_function**: optional parameters to send to init_function
+  - **next_state**: next state to go once init_function done and change conditions are fullfiled
+  - **pushpop_state**: <br> 
 	If 'PushState', then current state is pushed in the StateStack then next_state takes place. If set in an event defined in 'DefaultState', the system will get the actual state.
 	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
-  - **next_state_when** : <br>
+  - **next_state_when**: <br>
 	Definition of condition test that will be evaluated, and if result is true then state will change
 	Following variables may be used for the test
 	- this	: the FSM object
-	- this.EventIteration : variable that gives the iteration of the number of calls of the current event. 
+	- this.EventIteration: variable that gives the iteration of the number of calls of the current event. 
 	EventIteration is reset when the state changes
-  - **next_state_on_target** :<br>
+  - **next_state_on_target**:<br>
 	Definition of condition test based on the current states of the defined submachines
-	The test consist to :
+	The test consist to:
 	- get the current states of each defined sub-machines, 
 	- match the current state to the targeted state array, resulting to true if found 
 	- apply the defined operator between the results
 	- if the result is positive, then the next state processing is done
   - **out_function(properties_out_function,event,data)**: function name or anonymous function, called just before ending the processing of an event
-  - **properties_out_function** : optional parameters to send to out_function
-  - **next_state_if_error** (default: does not change state) : state set if init_function return false
-  - **pushpop_state_if_error** : 
+    - function has the following input:
+  	  * parameters: the properties_out_function
+  	  * event: the event 
+  	  * data: the data sent with the event
+  - **properties_out_function**: optional parameters to send to out_function
+  - **next_state_if_error** (default: does not change state): state set if init_function return false
+  - **pushpop_state_if_error**: 
 	If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
 	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state_if_error is so overwritten... If the stack is void, there is no state change. 
-  - **propagate_event** : if defined to true, the current event is propagated to the next state
+  - **propagate_event**: if defined to true, the current event is propagated to the next state
   				if it's the name of an event, the event is triggered
 				if it's an array of events, events are triggered in sequence
-  - **prevent_bubble** : for submachines use, if defined and true, the current event will not bubble to its parent machine. By default, events bubble from submachines to their parent
-  - **UI_event_bubble** : for graphic events use, if defined and true, the current event will bubble. By default, no UI event bubbling...
-  - **process_on_UItarget** : if defined and true, the current event will be processed only if the event was directly targeting 
+  - **prevent_bubble**: for submachines use, if defined and true, the current event will not bubble to its parent machine. By default, events bubble from submachines to their parent
+  - **UI_event_bubble**: for graphic events use, if defined and true, the current event will bubble. By default, no UI event bubbling...
+  - **process_on_UItarget**: if defined and true, the current event will be processed only if the event was directly targeting 
    									the UI jQuery object linked to the machine
 
-Remarks
-========
-  - state function should return a boolean : true: ok works fine; false: error
-  - state function should have the following input :
-  	- parameters : the properties_<init/out>_function
-  	- event : the event 
-  	- data : the data sent with the event
   
 The start of a machine or a sub-machine
 =======================================
@@ -339,7 +341,7 @@ It is possible to trigger any event to a machine with the jquery trigger functio
   $('#myButton1').trigger('aEventName',data);
   $('#myButton1').trigger('aEventName',{data1:adata1,data2:adata2});
 
-In a state/event function, you can trigger event to the current machine :
+In a state/event function, you can trigger event to the current machine:
     	ex: this.trigger('aEventName')
 
 By default, when a machine receives a new event and is currently processing one, it will push it in its next event list to be processed... and gives back the hand... 
@@ -364,11 +366,11 @@ The "how_process_event" allows to define how the event should be processed by th
 
 SubMachine
 ==========
-  - when there are sub machines defined for a state :
+  - when there are sub machines defined for a state:
 	- the events are sent to each defined submachines in the order
 	- once the event is processed by the submachines, it is bubbled to the upper machines
 	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
-	- a submachine works as the main one : 
+	- a submachine works as the main one: 
 		- if no_reinitialisation == false (default), it is initialized each time we enter the main state
 		- a start event is triggered to it (if initialized)
 		- once initialized, the submachine is ready to listen to the triggered events
@@ -376,26 +378,26 @@ SubMachine
 
 The public available variables
 ==============================
- - myFSM.currentState : current state name
- - myFSM.myUIObject : the jQuery object associated to the FSM
- - myFSM._stateDefinition : the definition of the states and events
+ - myFSM.currentState: current state name
+ - myFSM.myUIObject: the jQuery object associated to the FSM
+ - myFSM._stateDefinition: the definition of the states and events
  - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
  - myFSM.opts - the defined options
- - myFSM.rootMachine : the root machine
- - myFSM.parentMachine : the parent machine if we're in a sub machine (null if none)
+ - myFSM.rootMachine: the root machine
+ - myFSM.parentMachine: the parent machine if we're in a sub machine (null if none)
  
-Within the call of FSM function, you can refer to the FSM by 'this' :
+Within the call of FSM function, you can refer to the FSM by 'this':
  - this.currentState
  - this.myUIObject
  - this._stateDefinition
  - this.opts
- - this.EventIteration : the current event iteration
+ - this.EventIteration: the current event iteration
  
 
 LIBRARY DEPENDENCIES
 ====================
 
-To work properly, you need to include the following javascript library :
+To work properly, you need to include the following javascript library:
 * jQuery (>= 1.10) `<script type="text/javascript" src="extlib/jquery-1.10.2.min.js"></script>`
 * doTimeout by ["Cowboy" Ben Alman](http://benalman.com/projects/jquery-dotimeout-plugin/)
 	* this library brings some very usefull feature on the usual javascript setTimeout function like Debouncing, Delays & Polling Loops, Hover Intent...
