@@ -328,7 +328,7 @@ var nb_FSM = 0;
 var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, options)
 {
 	var $defaults = {
-			debug				: true,
+			debug				: false,
 			LogLevel			: 2,
 			AlertError			: false,
 			maxPushEvent		: 100,
