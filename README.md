@@ -272,9 +272,9 @@ var aStateDefinition =
   	Definition of condition test that will be evaluated, and if result is true then event will be processed
   	if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
   - **propagate_event_on_refused** : an event name to trigger if process_event_if is false
-  - **init_function**  : function name
-  - **properties_init_function** : parameters to send to init_function
-  - **next_state** : next state once init_function done
+  - **init_function(properties_init_function,event,data)**  : function name or anonymous function, called before the state change when processing the event
+  - **properties_init_function** : optional parameters to send to init_function
+  - **next_state** : next state to go once init_function done and change conditions are fullfiled
   - **pushpop_state** : <br> 
 	If 'PushState', then current state is pushed in the StateStack then next_state takes place. If set in an event defined in 'DefaultState', the system will get the actual state.
 	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
@@ -291,8 +291,8 @@ var aStateDefinition =
 	- match the current state to the targeted state array, resulting to true if found 
 	- apply the defined operator between the results
 	- if the result is positive, then the next state processing is done
-  - **out_function**	 : function name to do once next_state changed
-  - **properties_out_function** : parameters to send to out_function
+  - **out_function(properties_out_function,event,data)**: function name or anonymous function, called just before ending the processing of an event
+  - **properties_out_function** : optional parameters to send to out_function
   - **next_state_if_error** (default: does not change state) : state set if init_function return false
   - **pushpop_state_if_error** : 
 	If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
@@ -312,33 +312,54 @@ Remarks
   	- parameters : the properties_<init/out>_function
   	- event : the event 
   	- data : the data sent with the event
-  - a default statename 'DefaultState' can be defined to define the default behaviour of some events... 
-  - an event is first search in the current state, then if not found in the 'DefaultState'
-  - when an event is not found, nothing is done...
-  - it is possible to trigger any event to a machine with the jquery trigger function :
-  		ex: $('#myButton1').trigger('aEventName');
-  - in a state/event function, you can trigger event to the current machine :
-    	ex : this.trigger('aEventName')
-  - if a delayed event is sent again before a previous one was processed, the previous event is cancelled and the new one re-started
-  - a 'start' event is always triggered when the FSM is started with InitManager
-  - when the machine starts and sets the 'options.initState' to be the initial state, 'enterState' is not triggered. This event may be triggered manually when 'start' event is received (see 'propagate_event')
+  
+The start of a machine or a sub-machine
+=======================================
+
+When the machine starts, the starting state is 'DefaultState'.
+
+A 'start' event is always triggered when the FSM is started.
+
+The 'DefaultState' state may be used to define the default behaviours of some events... 
+
+There is no 'enterState' event triggered for this default state. This kind of event may be managed when 'start' event is received in order to initialize the machine.
+
+The initial state of the FSM may be redefined with the option 'options.initState'.
+
 
 Event Processing
 ================
 
-The "how_process_event" allows to define how the event should be processed by the machine.
+When a event is received by the machine, it is first searched in the current state, and if not found, then searched in the 'DefaultState'.
 
-By default, when a machine receives an event and is still processing one, it will push it in its next event list to be processed... and gives back the hand...
+When an event is not found, then it is dropped and nothing is done...
 
-This way, any function that triggers an event will have immediatly the hand back. It prevents any uncontrolled effects that could arrive with the normal trigger mecanisms that immediatly processes event and all the function calls and then gives back the hand to the caller.
+It is possible to trigger any event to a machine with the jquery trigger function. Examples: 
+  $('#myButton1').trigger('aEventName');
+  $('#myButton1').trigger('aEventName',data);
+  $('#myButton1').trigger('aEventName',{data1:adata1,data2:adata2});
+
+In a state/event function, you can trigger event to the current machine :
+    	ex: this.trigger('aEventName')
+
+By default, when a machine receives a new event and is currently processing one, it will push it in its next event list to be processed... and gives back the hand... 
+This way, any function that triggers an event will have immediatly the hand back without changing the processing context. It prevents any uncontrolled effects that could arouse with the normal trigger mecanisms that process the (sub)events immediatly and may change/disturb the context of event processing.
 
 Of course, if you want to have the event immediatly processed, you can ask it with the "immediate" option.
-Or on the contrary, to have the event processed after a delay with the "delay:delay_value" option.
+
+Or on the contrary, to have the event processed after a delay, you can use the "delay:<delay_value>" option.
 
 Delayed Events
 ==============
 
-By default, any delayed event will be cancelled if the state of the machine change, as it is considered that the event has its context changed... It is possible to keep it even though the state changed with the preventcancel option.
+By default, any delayed event will be cancelled if the state of the machine change, as it is considered that the event has its context changed... 
+
+It is possible to keep it even though the state changed with the 'preventcancel' option but beware to side effects.
+
+If a delayed event is sent again before a previous one on the same event was processed, the previous event is cancelled and the new one replaces it starting with the initial delay.
+
+The "how_process_event" allows to define how the event should be processed by the machine.
+
 
 
 SubMachine
