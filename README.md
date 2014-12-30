@@ -24,7 +24,7 @@ The FSM has Push/Pop state capabilities and offers different useful features as:
 
 Official website
 ================
-http://www.intersel.fr/ifsm-jquery-plugin-demos.html
+http://www.intersel.fr/ifsm-jquery-plugin-demos.html with some live demos
 
 
 The "Hello world" example
@@ -101,6 +101,9 @@ See them live: http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - [Example_HSM_calculator](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_HSM_calculator.html) - a simple working calculator managed with states and events...
   - The [Mastermind game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Mastermind.html)...
   - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example and [a little game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall_reacting_to_mouse.html) with requestframeanimation support for the game loop...
+
+See some nice HTML5 animations done with specific machines made with [iFSMAnimation](https://github.com/intersel/iFSMAnimation): 
+  - http://intersel.net/demos/intersel/voeux_demo/
 
 .iFSM(aStateDefinition, [options])
 ==================================
