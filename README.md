@@ -160,8 +160,6 @@ returns the array of FSMs bound to the jQuery object.
   </script>
 ```
 
-
-
 Machine State Definition
 ========================
 
