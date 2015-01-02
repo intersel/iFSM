@@ -147,16 +147,16 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
 
 .getFSM([aStateDefinition])
 ===========================
-Get the FSM bound to the jQuery object.
+returns the array of FSMs bound to the jQuery object.
 
-  * aStateDefinition: object, a state definition used to define a FSM. it Allows to find a specific FSM if several are defined on the same jQuery object.
+  * aStateDefinition: object, a state definition used to define a FSM. it Allows to find a specific FSM if several are defined on the same jQuery object. So, when defined, it returns the FSM itself (and not an array).
 
   Call Examples
   =============
   
 ```html
   <script>
-  myFSM = $('#myButton').getFSM(); //get the linked FSM objects
+  myFSMs = $('#myButton').getFSM(); //get the linked FSM objects in an array
   </script>
 ```
 
