@@ -105,7 +105,7 @@ See them live: http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example and [a little game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall_reacting_to_mouse.html) with requestframeanimation support for the game loop...
 
 See some nice HTML5 animations done with specific machines made with [iFSMAnimation](https://github.com/intersel/iFSMAnimation): 
-  - http://intersel.net/demos/intersel/voeux_demo/
+  - http://www.intersel.fr/assets/voeux/2015/
 
 .iFSM(aStateDefinition, [options])
 ==================================
