@@ -1,9 +1,7 @@
 iFSM - a Flexible Finite and Hierarchical State Machine ( FSM / HSM ) for JQuery Objects
 ========================================================================================
 
-iFSM is a javascript/jquery plugin that helps to manage the dynamic behavior's complexities of Graphic User Interface by using finite state machine engines (FSM).
-
-iFSM is more than a simple FSM engine as it can handle sub-machines within states and handle Push/Pop states. It handles automatically the javascript and virtual event bindings to the states.
+Designed to manage the complexity of graphic user interface behaviours with javascript, this jQuery package can animate and manage HTML elements with their dynamic behaviours using Finite State Machines.
 
 It takes jQuery objects to define the states of the Web page elements and the events the page elements should react on.
 
@@ -105,7 +103,7 @@ See them live: http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example and [a little game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall_reacting_to_mouse.html) with requestframeanimation support for the game loop...
 
 See some nice HTML5 animations done with specific machines made with [iFSMAnimation](https://github.com/intersel/iFSMAnimation): 
-  - http://www.intersel.fr/assets/voeux/2015/
+  - http://intersel.net/demos/intersel/voeux_demo/
 
 .iFSM(aStateDefinition, [options])
 ==================================
