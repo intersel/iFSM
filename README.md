@@ -260,18 +260,18 @@ var aStateDefinition =
 		- data sent:
 			* newValue      - New value of the modified attribute
 			* oldValue      - Previous value of the modified attribute
-	- 'attrchange_style_<cssattributename_in_camelcase>' (ex:'attrchange_style_width'): received if the css attribute of the jquery object changed
+	- 'attrchange_style_[cssattributename_in_camelcase]' (ex:'attrchange_style_width'): received if the css attribute of the jquery object changed
 		- data sent:
 		    * newValue      - New value of the modified attribute
 		    * oldValue      - Previous value of the modified attribute
   An event can be the synonymous to an other event. Then give the name of the synomymous event instead of its definition.
-  - **how_process_event** [default:{push}]: {immediate}||{push}||{delay:delay_value,preventcancel:<false(default)|true>}
-  	if delay is defined, the processing of the event is delayed and activated at 'delay'
-  	by default, any event delayed will be cancelled if the state changes
-  	if preventcancel is defined, the delayed event won't be cancelled
+  - **how_process_event** [default:{push}]: {immediate}||{push}||{delay:delay_value,preventcancel:[false(default)|true]}
+  	- if delay is defined, the processing of the event is delayed and activated at 'delay'
+  	- by default, any event delayed will be cancelled if the state changes
+  	- if preventcancel is defined, the delayed event won't be cancelled
   - **process_event_if**:
-  	Definition of condition test that will be evaluated, and if result is true then event will be processed
-  	if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
+  	- Definition of condition test that will be evaluated, and if result is true then event will be processed
+  	- if not, see if a propagate_event_on_refused to trigger it... and do nothing more...
   - **propagate_event_on_refused**: an event name to trigger if process_event_if is false
   - **init_function(parameters,event,data)**: function name or anonymous function, called before the state change when processing the event
     - function should return a boolean: true: ok works fine; false: error
@@ -312,8 +312,7 @@ var aStateDefinition =
 				if it's an array of events, events are triggered in sequence
   - **prevent_bubble**: for submachines use, if defined and true, the current event will not bubble to its parent machine. By default, events bubble from submachines to their parent
   - **UI_event_bubble**: for graphic events use, if defined and true, the current event will bubble. By default, no UI event bubbling...
-  - **process_on_UItarget**: if defined and true, the current event will be processed only if the event was directly targeting 
-   									the UI jQuery object linked to the machine
+  - **process_on_UItarget**: if defined and true, the current event will be processed only if the event was directly targeting the UI jQuery object linked to the machine
 
   
 The start of a machine or a sub-machine
@@ -337,20 +336,26 @@ When a event is received by the machine, it is first searched in the current sta
 
 When an event is not found, then it is dropped and nothing is done...
 
-It is possible to trigger any event to a machine with the jquery trigger function. Examples: 
+It is possible to trigger any event to a machine with the jquery trigger function. 
+Examples: 
+```
   $('#myButton1').trigger('aEventName');
   $('#myButton1').trigger('aEventName',data);
   $('#myButton1').trigger('aEventName',{data1:adata1,data2:adata2});
+```
 
 In a state/event function, you can trigger event to the current machine:
-    	ex: this.trigger('aEventName')
+```
+   this.trigger('aEventName')
+```
 
 By default, when a machine receives a new event and is currently processing one, it will push it in its next event list to be processed... and gives back the hand... 
+
 This way, any function that triggers an event will have immediatly the hand back without changing the processing context. It prevents any uncontrolled effects that could arouse with the normal trigger mecanisms that process the (sub)events immediatly and may change/disturb the context of event processing.
 
 Of course, if you want to have the event immediatly processed, you can ask it with the "immediate" option.
 
-Or on the contrary, to have the event processed after a delay, you can use the "delay:<delay_value>" option.
+Or on the contrary, to have the event processed after a delay, you can use the "delay:[delay_value]" option.
 
 Delayed Events
 ==============
@@ -382,7 +387,7 @@ The public available variables
  - myFSM.currentState: current state name
  - myFSM.myUIObject: the jQuery object associated to the FSM
  - myFSM._stateDefinition: the definition of the states and events
- - myFSM._stateDefinition.<statename>.<eventname>.EventIteration - the number of times an event has been called
+ - myFSM._stateDefinition.[statename].[eventname].EventIteration - the number of times an event has been called
  - myFSM.opts - the defined options
  - myFSM.rootMachine: the root machine
  - myFSM.parentMachine: the parent machine if we're in a sub machine (null if none)
