@@ -23,6 +23,8 @@
  * - 2014/07/14 - E.Podvin - 1.6.14 - improve performance
  * - 2014/09/04 - E.Podvin - 1.6.15 - fix on the 'exitMachine' message when it was sent
  * - 2014/09/11 - E.Podvin - 1.6.16 - fix on synonymous event that was not set when still defined in a previous state
+ * - 2016/04/26 - E.Podvin - 1.6.17 - fix on delayed events
+ * - 2016/04/26 - E.Podvin - 1.6.17 - fix on delayed events on "DefaultState"
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2014
@@ -37,7 +39,7 @@
  * How to use it :
  * ===============
  * <code>
- * <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+ * <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
  * <script type="text/javascript" src="jquery.dotimeout.js"></script>
  * <script type="text/javascript" src="jquery.attrchange.js"></script>
  * <script type="text/javascript" src="ifsm.js"></script>
@@ -1104,10 +1106,22 @@ fsm_manager.prototype.popEvent	= function() {
  * @param aDelay	: a delay to do the processing
  * @param data		: {event, data}
  */
+var aPreviousId=0;//to manage the preventcancel by creating a unique id for doTimeout
 fsm_manager.prototype.delayProcess	= function(anEvent, aDelay, data) {
 	this._log('delayProcess:  ---> '+anEvent);
+
+	aPreviousId++;
+	
+	var currentState = this.currentState;
+	
+	if (!this._stateDefinition[this.currentState][anEvent]) currentState = "DefaultState";
+
+	if (!this._stateDefinition[currentState][anEvent].how_process_event.DelayedProcessNames)
+		this._stateDefinition[currentState][anEvent].how_process_event.DelayedProcessNames=[];
+	aDelayedProcessName=this.myUIObject.attr('id')+currentState+anEvent+aPreviousId;
+	this._stateDefinition[currentState][anEvent].how_process_event.DelayedProcessNames[aDelayedProcessName]=aDelayedProcessName;
 	//setTimeout(this.launchProcess,aDelay,this,anEvent,data);
-	jQuery.doTimeout(this.myUIObject.attr('id')+this._stateDefinition[this.currentState]+anEvent,aDelay,fsm_manager_launchProcess,this,anEvent,data);
+	jQuery.doTimeout(aDelayedProcessName,aDelay,fsm_manager_launchProcess,this,anEvent,data);
 };
 
 /**
@@ -1116,16 +1130,33 @@ fsm_manager.prototype.delayProcess	= function(anEvent, aDelay, data) {
  */
 fsm_manager.prototype.cancelDelayedProcess	= function() {
 	this._log('cancelDelayedProcess:  ---> ');
+
+	var currentState = null;
 	var currentEventConfiguration;
+
 	for(aEvent in this._stateDefinition[this.currentState]) 
 	{
-		currentEventConfiguration = this._stateDefinition[this.currentState][aEvent];
+		currentState = this.currentState;
+		
+		if (!this._stateDefinition[currentState][aEvent]) currentState = "DefaultState";
+		
+		currentEventConfiguration = this._stateDefinition[currentState][aEvent];
+		
 		if 	( 	 	currentEventConfiguration.how_process_event
 				&& 	(		currentEventConfiguration.how_process_event.preventcancel == undefined
 						||  currentEventConfiguration.how_process_event.preventcancel != true
 					)
 			)
-			jQuery.doTimeout(this._stateDefinition[this.currentState]+aEvent);//cancel event
+		{
+			if (currentEventConfiguration.how_process_event.DelayedProcessNames)
+			{
+				for(aDelayedProcessName in currentEventConfiguration.how_process_event.DelayedProcessNames) 
+				{
+					jQuery.doTimeout(aDelayedProcessName);//cancel event
+				}
+				currentEventConfiguration.how_process_event.DelayedProcessNames=[];
+			}
+		}
 	}
 
 };
