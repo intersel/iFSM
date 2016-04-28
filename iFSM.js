@@ -24,14 +24,14 @@
  * - 2014/09/04 - E.Podvin - 1.6.15 - fix on the 'exitMachine' message when it was sent
  * - 2014/09/11 - E.Podvin - 1.6.16 - fix on synonymous event that was not set when still defined in a previous state
  * - 2016/04/26 - E.Podvin - 1.6.17 - fix on delayed events
- * - 2016/04/26 - E.Podvin - 1.6.17 - fix on delayed events on "DefaultState"
+ * - 2016/04/26 - E.Podvin - 1.6.18 - fix on delayed events on "DefaultState"
  * -----------------------------------------------------------------------------------------
  *
- * @copyright Intersel 2013-2014
+ * @copyright Intersel 2013-2016
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.6.16
+ * @version : 1.6.18
  * -----------------------------------------------------------------------------------------
  */
 
