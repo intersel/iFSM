@@ -772,7 +772,17 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> process submachine  (event)---> '+aSubMachine+'('+anEvent+') Start',2);
 				aSubMachineDefinition.myFSM.processEvent(anEvent,data);
 				this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> process submachine  (event)---> '+aSubMachine+'('+anEvent+') Processed',2);
-			
+				
+				//current state changed during the process of the submachine...?
+				//not sure it is a normal behaviour... if it occurs, we exit... 
+				if (currentState != this.currentState)
+				{
+					this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> process submachine changed the current environment (event)',2);
+					this.cleanExitProcess();
+					this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> EXIT PROCESS',2,-1);
+					return;
+				}
+				
 				if (		
 							(	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
 							&& 	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent].prevent_bubble
@@ -810,8 +820,8 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> take Event '+anEvent+' configuration from catchEvent',2);
 				currentEventConfiguration = this._stateDefinition.DefaultState["catchEvent"];
 				//we create the dummy event in the default state if it does not exist for the catchall 
-				if (!this._stateDefinition[currentStateEvent][anEvent]) 
-					this._stateDefinition[currentStateEvent][anEvent]=jQuery.extend( true,{}, currentEventConfiguration);
+				if (!this._stateDefinition['DefaultState'][anEvent]) 
+					this._stateDefinition['DefaultState'][anEvent]=jQuery.extend( true,{}, currentEventConfiguration);
 			}
 		}
 		
