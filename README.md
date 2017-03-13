@@ -392,20 +392,22 @@ SubMachine
 The public available variables
 ==============================
  - myFSM.currentState: current state name
+ - myFSM.lastState: previous state name of the current state
  - myFSM.eventCalled: current event name
  - myFSM.myUIObject: the jQuery object associated to the FSM
  - myFSM._stateDefinition: the definition of the states and events
- - myFSM._stateDefinition.[statename].[eventname].EventIteration - the number of times an event has been called
+ - myFSM._stateDefinition.[statename].[eventname].EventIteration - the number of times an event has been called since we entered the state
  - myFSM.opts - the defined options
  - myFSM.rootMachine: the root machine
  - myFSM.parentMachine: the parent machine if we're in a sub machine (null if none)
  
 Within the call of FSM function, you can refer to the FSM by 'this':
  - this.currentState
+ - this.lastState
  - this.myUIObject
  - this._stateDefinition
  - this.opts
- - this.EventIteration: the current event iteration
+ - this.EventIteration: the current event iteration since we entered the state
  
 
 LIBRARY DEPENDENCIES

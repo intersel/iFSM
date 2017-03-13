@@ -150,6 +150,10 @@ pre {
 			},
 			notAuthorizedKey : //in order to cancel the event bubbling
 			{},
+			catchEvent: 
+			{
+				UI_event_bubble : true,
+			}
 		},
 	};
 
@@ -161,9 +165,11 @@ pre {
 				return $('#Age').val();
 			},
 			outputRes : $('#result'),
+			debug:true,
 		});
 		$('#Age').iFSM(KeyboardHandling, {
-			aButton : $('#myButton')
+			aButton : $('#myButton'),
+			debug:true
 		});
 	});
 </script>

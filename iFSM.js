@@ -26,6 +26,7 @@
  * - 2016/04/26 - E.Podvin - 1.6.17 - fix on delayed events
  * - 2016/04/26 - E.Podvin - 1.6.18 - fix on delayed events on "DefaultState"
  * - 2017/03/08 - E.Podvin - 1.7.0 - myFSM.eventCalled available for script + 'propagate_event_on_localmachine' directive + catchEvent
+ * - 2017/03/13 - E.Podvin - 1.7.1 - add myFSM.lastState
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2017
@@ -363,6 +364,11 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	 */
     this.currentState = '';
     
+    /**
+     * lastState - previous state of the current state 
+     */
+    this.lastState=this.currentState;
+
 	/**
 	 * @param currentEvent - current event processed by the fsm
 	 * 
@@ -999,6 +1005,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		 * we change the current state Here!
 		 */
 		this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> Go to (see next_state) '+currentEventConfiguration.next_state,2);
+		this.lastState=this.currentState;
 		this.currentState = currentEventConfiguration.next_state;
 	
 		
@@ -1073,6 +1080,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		 * we change the current state Here!
 		 */
 		this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> Go to (see next_state_if_error) '+currentEventConfiguration.next_state_if_error,2);
+		this.lastState=this.currentState;
 		this.currentState = currentEventConfiguration.next_state_if_error;
 
 		//and now that we're entering the new state
