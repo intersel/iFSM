@@ -27,13 +27,14 @@
  * - 2016/04/26 - E.Podvin - 1.6.18 - fix on delayed events on "DefaultState"
  * - 2017/03/08 - E.Podvin - 1.7.0 - myFSM.eventCalled available for script + 'propagate_event_on_localmachine' directive + catchEvent
  * - 2017/03/13 - E.Podvin - 1.7.1 - add myFSM.lastState
+ * - 2017/03/20 - E.Podvin - 1.7.2 - fixes to be compliant with jquery 3.2.0
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2017
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.7.0
+ * @version : 1.7.2
  * -----------------------------------------------------------------------------------------
  */
 
@@ -487,13 +488,11 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 	}
 	
 	//define a selector object if none defined
-	if ( (anObject.selector == null) 
-			||  (
-					(anObject.selector == "") 
-				&& 	(anObject.attr('id') )
-				)
+	if ( 	(!anObject.selector) 
+		&& 	(anObject.attr('id') )
 		)
 		anObject.selector='#'+anObject.attr('id');// set to the #id
+	else anObject.selector='';
 	
 	//define the triggers for attrchange
 	if ( attrChangeRequested && (anObject.selector) )
@@ -600,7 +599,7 @@ fsm_manager.prototype.InitManager	= function(aInitState)
 		this._stateDefinition.DefaultState={};
 	
 	//send 'start' event
-	if (this.parentMachine == null)
+	if (!this.parentMachine)
 		this.trigger(this.opts.startEvent);
 	else //directly talk to the sub machine to process the start
 	{

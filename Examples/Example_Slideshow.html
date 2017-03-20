@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>iFSM in action! a Finite State Machine for jQuery</title>
-<script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery-3.2.0.min.js"></script>
 <script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
 <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
 <script type="text/javascript" src="../iFSM.js"></script>
@@ -290,8 +290,8 @@ $(document).ready(function() {
 	<div id="adiv">a simple slideshow driven by iFSM:<br>
 	<ul>
 		<li>it goes right or left with the buttons</li>
-		<li>it starts automatically after 5 seconds of interaction</li>
-		<li>slide changes after 3secs</li>
+		<li>it starts automatically after 5 seconds of no user interaction with the slideshow</li>
+		<li>the slides change after 3secs</li>
 		<li>it stops each time we click on the right/left buttons</li>
 		<li>it stops when the mouse is over the slideshow</li>
 		<li>it restarts when the mouse leaves after 5secs</li>
