@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>iFSM in action! a Finite State Machine for jQuery</title>
+<script type="text/javascript" src="../extlib/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
+<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+<script type="text/javascript" src="../iFSM.js"></script>
+<style type="text/css">
+html {
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
+	padding: 0 10px;
+}
+
+pre {
+	font-size: 12px;
+	background-color: black;
+	color: green;
+}
+
+#cursor,#cursor2 {
+	position: absolute;
+	width:30px;
+	height:50px;
+	background-color: #AAA;
+	margin:10px 0px;
+}
+#cursor.dragged,#cursor2.dragged {
+	background-color: #CCC;
+}
+
+#cursorContainer,#cursorContainer2{
+	position: relative;
+	width:100%;
+	height:70px;
+	background-color: #404040;
+	margin: 10px 0px;
+}
+#cursorContainer.dragged,#cursorContainer2.dragged {
+	background-color: #505050;
+}
+
+#status,#status2 {
+	margin: 10px;
+}
+
+</style>
+
+<script type="text/javascript" id="iFSMscript">
+
+$(document).ready(function() {
+	
+	$('#cursorContainer').iFSM(aSliderAnimation, {sticky:false,cursor:$('#cursor'),steps:5,alertObject:$( "#status" )}); 
+	$('#cursor').iFSM(aCursorAnimation); 
+	$('#cursorContainer2').iFSM(aSliderAnimation, {sticky:true,cursor:$('#cursor2'),steps:51,alertObject:$( "#status2" )}); 
+	$('#cursor2').iFSM(aCursorAnimation); 
+	
+	var debug=true;
+	$( "#status,#status2" ).on( 
+	{
+		"slideCursorMoveStart": function(e,posX) {
+		  $(this).html( 'slideCursorMoveStart!' );
+		  if (debug) console.log( 'slideCursorMoveStart!' );
+		},
+		"slideCursorMoveStop": function(e,posX) {
+		  $(this).html( 'slideCursorMoveStop!' );
+		  if (debug) console.log( 'slideCursorMoveStop!' );
+		},
+		"slideCursorMove": function(e,posX) {
+		  //$(this).html( 'slideCursorMove:'+posX );
+		  if (debug) console.log( 'slideCursorMove:'+posX );
+		},
+		"slideCursorMoveToStep": function(e,dataStep) {
+		  $(this).html( 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step+' - '+dataStep.cursor);
+		  if (debug) console.log( 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step );
+		}
+	});
+
+});
+
+
+
+var	docMachine= {
+		DefaultState : {
+			mouseup:{
+				init_function:function(){
+					this.opts.slider.trigger('mouseup');
+				},
+			},
+			mousemove:	
+			{
+				init_function:function(p,e){
+					this.opts.slider.trigger('mousemove',e);
+				},
+			}
+
+		},
+	};
+
+
+/**
+ * States to handle the click on buttons
+ */
+var aSliderAnimation = {
+
+		waitToDragCursor: //in order to let the animation ends after its 500ms and to not cumulate multiple clicks
+		{
+			mousedown:	
+			{
+				init_function: function(p,e) {
+					this.opts['startleft']=this.myUIObject.offset().left+this.opts.cursor.outerWidth()/2;
+					this.opts['starttop']=this.myUIObject.offset().top+this.opts.cursor.outerHeight()/2;
+					this.myUIObject.addClass('dragged');
+					this.opts.cursor.trigger('setLeftX',Math.max(Math.min(e.pageX-this.opts.startleft,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+					this.opts.cursor.trigger('startDrag');
+					
+					var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
+					cursorPosX += this.opts.cursor.outerWidth()/2;
+					this.opts.targetPosition  =  100 * cursorPosX/this.opts['el_w'];
+					
+					this.opts.alertObject.trigger('slideCursorMoveStart');
+
+
+				},
+				next_state: 'dragCursor', 
+			},
+		},				
+		dragCursor: 
+		{
+			mouseup:	
+			{
+				init_function: function() {
+					this.myUIObject.removeClass('dragged');
+					this.opts.cursor.trigger('stopDrag');
+				},
+				next_state: 'moveCursorToFinal', 
+			},
+			mousemove:	
+			{
+				init_function: function(p,e,eDoc) {
+					if (eDoc) e=eDoc;//comes from document...
+					this.opts.nextCursorPosition = Math.max(Math.min(e.pageX-this.opts.startleft,this.opts.el_w-this.opts.cursor.outerWidth()),0);
+					if (!this.opts.sticky) 
+					{
+						this.opts.cursor.trigger('setLeftX',this.opts.nextCursorPosition);
+					}
+				},
+				propagate_event:'sendEvent',
+			},
+			sendEvent:
+			{
+				init_function: function() {
+					var targetPosition;
+					var stepFound = 0;
+
+					//var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
+					var cursorPosX=this.opts.nextCursorPosition;
+					cursorPosX += this.opts.cursor.outerWidth()/2;
+					var cursorPosXNormalized =  100 * cursorPosX/(this.opts['el_w']-this.opts.cursor.outerWidth());
+
+					if (this.opts.steps)
+					{
+					
+						var OneStep = 100 / (this.opts.steps - 1);
+						
+						targetPosition = 0;
+						
+						var found = false;
+						do{
+							if ( 
+										(cursorPosXNormalized  >= (targetPosition - OneStep/2) ) 
+									&& 	(cursorPosXNormalized  <= (targetPosition + OneStep/2))
+								)
+								found = true;
+							else
+							{
+								targetPosition += OneStep;
+								stepFound ++;
+							}
+						}
+						while(!found && targetPosition < 100);
+
+						if (targetPosition != this.opts.targetPosition)
+						{
+							this.opts.alertObject.trigger('slideCursorMoveToStep',{posX:targetPosition/100,step:stepFound,cursor:cursorPosXNormalized});
+							this.opts.targetPosition = targetPosition;
+						}
+						if (this.opts.sticky) 
+						{
+							var offsetX = targetPosition * this.opts['el_w'] / 100 - this.opts.cursor.outerWidth();
+							this.opts.cursor.trigger('setLeftX',Math.max(Math.min(offsetX,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+						}
+						
+					}
+					
+					this.opts.alertObject.trigger('slideCursorMove',cursorPosXNormalized/100);
+					
+				},
+			},
+		},				
+		moveCursorToFinal: 
+		{
+			enterState:
+			{
+				init_function: function() {
+					var targetPosition;
+					var stepFound=0;
+					var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
+					cursorPosX += this.opts.cursor.outerWidth()/2;
+					var cursorPosXNormalized =  100 * cursorPosX/(this.opts['el_w']-this.opts.cursor.outerWidth());
+
+					if (this.opts.steps)
+					{
+					
+						var OneStep = 100 / (this.opts.steps - 1);
+						
+						targetPosition = 0;
+						
+						var found = false;
+						do{
+							if ( 
+										(cursorPosXNormalized  >= (targetPosition - OneStep/2) ) 
+									&& 	(cursorPosXNormalized  <= (targetPosition + OneStep/2))
+								)
+								found = true;
+							else
+							{
+								targetPosition += OneStep;
+								stepFound ++;
+							}
+						}
+						while(!found && targetPosition < 100);
+						
+						var offsetX = targetPosition * this.opts['el_w'] / 100 - this.opts.cursor.outerWidth();
+						this.opts.cursor.trigger('setLeftX',Math.max(Math.min(offsetX,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+						
+					}
+					else
+					{
+						targetPosition = cursorPosXNormalized;
+					}
+					
+					this.opts.alertObject.trigger('slideCursorMoveToStep',{posX:targetPosition/100,step:stepFound,cursor:cursorPosXNormalized});
+					this.opts.alertObject.trigger('slideCursorMove',targetPosition/100);
+					
+					this.opts.alertObject.trigger('slideCursorMoveStop');
+
+					
+				},
+				next_state: 'waitToDragCursor', 
+			}
+		},
+		DefaultState:
+		{
+			start:	
+			{
+				init_function: function() {
+					this.opts['el_w'] = this.myUIObject.outerWidth();
+					this.opts['el_h'] = this.myUIObject.outerHeight();
+					
+					//to manage when the events are outside the slider
+					$(document).iFSM(docMachine,{slider:this.myUIObject});
+
+					
+				},
+				next_state: 'waitToDragCursor'
+			},
+		}				
+}
+/**
+ * States to handle the click on buttons
+ */
+var aCursorAnimation = {
+
+		waitToBeDragged: //in order to let the animation ends after its 500ms and to not cumulate multiple clicks
+		{
+			startDrag:'mousedown',
+			mousedown:	
+			{
+				init_function: function(p,e) {
+					this.myUIObject.addClass('dragged');
+				},
+				next_state: 'dragged', 
+				UI_event_bubble:true,
+			},
+		},				
+		dragged: //in order to let the animation ends after its 500ms and to not cumulate multiple clicks
+		{
+			stopDrag:'mouseup',
+			mouseup:	
+			{
+				init_function: function() {
+					this.myUIObject.removeClass('dragged');
+				},
+				next_state: 'waitToBeDragged', 
+				UI_event_bubble:true,
+			},
+		},				
+		DefaultState:
+		{
+			start:	
+			{
+				init_function: function() {
+					this.opts['el_w'] = this.myUIObject.outerWidth();
+					this.opts['el_h'] = this.myUIObject.outerHeight();
+				},
+				next_state: 'waitToBeDragged'
+			},
+			setLeftX:
+			{
+				init_function: function(p,e,posX) {
+					this.myUIObject.animate({
+						left: parseFloat(posX),
+					},0);
+					if (this.opts.debug) $('#status').html('posX:'+posX);
+				},
+
+			},
+		}				
+}
+
+
+ </script>
+ </head>
+<body style="margin:100px;">
+	<h1>A (not so) simple slide scale driven with iFSM </h1>
+	<p>This example shows an horizontal slider made up of a cursor and a background where the cursor moves.<p>
+	<p>	Steps may be defined where the cursor should be set when the mouse button is released. </p>
+	<p>Events that are sent to any listening objects are :</p>
+	<ul>
+		<li>"slideCursorMoveStart": cursor starts to move (mousedown)</li>
+		<li>"slideCursorMoveStop": cursor was released (mouseup)</li>
+		<li>"slideCursorMove": cursor moves along the slider</li>
+		<li>"slideCursorMoveToStep": cursor is on a step of the slider</li>
+	</ul>
+	<h2>Slide with 5 steps (0 to 4) with no "sticky steps"</h2>
+	<div id="cursorContainer">
+		<div id="cursor"></div>
+	</div>
+	<div id="status"></div>
+	<h2>Slide with 50 steps with "sticky steps"</h2>
+	<div id="cursorContainer2">
+		<div id="cursor2"></div>
+	</div>
+	<div id="status2"></div>
+<br>
+	<br>
+	<br>
+	<pre>
+	<script>
+		function escapeHtml(text) {
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+		    '>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+
+			return text.replace(/[&<>"']/g, function(m) {
+				return map[m];
+			});
+		}
+		document.write(escapeHtml($('#iFSMscript').html()))
+	</script>
+    </pre>
+	<p>
+		provided by <a href="http://www.intersel.fr">Intersel</a>
+	</p>
+	</pre>
+</body>
+</html>
