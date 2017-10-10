@@ -5,6 +5,8 @@
 <script type="text/javascript" src="../extlib/jquery-3.2.0.min.js"></script>
 <script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
 <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+<script type="text/javascript" src="../extlib/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="../extlib/jquery.touchSwipe.js"></script>
 <script type="text/javascript" src="../iFSM.js"></script>
 <style type="text/css">
 html {
@@ -53,9 +55,9 @@ pre {
 
 $(document).ready(function() {
 	
-	$('#cursorContainer').iFSM(aSliderAnimation, {sticky:false,cursor:$('#cursor'),steps:5,alertObject:$( "#status" )}); 
+	$('#cursorContainer').iFSM(aSliderAnimation, {sticky:false,cursor:$('#cursor'),steps:5,alertObject:$( "#status" ),debugAnimation:true}); 
 	$('#cursor').iFSM(aCursorAnimation); 
-	$('#cursorContainer2').iFSM(aSliderAnimation, {sticky:true,cursor:$('#cursor2'),steps:51,alertObject:$( "#status2" )}); 
+	$('#cursorContainer2').iFSM(aSliderAnimation, {sticky:true,cursor:$('#cursor2'),steps:51,alertObject:$( "#status2" ),debugAnimation:true}); 
 	$('#cursor2').iFSM(aCursorAnimation); 
 	
 	var debug=true;
@@ -111,23 +113,77 @@ var aSliderAnimation = {
 			mousedown:	
 			{
 				init_function: function(p,e) {
-					this.opts['startleft']=this.myUIObject.offset().left+this.opts.cursor.outerWidth()/2;
-					this.opts['starttop']=this.myUIObject.offset().top+this.opts.cursor.outerHeight()/2;
+					//init basic values of the slider
+					this.opts['sliderWidth'] = this.myUIObject.outerWidth();
+					this.opts['sliderMaxCursorPosX'] = this.myUIObject.outerWidth()-this.opts.cursor.outerWidth();
+					this.opts['sliderHeight'] = this.myUIObject.outerHeight();
+					this.opts['sliderLeft'] = this.myUIObject.offset().left;
+					this.opts['sliderTop'] = this.myUIObject.offset().top;
+					if (!this.opts.mouseWheelFactor)
+					{
+						if (this.opts.steps)
+							this.opts.mouseWheelFactor = this.opts['sliderMaxCursorPosX'] / (this.opts.steps);
+						else 
+							this.opts.mouseWheelFactor = 10;
+					}
+
+					this.opts.eventPosition = {};
+					this.opts.eventPosition['positionX'] = this.computeCursorPositionXFromDocToSlider(e.pageX);
+					//this.opts['eventPosition']['positionY'] = this.computeCursorPositionYFromDocToSlider(e.pageY);;
+
+				},
+				next_state: 'initDragCursor', 
+			},
+			mousewheel:
+			{
+				init_function: function(p,e) {
+					var delta = e.deltaY;
+					delta *= this.opts.mouseWheelFactor;
+					e.pageX=this.opts.cursor.offset().left+delta;
+					this.trigger('mousedown',e);
+					this.trigger('mousemove',e);
+					if (this.opts.debugAnimation) console.log( 'pageX:'+e.pageX );
+
+				},
+				propagate_event:'mouseWheelUp',
+			},
+/*
+//@todo: swipe implementation
+			swipe:
+			{
+				init_function: function(p,e, direction, distance, duration, fingerCount, fingerData){
+					var delta = e.deltaY;
+					delta *= this.opts.mouseWheelFactor;
+					e.pageX=this.opts.cursor.offset().left+delta;
+					this.trigger('mousedown',e);
+					this.trigger('mousemove',e);
+					if (this.opts.debugAnimation) console.log( 'pageX:'+e.pageX );
+
+				},
+				propagate_event:'mouseWheelUp',
+			},
+*/
+		},
+		initDragCursor:
+		{
+			enterState:
+			{
+				init_function: function() {
+
+				
 					this.myUIObject.addClass('dragged');
-					this.opts.cursor.trigger('setLeftX',Math.max(Math.min(e.pageX-this.opts.startleft,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+					
+					//position the cursor where we have clicked
+					this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(this.opts.eventPosition.positionX));
 					this.opts.cursor.trigger('startDrag');
 					
-					var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
-					cursorPosX += this.opts.cursor.outerWidth()/2;
-					this.opts.targetPosition  =  100 * cursorPosX/this.opts['el_w'];
+					this.opts.targetPosition  =  100 * this.opts.eventPosition.positionX/this.opts['sliderMaxCursorPosX'];
 					
 					this.opts.alertObject.trigger('slideCursorMoveStart');
-
-
 				},
 				next_state: 'dragCursor', 
 			},
-		},				
+		},
 		dragCursor: 
 		{
 			mouseup:	
@@ -142,13 +198,18 @@ var aSliderAnimation = {
 			{
 				init_function: function(p,e,eDoc) {
 					if (eDoc) e=eDoc;//comes from document...
-					this.opts.nextCursorPosition = Math.max(Math.min(e.pageX-this.opts.startleft,this.opts.el_w-this.opts.cursor.outerWidth()),0);
+					this.opts.nextCursorPosition = this.computeCursorPositionXFromDocToSlider(e.pageX);
 					if (!this.opts.sticky) 
 					{
-						this.opts.cursor.trigger('setLeftX',this.opts.nextCursorPosition);
+						this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(this.opts.nextCursorPosition));
 					}
 				},
 				propagate_event:'sendEvent',
+			},
+			mouseWheelUp:
+			{
+				propagate_event:'mouseup',
+				how_process_event :{delay:200},
 			},
 			sendEvent:
 			{
@@ -156,10 +217,8 @@ var aSliderAnimation = {
 					var targetPosition;
 					var stepFound = 0;
 
-					//var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
 					var cursorPosX=this.opts.nextCursorPosition;
-					cursorPosX += this.opts.cursor.outerWidth()/2;
-					var cursorPosXNormalized =  100 * cursorPosX/(this.opts['el_w']-this.opts.cursor.outerWidth());
+					var cursorPosXNormalized =  100 * cursorPosX/this.opts['sliderMaxCursorPosX'];
 
 					if (this.opts.steps)
 					{
@@ -190,8 +249,8 @@ var aSliderAnimation = {
 						}
 						if (this.opts.sticky) 
 						{
-							var offsetX = targetPosition * this.opts['el_w'] / 100 - this.opts.cursor.outerWidth();
-							this.opts.cursor.trigger('setLeftX',Math.max(Math.min(offsetX,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+							var offsetX = targetPosition * this.opts['sliderMaxCursorPosX'] / 100;
+							this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(offsetX));
 						}
 						
 					}
@@ -208,9 +267,8 @@ var aSliderAnimation = {
 				init_function: function() {
 					var targetPosition;
 					var stepFound=0;
-					var cursorPosX=this.opts.cursor.offset().left - this.myUIObject.offset().left;
-					cursorPosX += this.opts.cursor.outerWidth()/2;
-					var cursorPosXNormalized =  100 * cursorPosX/(this.opts['el_w']-this.opts.cursor.outerWidth());
+					var cursorPosX=this.computeCursorPositionXFromSliderToDoc(this.opts.cursor.offset().left-this.opts.sliderLeft+this.opts.cursor.outerWidth()/2);
+					var cursorPosXNormalized =  100 * cursorPosX/this.opts['sliderMaxCursorPosX'];
 
 					if (this.opts.steps)
 					{
@@ -234,8 +292,8 @@ var aSliderAnimation = {
 						}
 						while(!found && targetPosition < 100);
 						
-						var offsetX = targetPosition * this.opts['el_w'] / 100 - this.opts.cursor.outerWidth();
-						this.opts.cursor.trigger('setLeftX',Math.max(Math.min(offsetX,this.opts.el_w-this.opts.cursor.outerWidth()),0));
+						var offsetX = targetPosition * this.opts['sliderMaxCursorPosX'] / 100;
+						this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(offsetX));
 						
 					}
 					else
@@ -258,11 +316,28 @@ var aSliderAnimation = {
 			start:	
 			{
 				init_function: function() {
-					this.opts['el_w'] = this.myUIObject.outerWidth();
-					this.opts['el_h'] = this.myUIObject.outerHeight();
-					
+
 					//to manage when the events are outside the slider
 					$(document).iFSM(docMachine,{slider:this.myUIObject});
+					
+					var sliderOpts=this.opts;
+					
+					this.computeCursorPositionXFromDocToSlider = function (aPosXinDocument)
+					{
+						var posX = aPosXinDocument-sliderOpts.sliderLeft-sliderOpts.cursor.outerWidth()/2;
+						posX = Math.max(Math.min(posX,this.opts.sliderMaxCursorPosX),0);
+						if (this.opts.debugAnimation) this.opts.alertObject.html('posXSlider:'+posX);
+						//limit the position of the cursor between 0 and slider width
+						return posX;
+						
+					};
+					this.computeCursorPositionXFromSliderToDoc = function (aPosXinSlider)
+					{
+						var posX = aPosXinSlider;
+						//if (this.opts.debugAnimation) $('#status').html('posX:'+posX);
+						return posX;
+						
+					};
 
 					
 				},
@@ -304,18 +379,19 @@ var aCursorAnimation = {
 			start:	
 			{
 				init_function: function() {
-					this.opts['el_w'] = this.myUIObject.outerWidth();
-					this.opts['el_h'] = this.myUIObject.outerHeight();
+					this.opts['sliderWidth'] = this.myUIObject.outerWidth();
+					this.opts['sliderHeight'] = this.myUIObject.outerHeight();
 				},
 				next_state: 'waitToBeDragged'
 			},
 			setLeftX:
 			{
+				//posX considered at the middle of the object
 				init_function: function(p,e,posX) {
 					this.myUIObject.animate({
 						left: parseFloat(posX),
 					},0);
-					if (this.opts.debug) $('#status').html('posX:'+posX);
+					if (this.opts.debugAnimation) $('#status').html('posX:'+posX);
 				},
 
 			},
