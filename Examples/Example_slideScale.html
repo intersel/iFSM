@@ -110,9 +110,9 @@ var aSliderAnimation = {
 
 		waitToDragCursor: //in order to let the animation ends after its 500ms and to not cumulate multiple clicks
 		{
-			mousedown:	
+			enterState:
 			{
-				init_function: function(p,e) {
+				init_function: function() {
 					//init basic values of the slider
 					this.opts['sliderWidth'] = this.myUIObject.outerWidth();
 					this.opts['sliderMaxCursorPosX'] = this.myUIObject.outerWidth()-this.opts.cursor.outerWidth();
@@ -127,6 +127,11 @@ var aSliderAnimation = {
 							this.opts.mouseWheelFactor = 10;
 					}
 
+				}
+			},
+			mousedown:	
+			{
+				init_function: function(p,e) {
 					this.opts.eventPosition = {};
 					this.opts.eventPosition['positionX'] = this.computeCursorPositionXFromDocToSlider(e.pageX);
 					//this.opts['eventPosition']['positionY'] = this.computeCursorPositionYFromDocToSlider(e.pageY);;
@@ -209,7 +214,7 @@ var aSliderAnimation = {
 			mouseWheelUp:
 			{
 				propagate_event:'mouseup',
-				how_process_event :{delay:200},
+				how_process_event :{delay:20},
 			},
 			sendEvent:
 			{
