@@ -23,29 +23,29 @@ pre {
 	color: green;
 }
 
-#cursor,#cursor2 {
+#cursor,#cursor2,#cursor3 {
 	position: absolute;
 	width:30px;
 	height:50px;
 	background-color: #AAA;
 	margin:10px 0px;
 }
-#cursor.dragged,#cursor2.dragged {
+#cursor.dragged,#cursor2.dragged,#cursor3.dragged {
 	background-color: #CCC;
 }
 
-#cursorContainer,#cursorContainer2{
+#cursorContainer,#cursorContainer2,#cursorContainer3{
 	position: relative;
 	width:100%;
 	height:70px;
 	background-color: #404040;
 	margin: 10px 0px;
 }
-#cursorContainer.dragged,#cursorContainer2.dragged {
+#cursorContainer.dragged,#cursorContainer2.dragged,#cursorContainer3.dragged {
 	background-color: #505050;
 }
 
-#status,#status2 {
+#status,#status2,#status3 {
 	margin: 10px;
 }
 
@@ -55,29 +55,54 @@ pre {
 
 $(document).ready(function() {
 	
-	$('#cursorContainer').iFSM(aSliderAnimation, {sticky:false,cursor:$('#cursor'),steps:5,alertObject:$( "#status" ),debugAnimation:true}); 
+	$('#cursorContainer').iFSM(aSliderAnimation, {
+			sticky:false,cursor:$('#cursor')
+		,	alertObject:$( "#status" )
+		,	debugAnimation:false
+		,	debugInfo:$( "#status" )
+	}); 
 	$('#cursor').iFSM(aCursorAnimation); 
-	$('#cursorContainer2').iFSM(aSliderAnimation, {sticky:true,cursor:$('#cursor2'),steps:51,alertObject:$( "#status2" ),debugAnimation:true}); 
+	
+	$('#cursorContainer2').iFSM(aSliderAnimation, {
+			sticky:false,cursor:$('#cursor2')
+		,	steps:10
+		,	alertObject:$( "#status2" )
+		,	debugAnimation:false
+		,	debugInfo:$( "#status2" )
+	}); 
 	$('#cursor2').iFSM(aCursorAnimation); 
 	
-	var debug=true;
-	$( "#status,#status2" ).on( 
+	$('#cursorContainer3').iFSM(aSliderAnimation, {
+			sticky:true
+		,	cursor:$('#cursor3')
+		,	steps:51
+		,	alertObject:$( "#status3" )
+		,	debugAnimation:false
+		,	debugInfo:$( "#status3" )
+	}); 
+	$('#cursor3').iFSM(aCursorAnimation); 
+	
+	var debug=false;
+	$( "#status,#status2,#status3" ).on( 
 	{
 		"slideCursorMoveStart": function(e,posX) {
-		  $(this).html( 'slideCursorMoveStart!' );
-		  if (debug) console.log( 'slideCursorMoveStart!' );
+		  if (debug) 
+			$(this).html($(this).html()+ 'slideCursorMoveStart!'+ "<br>-------------<br>");
+		  else
+			$(this).html('slideCursorMoveStart!'+ "<br>-------------<br>");
+		  if (debug) this.logConsole( 'slideCursorMoveStart!' );
 		},
 		"slideCursorMoveStop": function(e,posX) {
-		  $(this).html( 'slideCursorMoveStop!' );
-		  if (debug) console.log( 'slideCursorMoveStop!' );
+		  $(this).html( $(this).html()+'slideCursorMoveStop!' +"<br>-------------<br>");
+		  if (debug) this.logConsole( 'slideCursorMoveStop!' );
 		},
 		"slideCursorMove": function(e,posX) {
-		  //$(this).html( 'slideCursorMove:'+posX );
-		  if (debug) console.log( 'slideCursorMove:'+posX );
+		  //$(this).html( $(this).html()+'slideCursorMove:'+posX +"<br>-------------<br>");
+		  if (debug) this.logConsole( 'slideCursorMove:'+posX );
 		},
 		"slideCursorMoveToStep": function(e,dataStep) {
-		  $(this).html( 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step+' - '+dataStep.cursor);
-		  if (debug) console.log( 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step );
+		  $(this).html( $(this).html()+ 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step+' - '+dataStep.cursor+"<br>-------------<br>");
+		  if (debug) this.logConsole( 'slideCursorMoveToStep:'+dataStep.posX + ' - ' + dataStep.step );
 		}
 	});
 
@@ -97,11 +122,21 @@ var	docMachine= {
 				init_function:function(p,e){
 					this.opts.slider.trigger('mousemove',e);
 				},
-			}
-
+			},
 		},
 	};
 
+var	windowMachine= {
+		DefaultState : {
+			resize:	
+			{
+				init_function:function(p,e){
+					this.opts.slider.trigger('resize',e);
+				},
+			},
+
+		},
+	};
 
 /**
  * States to handle the click on buttons
@@ -122,60 +157,73 @@ var aSliderAnimation = {
 					if (!this.opts.mouseWheelFactor)
 					{
 						if (this.opts.steps)
-							this.opts.mouseWheelFactor = this.opts['sliderMaxCursorPosX'] / (this.opts.steps);
+							this.opts.myMouseWheelFactor = this.opts['sliderMaxCursorPosX'] / (this.opts.steps);
 						else 
-							this.opts.mouseWheelFactor = 10;
+							this.opts.myMouseWheelFactor = this.opts.cursor.width()*2;
 					}
 
 				}
 			},
-			mousedown:	
+			resize:
 			{
 				init_function: function(p,e) {
+					//alert('coucou');
+				},
+				how_process_event:{delay:200},
+				propagate_event:['enterState','reinitCursor'],
+			},
+			reinitCursor:
+			{
+				next_state:'moveCursorToFinal',
+			},
+			mousedown:	
+			{
+				init_function: function(p,e,eExt) {
+					this.logConsole('waitToDragCursor:mousedown',true);
+					if (eExt) e=eExt;
 					this.opts.eventPosition = {};
 					this.opts.eventPosition['positionX'] = this.computeCursorPositionXFromDocToSlider(e.pageX);
 					//this.opts['eventPosition']['positionY'] = this.computeCursorPositionYFromDocToSlider(e.pageY);;
-
+					this.logConsole( 'waitToDragCursor:mousedown:pageX:'+e.pageX );
 				},
 				next_state: 'initDragCursor', 
 			},
+
 			mousewheel:
 			{
 				init_function: function(p,e) {
 					var delta = e.deltaY;
-					delta *= this.opts.mouseWheelFactor;
+					delta *= this.opts.myMouseWheelFactor;
 					e.pageX=this.opts.cursor.offset().left+delta;
 					this.trigger('mousedown',e);
 					this.trigger('mousemove',e);
-					if (this.opts.debugAnimation) console.log( 'pageX:'+e.pageX );
-
+					this.logConsole( 'waitToDragCursor:mousewheel:pageX:'+e.pageX );
 				},
 				propagate_event:'mouseWheelUp',
 			},
-/*
-//@todo: swipe implementation
-			swipe:
+
+			swipestart:
 			{
-				init_function: function(p,e, direction, distance, duration, fingerCount, fingerData){
-					var delta = e.deltaY;
-					delta *= this.opts.mouseWheelFactor;
-					e.pageX=this.opts.cursor.offset().left+delta;
-					this.trigger('mousedown',e);
-					this.trigger('mousemove',e);
-					if (this.opts.debugAnimation) console.log( 'pageX:'+e.pageX );
-
-				},
-				propagate_event:'mouseWheelUp',
-			},
-*/
+			  init_function:function(p,e,data){
+				this.logConsole( 'waitToDragCursor:swipestart:start');
+				if (!data || !data.fingerData || !data.fingerData[0].end) return;
+				e={pageX:data.fingerData[0].end.x,pageY:data.fingerData[0].end.y};
+				this.trigger('mousedown',e);
+			  }
+			}
 		},
 		initDragCursor:
 		{
 			enterState:
 			{
 				init_function: function() {
+				},
+			},
+			mousemove:	
+			{
+				init_function: function(p,e,eExt) {
 
-				
+					if (eExt && eExt.pageX) e=eExt;//comes from fsm...
 					this.myUIObject.addClass('dragged');
 					
 					//position the cursor where we have clicked
@@ -185,8 +233,48 @@ var aSliderAnimation = {
 					this.opts.targetPosition  =  100 * this.opts.eventPosition.positionX/this.opts['sliderMaxCursorPosX'];
 					
 					this.opts.alertObject.trigger('slideCursorMoveStart');
+					this.logConsole( 'initDragCursor:mousemove:pageX:'+e.pageX );
+				},
+				propagate_event: true,
+				next_state: 'dragCursor', 
+			},
+			//~clic
+			mouseup:	
+			{
+				init_function: function(p,e,eExt) {
+					if (eExt && eExt.pageX) e=eExt;//comes from fsm...
+					if ( (e.pageX - this.opts.cursor.offset().left) > 0)
+						//cursor on the right
+						e.pageX = this.opts.cursor.offset().left + this.opts.myMouseWheelFactor;
+					else
+						//cursor on the left
+						e.pageX = this.opts.cursor.offset().left - this.opts.myMouseWheelFactor;
+						
+					this.trigger('mousemove',e);
+					this.opts.alertObject.trigger('slideCursorMoveStart');
+					this.logConsole( 'initDragCursor:mouseup:pageX:'+e.pageX );
 				},
 				next_state: 'dragCursor', 
+				propagate_event:'mouseWheelUp',
+			},
+			swipemove:
+			{
+			  init_function:function(p,e,data){
+				if (!data || !data.fingerData || !data.fingerData[0].end) return;
+				e={pageX:data.fingerData[0].end.x,pageY:data.fingerData[0].end.y};
+				this.trigger('mousemove',e);
+				this.logConsole( 'initDragCursor:swipemove:pageX:'+e.pageX );
+			  }
+			},
+			swipecancel:'swipeend',
+			swipeend:
+			{
+			  init_function:function(p,e,data){
+				if (!data || !data.fingerData || !data.fingerData[0].end) return;
+				e={pageX:data.fingerData[0].end.x,pageY:data.fingerData[0].end.y};
+				this.trigger('mouseup',e);
+				this.logConsole( 'initDragCursor:swipeend:pageX:'+e.pageX );
+			  }
 			},
 		},
 		dragCursor: 
@@ -196,27 +284,52 @@ var aSliderAnimation = {
 				init_function: function() {
 					this.myUIObject.removeClass('dragged');
 					this.opts.cursor.trigger('stopDrag');
+					this.logConsole( 'dragCursor:mouseup');
+
 				},
 				next_state: 'moveCursorToFinal', 
 			},
 			mousemove:	
 			{
-				init_function: function(p,e,eDoc) {
-					if (eDoc) e=eDoc;//comes from document...
-					this.opts.nextCursorPosition = this.computeCursorPositionXFromDocToSlider(e.pageX);
+				init_function: function(p,e,eExt) {
+					if (eExt && eExt.pageX) e=eExt;//comes from fsm...
+					if (e.pageX) this.opts.nextCursorPosition = this.computeCursorPositionXFromDocToSlider(e.pageX);
+					else return; //curious that there is no pageX
+					
 					if (!this.opts.sticky) 
 					{
 						this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(this.opts.nextCursorPosition));
 					}
+					this.logConsole( 'dragCursor:mousemove:pageX:'+e.pageX );
+
 				},
-				propagate_event:'sendEvent',
+				propagate_event:'setCursorPosition',
 			},
 			mouseWheelUp:
 			{
 				propagate_event:'mouseup',
 				how_process_event :{delay:20},
 			},
-			sendEvent:
+			swipemove:
+			{
+			  init_function:function(p,e,data){
+				if (!data || !data.fingerData || !data.fingerData[0].end) return;
+				e={pageX:data.fingerData[0].end.x,pageY:data.fingerData[0].end.y};
+				this.trigger('mousemove',e);
+				this.logConsole( 'dragCursor:swipemove:pageX:'+e.pageX );
+			  }
+			},
+			swipecancel:'swipeend',
+			swipeend:
+			{
+			  init_function:function(p,e,data){
+				if (!data || !data.fingerData || !data.fingerData[0].end) return;
+				e={pageX:data.fingerData[0].end.x,pageY:data.fingerData[0].end.y};
+				this.trigger('mouseup',e);
+				this.logConsole( 'dragCursor:swipeend:pageX:'+e.pageX );
+			  }
+			},
+			setCursorPosition:
 			{
 				init_function: function() {
 					var targetPosition;
@@ -300,13 +413,14 @@ var aSliderAnimation = {
 						var offsetX = targetPosition * this.opts['sliderMaxCursorPosX'] / 100;
 						this.opts.cursor.trigger('setLeftX',this.computeCursorPositionXFromSliderToDoc(offsetX));
 						
+						this.opts.alertObject.trigger('slideCursorMoveToStep',{posX:targetPosition/100,step:stepFound,cursor:cursorPosXNormalized});
+						
 					}
 					else
 					{
 						targetPosition = cursorPosXNormalized;
 					}
 					
-					this.opts.alertObject.trigger('slideCursorMoveToStep',{posX:targetPosition/100,step:stepFound,cursor:cursorPosXNormalized});
 					this.opts.alertObject.trigger('slideCursorMove',targetPosition/100);
 					
 					this.opts.alertObject.trigger('slideCursorMoveStop');
@@ -324,14 +438,29 @@ var aSliderAnimation = {
 
 					//to manage when the events are outside the slider
 					$(document).iFSM(docMachine,{slider:this.myUIObject});
-					
+					$(window).iFSM(windowMachine,{slider:this.myUIObject});
+					this.myUIObject.swipe({
+						//Generic swipe handler for all directions
+						swipeStatus:function(event, phase, direction, distance, duration, fingerCount, fingerData) {
+							$(this).trigger('doSwipe',
+								{ phase:phase
+								, direction:direction
+								, distance:distance
+								, duration:duration
+								, fingerCount:fingerCount
+								, fingerData:fingerData}
+							);
+						},
+						//Default is 75px, set to 0 for demo so any distance triggers swipe
+					   threshold:0
+					});
+
 					var sliderOpts=this.opts;
 					
 					this.computeCursorPositionXFromDocToSlider = function (aPosXinDocument)
 					{
 						var posX = aPosXinDocument-sliderOpts.sliderLeft-sliderOpts.cursor.outerWidth()/2;
-						posX = Math.max(Math.min(posX,this.opts.sliderMaxCursorPosX),0);
-						if (this.opts.debugAnimation) this.opts.alertObject.html('posXSlider:'+posX);
+						posX = Math.max(Math.min(posX,sliderOpts.sliderMaxCursorPosX),0);
 						//limit the position of the cursor between 0 and slider width
 						return posX;
 						
@@ -339,17 +468,41 @@ var aSliderAnimation = {
 					this.computeCursorPositionXFromSliderToDoc = function (aPosXinSlider)
 					{
 						var posX = aPosXinSlider;
-						//if (this.opts.debugAnimation) $('#status').html('posX:'+posX);
 						return posX;
 						
+					};
+					
+					this.logConsole = function (aMsg,reset)
+					{
+						if (!reset) reset = false;
+						if (this.opts.debugAnimation)
+						{
+							console.log(aMsg);
+							if (this.opts.debugInfo) 
+							{
+								if (reset)
+									sliderOpts.debugInfo.html("<br>"+aMsg+"<br>");
+								else
+									sliderOpts.debugInfo.html(sliderOpts.debugInfo.html()+"<br>"+aMsg+"<br>");
+							}
+						}
 					};
 
 					
 				},
 				next_state: 'waitToDragCursor'
 			},
-		}				
-}
+			doSwipe:
+			{
+				init_function:function(p,e,data){
+					if (!data || !data.fingerData || !data.fingerData[0].end) return;
+					this.trigger('swipe'+data.phase,data);//trigger event swipestart, swipemove, swipeend, swipecancel
+					this.logConsole( 'DefaultState('+this.currentState+'):swipe:data.phase:'+data.phase );
+				}
+
+			}
+		}
+};
 /**
  * States to handle the click on buttons
  */
@@ -409,7 +562,8 @@ var aCursorAnimation = {
 <body style="margin:100px;">
 	<h1>A (not so) simple slide scale driven with iFSM </h1>
 	<p>This example shows an horizontal slider made up of a cursor and a background where the cursor moves.<p>
-	<p>	Steps may be defined where the cursor should be set when the mouse button is released. </p>
+	<p>Steps may be defined where the cursor should be set when the mouse button is released. </p>
+	<p>Steps may be "sticky" meaning that the cursor will move step by step when the mouse moves...</p>
 	<p>Events that are sent to any listening objects are :</p>
 	<ul>
 		<li>"slideCursorMoveStart": cursor starts to move (mousedown)</li>
@@ -417,16 +571,31 @@ var aCursorAnimation = {
 		<li>"slideCursorMove": cursor moves along the slider</li>
 		<li>"slideCursorMoveToStep": cursor is on a step of the slider</li>
 	</ul>
-	<h2>Slide with 5 steps (0 to 4) with no "sticky steps"</h2>
+	<p>
+		the cursor reacts to:
+		<ul>
+			<li>the click of the mouse on the left or the right of the cursor</li>
+			<li>the mouse move on the cursor or the slider</li>
+			<li>the 'swipe' of your finger on mobile</li>
+			<li>the 'wheel' of the mouse</li>
+		</ul>
+	</p>
+	
+	<h2>Slide free to move...</h2>
 	<div id="cursorContainer">
 		<div id="cursor"></div>
 	</div>
 	<div id="status"></div>
-	<h2>Slide with 50 steps with "sticky steps"</h2>
+	<h2>Slide with 10 steps (0 to 9) with no "sticky steps" when moving the mouse</h2>
 	<div id="cursorContainer2">
 		<div id="cursor2"></div>
 	</div>
 	<div id="status2"></div>
+	<h2>Slide with 50 steps with "sticky steps"</h2>
+	<div id="cursorContainer3">
+		<div id="cursor3"></div>
+	</div>
+	<div id="status3"></div>
 <br>
 	<br>
 	<br>
