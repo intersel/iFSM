@@ -28,13 +28,14 @@
  * - 2017/03/08 - E.Podvin - 1.7.0 - myFSM.eventCalled available for script + 'propagate_event_on_localmachine' directive + catchEvent
  * - 2017/03/13 - E.Podvin - 1.7.1 - add myFSM.lastState
  * - 2017/03/20 - E.Podvin - 1.7.2 - fixes to be compliant with jquery 3.2.0
+ * - 2017/10/14 - E.Podvin - 1.7.3 - small fix in case event is triggered with multiple parameters
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2017
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.7.2
+ * @version : 1.7.3
  * -----------------------------------------------------------------------------------------
  */
 
@@ -42,8 +43,8 @@
  * How to use it :
  * ===============
  * <code>
- * <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
- * <script type="text/javascript" src="jquery.dotimeout.js"></script>
+ * <script type="text/javascript" src="jquery-3.2.0.min.js"></script>
+ * <script type="text/javascript" src="jquery.dorequesttimeout.js"></script>
  * <script type="text/javascript" src="jquery.attrchange.js"></script>
  * <script type="text/javascript" src="ifsm.js"></script>
  * //Example of use :
@@ -641,6 +642,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	//we consider the sub FSMs of a machine as the same machine... 
 	//except if the event was triggered as addressing only the "localmachine"
 	if (data.length > 1
+			&& data[(data.length - 1)] != null
 			&& data[data.length-1].targetFSM 
 			&& (data[data.length-1].targetFSM != this)
 			&& (
@@ -654,7 +656,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		return; //not for this machine...
 	}
 	
-	if (data.length > 1 && data[data.length-1].localMachine)
+	if (data.length > 1 && data[(data.length - 1)] != null && data[data.length-1].localMachine)
 		this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> process event locally',2);
 	
 
