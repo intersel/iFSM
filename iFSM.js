@@ -29,13 +29,14 @@
  * - 2017/03/13 - E.Podvin - 1.7.1 - add myFSM.lastState
  * - 2017/03/20 - E.Podvin - 1.7.2 - fixes to be compliant with jquery 3.2.0
  * - 2017/10/14 - E.Podvin - 1.7.3 - small fix in case event is triggered with multiple parameters
+ * - 2017/10/17 - E.POdvin - 1.7.4 - change log level - by default, displays the state&event processing step in the console
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2017
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.7.3
+ * @version : 1.7.4
  * -----------------------------------------------------------------------------------------
  */
 
@@ -335,7 +336,7 @@ var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, opt
 {
 	var $defaults = {
 			debug				: false,
-			LogLevel			: 2,
+			LogLevel			: 1,
 			AlertError			: false,
 			maxPushEvent		: 100,
 			startEvent			: 'start',
@@ -921,6 +922,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	}
 
 	//ok we will really process this event...
+	this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> currently processing',0);
 	var lastprocessEventStatus = this.processEventStatus;
 	this.processEventStatus = 'processing';
 	
@@ -1304,15 +1306,17 @@ fsm_manager.prototype.subMachinesRespectTargets = function (anEvent) {
  * 			- 1 : it's an error
  * 			- 2 : it's a warning
  * 			- 3 : it's a notice
- * 
+ * @param add_offset (default:0) :
+ * 		1 : add blank offset on the left of the message
+ * 		-1 : remove left blank offset on the left of the message
  */
 var log_offsetstring='';
 fsm_manager.prototype._log = function (message) {
 	/*global console:true */
 	
 	if (!this.opts.debug) return;
-	if ( (arguments.length > 1) && (arguments[1] > this.opts.LogLevel) ) return; //on ne continue que si le nv de message est <= LogLevel
-	if ( (arguments.length <= 1) && (3 > this.opts.LogLevel) ) return;// pas de niveau de msg défini => niveau notice (3)
+	if ( (arguments.length > 1) && (arguments[1] > this.opts.LogLevel) ) return; //we continue if error_level  <= LogLevel
+	if ( (arguments.length <= 1) && (3 > this.opts.LogLevel) ) return;// no defined level => notice level used (3)
 	if ( this.opts.logFSM && this.opts.logFSM.indexOf(this.FSMName)<0) return;
 	if ( (arguments.length > 2) && (arguments[2] == -1))
 		log_offsetstring = log_offsetstring.replace('  ',''); 
