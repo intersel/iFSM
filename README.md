@@ -275,8 +275,8 @@ var aStateDefinition =
   	- by default, any event delayed will be cancelled if the state changes
   	- if preventcancel is defined, the delayed event won't be cancelled
   - **process_event_if**:
-  	- Definition of condition test that will be evaluated, and if result is true then event will be processed and init_function will be called...
-  	- if not, see if a propagate_event_on_refused to trigger it... and do nothing more... and so, does not change state if any is defined.
+  	- Definition of condition test that will be evaluated, and if result is true then event will be processed: init_function will be called, state will change, propagate_event will be propagated, ...
+  	- if not, see if a propagate_event_on_refused to trigger it... and do nothing more.. it does not change state if any is defined.
   - **propagate_event_on_refused**: an event name to trigger if process_event_if is false
   - **init_function(parameters,event,data)**: function name or anonymous function, called before the state change when processing the event
     - function should return a boolean: true: ok works fine; false: error
