@@ -7,7 +7,7 @@
  * Abstract : a simple finite state machine for javascript and jQuery
  * Remark :
  * -----------------------------------------------------------------------------------------
- * @copyright : Intersel 2013
+ * @copyright : Intersel 2013-2018
  * @contributors : 
  *    - Emmanuel Podvin - jquery.ifsm@intersel.org
  * -----------------------------------------------------------------------------------------
