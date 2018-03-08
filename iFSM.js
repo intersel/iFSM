@@ -30,13 +30,14 @@
  * - 2017/03/20 - E.Podvin - 1.7.2 - fixes to be compliant with jquery 3.2.0
  * - 2017/10/14 - E.Podvin - 1.7.3 - small fix in case event is triggered with multiple parameters
  * - 2017/10/17 - E.POdvin - 1.7.4 - change log level - by default, displays the state&event processing step in the console
+ * - 2018/03/08 - E.POdvin - 1.7.5 - transfer data transmitted by trigger to enterEvent and exitEvent
  * -----------------------------------------------------------------------------------------
  *
- * @copyright Intersel 2013-2017
+ * @copyright Intersel 2013-2018
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.7.4
+ * @version : 1.7.5
  * -----------------------------------------------------------------------------------------
  */
 
@@ -633,9 +634,9 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	this.currentEvent	= currentEvent;
 	var currentStateEvent = this.currentState;
 	var doForceProcess = (forceProcess==undefined?false:true);
-	var anEv = new Array();//dummy event to be used in 'processEvent' function
+	var anEv = new Array();//dummy event to be used in 'processEvent' function (see processing of enterEvent and exitEvent)
 	anEv[0] = fsm_manager_create_event(this.myUIObject,'',null); // to use it, just change anEv[0].type='an_event_name';
-
+	anEv[1] = data[1]; anEv[2]= data[2];
 
 	this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> START Processing Event',2,1);
 
