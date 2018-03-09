@@ -274,6 +274,7 @@ var aStateDefinition =
   	- if delay is defined, the processing of the event is delayed and activated at 'delay'
   	- by default, any event delayed will be cancelled if the state changes
   	- if preventcancel is defined, the delayed event won't be cancelled
+	- **Remark**: this configuration value has no effect on generic events as 'enterState', 'exitState'...
   - **process_event_if**:
   	- Definition of condition test that will be evaluated, and if result is true then event will be processed: init_function will be called, state will change, propagate_event will be propagated, ...
   	- if not, see if a propagate_event_on_refused to trigger it... and do nothing more.. it does not change state if any is defined.
