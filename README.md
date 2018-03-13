@@ -20,7 +20,7 @@ The FSM has Push/Pop state capabilities and offers different useful features as:
   * delayed and asynchronous event processing
   * capability to create or change dynamically states and events on the machines
   * ...
-  
+
 
 Official website
 ================
@@ -45,7 +45,7 @@ This example shows a really simple example implementing the following state diag
 
     <script type="text/javascript">
     	var aStateDefinition = {
-		FirstState: 
+		FirstState:
 		{
 		     enterState:
 		    {
@@ -55,8 +55,8 @@ This example shows a really simple example implementing the following state diag
 		    {
 		        next_state: 'NextState'
 		    }
-		}, 
-		NextState: 
+		},
+		NextState:
 		{
 		    enterState:   
 		    {
@@ -95,14 +95,14 @@ See them live: http://www.intersel.fr/ifsm-jquery-plugin-demos.html#demolist
   - [Example_2.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_2.html) - simple example of sub-machine delegation. It shows how to set conditions on state change according to submachine states.
   - [Example_DropdownMenu.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_DropdownMenu.html) - a dropdown menu example.
   - [Example_PushPopState.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_PushPopState.html) - simple example of using the "Push/Pop" capabilities on states.
-  - [Example_AnalyseString.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_AnalyseString.html)  - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based. 
+  - [Example_AnalyseString.html](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_AnalyseString.html)  - show analysis on string input analysis with palindrome, showing that iFSM is more than a simple FSM using a Push/Pop states Stack-Based.
   - [Example_Rulers](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Rulers.html) - showing how to use iFSM to validate input data according to rules, with an example of the management of the keyboard input filtering only number input
-  - [Example_Request](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Request.html) - simple example of a 'request' process with a diagram showing the state changes according to the triggered events 
+  - [Example_Request](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_Request.html) - simple example of a 'request' process with a diagram showing the state changes according to the triggered events
   - [Example_HSM_calculator](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_HSM_calculator.html) - a simple working calculator managed with states and events...
   - The [Mastermind game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Mastermind.html)...
   - A [Bouncing ball](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall.html) using canvas (with jcanvas) showing a game loop example and [a little game](http://www.intersel.fr/assets/gitdemos/iFSM/Examples/Example_BouncingBall_reacting_to_mouse.html) with requestframeanimation support for the game loop...
 
-See some nice HTML5 animations done with specific machines made with [iFSMAnimation](https://github.com/intersel/iFSMAnimation): 
+See some nice HTML5 animations done with specific machines made with [iFSMAnimation](https://github.com/intersel/iFSMAnimation):
   - http://intersel.net/demos/intersel/voeux_demo/
 
 .iFSM(aStateDefinition, [options])
@@ -115,7 +115,7 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
     * initState: name of the state to set at start of the machine
     * debug (true|false): show debug message on the console (default true)
     * LogLevel
-      * '1' only errors displayed 
+      * '1' only errors displayed
       * '2' - errors and warnings (default)
       * '3' - all  
     * logFSM:  list of FSM names to follow on debug (ex: "FSM_1 FSM_4"). If void, then displays all machine messages
@@ -123,7 +123,7 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
 
   Call Examples
   =============
-  
+
 ```html
   <button id="myButton">Button</button>
   <script>
@@ -147,13 +147,13 @@ Create a Finite State Machine from the "aStateDefinition" object to bind with th
 
 .getFSM([aStateDefinition])
 ===========================
-returns the array of FSMs bound to the jQuery object.
+returns the array of FSMs bound to the jQuery object or the FSM if "aStateDefinition" is set.
 
   * aStateDefinition: object, a state definition used to define a FSM. it Allows to find a specific FSM if several are defined on the same jQuery object. So, when defined, it returns the FSM itself (and not an array).
 
   Call Examples
   =============
-  
+
 ```html
   <script>
   myFSMs = $('#myButton').getFSM(); //get the linked FSM objects in an array
@@ -167,17 +167,17 @@ The states are defined with a javascript object with the following organization:
 
 ```javascript
 var aStateDefinition =
-{ 
+{
  <aStateName1>:
  {
- 	delegate_machines	: 
+ 	delegate_machines	:
  	{
- 		<aSubMachine name 1>: 
+ 		<aSubMachine name 1>:
  		{
  			submachine: <a State definition>,
  			no_reinitialisation: <boolean, default:false>
  		},			
- 		<aSubMachine name i>: 
+ 		<aSubMachine name i>:
  		{
  			submachine: <a State definition>
  		},			
@@ -191,12 +191,12 @@ var aStateDefinition =
  		next_state: <aStateName>,
  		pushpop_state: <'PushState'||'PopState'>,
  		next_state_when: <a statement that returns boolean>,
- 		next_state_on_target: 
+ 		next_state_on_target:
  		{
  			condition 			: <'||'||'&&'>
- 			submachines			: 
+ 			submachines			:
  			{
- 				<submachineName1> 	: 
+ 				<submachineName1> 	:
  				{
  					condition	: <''(default)||'not'>
 					target_list: [<targetState1>,...,<targetStaten>],
@@ -283,36 +283,36 @@ var aStateDefinition =
     - function should return a boolean: true: ok works fine; false: error
     - function has the following input:
   	  * parameters: the properties_init_function
-  	  * event: the event 
+  	  * event: the event
   	  * data: the data sent with the event
   - **properties_init_function**: optional parameters to send to init_function
   - **next_state**: next state to go once init_function done and change conditions are fullfiled
-  - **pushpop_state**: <br> 
+  - **pushpop_state**: <br>
 	If 'PushState', then current state is pushed in the StateStack then next_state takes place. If set in an event defined in 'DefaultState', the system will get the actual state.
-	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change. 
+	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state is so overwritten... If the stack is void, there is no state change.
   - **next_state_when**: <br>
 	Definition of condition test that will be evaluated, and if result is true then state will change
-	Following variables may be used for the test
+	Following variables may be used for the test:
 	- this	: the FSM object
-	- this.EventIteration: variable that gives the iteration of the number of calls of the current event. 
+	- this.EventIteration: variable that gives the iteration of the number of calls of the current event.
 	EventIteration is reset when the state changes
   - **next_state_on_target**:<br>
 	Definition of condition test based on the current states of the defined submachines
 	The test consist to:
-	- get the current states of each defined sub-machines, 
-	- match the current state to the targeted state array, resulting to true if found 
+	- get the current states of each defined sub-machines,
+	- match the current state to the targeted state array, resulting to true if found
 	- apply the defined operator between the results
 	- if the result is positive, then the next state processing is done
   - **out_function(properties_out_function,event,data)**: function name or anonymous function, called just before ending the processing of an event
     - function has the following input:
   	  * parameters: the properties_out_function
-  	  * event: the event 
+  	  * event: the event
   	  * data: the data sent with the event
   - **properties_out_function**: optional parameters to send to out_function
   - **next_state_if_error** (default: does not change state): state set if init_function return false
-  - **pushpop_state_if_error**: 
+  - **pushpop_state_if_error**:
 	If 'PushState', then current state is pushed in the StateStack then next_state_if_error takes place.
-	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state_if_error is so overwritten... If the stack is void, there is no state change. 
+	If 'PopState', then the next state will be the one on top of the StateStack which is poped. next_state_if_error is so overwritten... If the stack is void, there is no state change.
   - **propagate_event**: if defined to true, the current event is propagated to the next state
   				if it's the name of an event, the event is triggered
 				if it's an array of events, events are triggered in sequence
@@ -321,7 +321,7 @@ var aStateDefinition =
   - **UI_event_bubble**: for graphic events use, if defined and true, the current event will bubble. By default, no UI event bubbling...
   - **process_on_UItarget**: if defined and true, the current event will be processed only if the event was directly targeting the UI jQuery object linked to the machine
 
-  
+
 The start of a machine or a sub-machine
 =======================================
 
@@ -329,7 +329,7 @@ When the machine starts, the starting state is 'DefaultState'.
 
 A 'start' event is always triggered when the FSM is started.
 
-The 'DefaultState' state may be used to define the default behaviours of some events... 
+The 'DefaultState' state may be used to define the default behaviours of some events...
 
 There is no 'enterState' event triggered for this default state. This kind of event may be managed when 'start' event is received in order to initialize the machine.
 
@@ -343,8 +343,8 @@ When a event is received by the machine, it is first searched in the current sta
 
 When an event is not found, then it is dropped and nothing is done...
 
-It is possible to trigger any event to a machine with the jquery trigger function. 
-Examples: 
+It is possible to trigger any event to a machine with the jquery trigger function.
+Examples:
 ```
   $('#myButton1').trigger('aEventName');
   $('#myButton1').trigger('aEventName',data);
@@ -356,7 +356,7 @@ In a state/event function, you can trigger event to the current machine:
    this.trigger('aEventName')
 ```
 
-By default, when a machine receives a new event and is currently processing one, it will push it in its next event list to be processed... and gives back the hand... 
+By default, when a machine receives a new event and is currently processing one, it will push it in its next event list to be processed... and gives back the hand...
 
 This way, any function that triggers an event will have immediatly the hand back without changing the processing context. It prevents any uncontrolled effects that could arouse with the normal trigger mecanisms that process the (sub)events immediatly and may change/disturb the context of event processing.
 
@@ -367,7 +367,7 @@ Or on the contrary, to have the event processed after a delay, you can use the "
 Delayed Events
 ==============
 
-By default, any delayed event will be cancelled if the state of the machine change, as it is considered that the event has its context changed... 
+By default, any delayed event will be cancelled if the state of the machine change, as it is considered that the event has its context changed...
 
 It is possible to keep it even though the state changed with the 'preventcancel' option but beware to side effects.
 
@@ -384,7 +384,7 @@ SubMachine
 	- once the event is processed by the submachines, it is bubbled to the upper machines
 	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
 	- it is possible to propagate event only to the local submachine with the directive 'propagate_event_on_localmachine' to true
-	- a submachine works as the main one: 
+	- a submachine works as the main one:
 		- if no_reinitialisation == false (default), it is initialized each time we enter the main state
 		- a start event is triggered to it (if initialized)
 		- once initialized, the submachine is ready to listen to the triggered events
@@ -401,7 +401,7 @@ The public available variables
  - myFSM.opts - the defined options
  - myFSM.rootMachine: the root machine
  - myFSM.parentMachine: the parent machine if we're in a sub machine (null if none)
- 
+
 Within the call of FSM function, you can refer to the FSM by 'this':
  - this.currentState
  - this.lastState
@@ -409,28 +409,28 @@ Within the call of FSM function, you can refer to the FSM by 'this':
  - this._stateDefinition
  - this.opts
  - this.EventIteration: the current event iteration since we entered the state
- 
+
 
 LIBRARY DEPENDENCIES
 ====================
 
 To work properly, you need to include the following javascript library:
-* jQuery (>= 1.10) `<script type="text/javascript" src="extlib/jquery-3.2.0.min.js"></script>`
-* doTimeout by ["Cowboy" Ben Alman](http://benalman.com/projects/jquery-dotimeout-plugin/)
-	* this library brings some very usefull feature on the usual javascript setTimeout function like Debouncing, Delays & Polling Loops, Hover Intent...
-	* `<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>`
-* attrchange by Selvakumar Arumugam](http://meetselva.github.io/attrchange/) 
-	* a simple jQuery function to bind a listener function to any HTML element on attribute change
-	* `<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>`
+- jQuery (>= 1.10) `<script type="text/javascript" src="extlib/jquery-3.2.0.min.js"></script>`
+- doTimeout by ["Cowboy" Ben Alman](http://benalman.com/projects/jquery-dotimeout-plugin/)
+	- this library brings some very usefull feature on the usual javascript setTimeout function like Debouncing, Delays & Polling Loops, Hover Intent...
+	- `<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>`
+- attrchange by Selvakumar Arumugam](http://meetselva.github.io/attrchange/)
+	- a simple jQuery function to bind a listener function to any HTML element on attribute change
+	- `<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>`
 
 FAQ
 ===
 
-If you have questions or unsolved problems, you can have a look on the our [FAQs](https://github.com/intersel/iFSM/wiki) 
+If you have questions or unsolved problems, you can have a look on the our [FAQs](https://github.com/intersel/iFSM/wiki)
 or leave a message on the [Issue board](https://github.com/intersel/iFSM/issues).
 
 
 Contact
 =======
-If you have any ideas, feedback, requests or bug reports, you can reach me at github@intersel.org, 
+If you have any ideas, feedback, requests or bug reports, you can reach me at github@intersel.org,
 or via my website: http://www.intersel.fr

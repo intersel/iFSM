@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../extlib/jquery.dorequesttimeout.js"></script>
     <script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
     <script type="text/javascript" src="../extlib/jcanvas.min.js"></script>
-    <script type="text/javascript" src="../iFSM.compressed.js"></script>
+    <script type="text/javascript" src="../iFSM.js"></script>
 	<style type="text/css">
 	  html {
 	    font-family: Helvetica, Arial, sans-serif;
@@ -33,14 +33,14 @@
     var aGameObject = {
     	WaitProcess:
 		{
-    		doProcess: 
+    		doProcess:
     			{
     				next_state:'Processing',
     			},
     	},
     	Processing:
 		{
-    		enterState: 
+    		enterState:
 			{
 				init_function:function(){
 					if (this.opts.process) this.opts.process(this);
@@ -60,11 +60,11 @@
 		},
 		Drawing:
 		{
-    		enterState: 
+    		enterState:
 			{
 				init_function:function(){
 					if (this.opts.draw) this.opts.draw(this);
-					if (this.opts.alertSenderData.aEvent) 
+					if (this.opts.alertSenderData.aEvent)
 						this.opts.alertSenderData.aFSM.trigger(this.opts.alertSenderData.aEvent);
 					},
 				next_state:'WaitProcess',
@@ -88,10 +88,10 @@
             		$('#status').html('object over: '+layer.eventX+'/'+layer.eventY);
             	}
             },
-            	
+
         }
     };
-    
+
     var aGameRound = {
         	WaitStart:
     		{
@@ -105,7 +105,7 @@
 	   					this.trigger('displayGame');
     				}
     			},
-   				StartStop: 
+   				StartStop:
        			{
        				next_state:'PlayGame',
        				init_function:function(){
@@ -127,7 +127,7 @@
         	},
         	PlayGame:
     		{
-        		enterState: 
+        		enterState:
     			{
     				init_function:function(){
     					this.trigger('displayGame');
@@ -175,7 +175,7 @@
                 		this.trigger('restartDisplayFPS');
                 	}
                 },
-        		displayGame: 
+        		displayGame:
     			{
     				init_function:function(){
     					//this.myUIObject.clearCanvas();
@@ -217,29 +217,29 @@
     		{
     			enterState:
     			{
-    				init_function: 
+    				init_function:
     	            	function(parameters, event, data)
     	            	{
     						this.myUIObject.show();
     	            	}
-    			}	
+    			}
     		},
     		Hidden:
     		{
     			enterState:
     			{
-    				init_function: 
+    				init_function:
     		        	function(parameters, event, data)
     		        	{
     						this.myUIObject.hide();
     		        	}
-    			},	
+    			},
     		},
     		DefaultState:
     		{
     			click:
     			{
-    				init_function: 
+    				init_function:
     	            	function(parameters, event, data)
     	            	{
     						this.opts.onClick.toWho.trigger(this.opts.onClick.sendWhat);
@@ -256,13 +256,13 @@
     			start:
     			{
     				process_event_if: 'this.opts.startState != undefined',
-    				init_function: 
+    				init_function:
     	            	function(parameters, event, data)
     	            	{
     						this.currentState = this.opts.startState;
     	            	},
     	            propagate_event_on_refused:'defaultState',
-    			
+
     			},
     			defaultState:
     			{
@@ -271,7 +271,7 @@
     		},
     }
     $(document).ready(function() {
-    	
+
         aBackGroundGame = $('#aBackground').iFSM(aGameObject,{
 										canvas:$('#canvas'),
         								color: '#FAF7F8',
@@ -287,20 +287,20 @@
         									  fromCenter: false,
         									});},
         });
-        
+
         function doProcessBall(aFSM){
 			if (aFSM.opts.x + aFSM.opts.dx > aFSM.opts.widthScreen || aFSM.opts.x + aFSM.opts.dx < 0)
 				aFSM.opts.dx = -aFSM.opts.dx;
 				if (aFSM.opts.y + aFSM.opts.dy > aFSM.opts.heightScreen || aFSM.opts.y + aFSM.opts.dy < 0)
 					aFSM.opts.dy = -aFSM.opts.dy;
-				
+
 				aFSM.opts.x += aFSM.opts.dx;
 				aFSM.opts.y += aFSM.opts.dy;
 		};
 		function doDrawBall(aFSM){
 			aFSM.opts.canvas.drawEllipse({
 				  fillStyle: aFSM.opts.color,
-				  x: aFSM.opts.x, 
+				  x: aFSM.opts.x,
 				  y: aFSM.opts.y,
 				  width: aFSM.opts.width,
 				  height: aFSM.opts.height,
@@ -348,9 +348,9 @@
 			process:doProcessBall,
 			draw:doDrawBall,
 		});
-        
+
         var aObjectList=[aBackGroundGame,aBallGame,a2ndBallGame,a3rdBallGame];
-        
+
         aGameFSM = $('#canvas').iFSM(aGameRound,{
 			gameFSMObjects:aObjectList,
         	y:300,
@@ -362,7 +362,7 @@
         	FPSCounter:$('#FPSCounter'),
         	speedOfGame:20,
 		});
-        
+
         $('#StartStop').iFSM(BasicStatesUI,{onClick:{toWho:aGameFSM,sendWhat:'StartStop'}});
     });
 
@@ -374,12 +374,12 @@
  	<section>
 	    <div>
 	        <canvas id="canvas" width="400" height="300">
-	         This text is displayed if your browser 
+	         This text is displayed if your browser
 	         does not support HTML5 Canvas.
 	        </canvas>
 			<button class="onoff" id="StartStop">Start/Stop Game</button>
 			<hr>
-			<div>FrameCounter: <span id='counter'></span></div>	  
+			<div>FrameCounter: <span id='counter'></span></div>
 			<div>FPS: <span id='FPSCounter'></span></div>
 			<div>Status: <span id='status'></span></div>
 			<div id='aBackground'></div>
@@ -387,9 +387,9 @@
 			<div id='aSecondBall'></div>
 			<div id='aThirdBall'></div>
 	    </div>
- 	</section>    
+ 	</section>
 
 <pre>
-</pre>    
+</pre>
 </body>
 </html>

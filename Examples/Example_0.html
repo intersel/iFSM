@@ -23,24 +23,24 @@
 
     <script type="text/javascript" id="iFSMscript">
     var aStateDefinition = {
-        IsDisplayed     : 
+        IsDisplayed     :
         {
             enterState:
             {
                 init_function: function(){this.opts.aDiv.show();}
             },
-            click   :   
+            click   :
             {
                 next_state      : 'IsNotDisplayed'
             }
-        }, 
-        IsNotDisplayed      : 
+        },
+        IsNotDisplayed      :
         {
             enterState:
             {
                 init_function: function(){this.opts.aDiv.hide();}
             },
-            click   :   
+            click   :
             {
                 next_state      : 'IsDisplayed'
             }
