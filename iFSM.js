@@ -339,7 +339,7 @@ var nb_FSM = 0;
 var fsm_manager = window.fsm_manager = function (anObject, aStateDefinition, options)
 {
 	var $defaults = {
-			debug				: false,
+			debug				: true,
 			LogLevel			: 1,
 			AlertError			: false,
 			maxPushEvent		: 100,
@@ -1380,10 +1380,10 @@ fsm_manager.prototype.log_offsetstring='';
 fsm_manager.prototype._log = function (message) {
 	/*global console:true */
 
-
   let error = (arguments[1])? arguments[1] : 3;
 
-	if (!this.opts.debug) return;
+  //show only errors if debug is not set
+  if ( (error >= 2) && (!this.opts.debug) ) return;
 	if ( error > this.opts.LogLevel) return; //we continue if error_level  <= LogLevel
 
   // if logFSM is defined, only log the FSM listed in it
