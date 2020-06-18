@@ -34,6 +34,7 @@
  * - 2018/03/13 - E.Podvin - 1.7.6 - add some controls when starting the state machines: can't start if no id on the object or if still exists
  * - 2019/11/22 - E.Podvin - 1.7.7 - prevent preventCancel event to stack if delayed again (see preventCancelSet)
  *                                   add console.warn (instead of log) for errors message
+ * - 2020/06/18 - E.Podvvin - 1.7.8 - Add alert when next_state does not exist (not defined)
  * -----------------------------------------------------------------------------------------
  *
  * @copyright Intersel 2013-2018
@@ -1030,9 +1031,20 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 		 * we change the current state Here!
     *********************************************
 		 */
-		this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> Go to (see next_state) '+currentEventConfiguration.next_state,3);
-		this.lastState=this.currentState;
-		this.currentState = currentEventConfiguration.next_state;
+		if (this._stateDefinition[currentEventConfiguration.next_state])
+		{
+			this._log('processEvent: '+this.FSMName+':'+currentState+':'+anEvent+'-> Go to (see next_state) '+currentEventConfiguration.next_state,3);
+
+			this.lastState=this.currentState;
+			this.currentState = currentEventConfiguration.next_state;
+		}
+		else
+		{
+			this._log('processEvent: '+this.FSMName+':'+currentEventConfiguration.next_state+'-> DOES NOT EXIST!',1);
+
+			this.lastState=this.currentState;
+
+		}
 
 
     //*********************************************

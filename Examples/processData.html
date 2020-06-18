@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>iFSM in action! Finite state machines are great for
+	stimulation on simulation :-)</title>
+<meta charset="utf-8">
+<script type="text/javascript" src="../extlib/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
+<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
+<script type="text/javascript" src="../iFSM.js"></script>
+<style type="text/css">
+html {
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
+	padding: 0 20px;
+}
+
+button {
+	margin: 0 2px;
+	font-size: 20px;
+	border: 1px solid #333;
+	width: 100px;
+	text-shadow: 0 -1px 0 #333;
+	border-radius: 5px;
+}
+
+button.on {
+	color: #dfd;
+	background: #00aa00;
+	background: -moz-linear-gradient(top, rgba(0, 153, 0, 1) 0%,
+		rgba(0, 119, 0, 1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(0,
+		153, 0, 1)), color-stop(100%, rgba(0, 119, 0, 1)));
+	background: -webkit-linear-gradient(top, rgba(0, 153, 0, 1) 0%,
+		rgba(0, 119, 0, 1) 100%);
+	background: -o-linear-gradient(top, rgba(0, 153, 0, 1) 0%,
+		rgba(0, 119, 0, 1) 100%);
+	background: -ms-linear-gradient(top, rgba(0, 153, 0, 1) 0%,
+		rgba(0, 119, 0, 1) 100%);
+	background: linear-gradient(top, rgba(0, 153, 0, 1) 0%,
+		rgba(0, 119, 0, 1) 100%);
+}
+
+button.off {
+	color: #fdd;
+	background: #CC0000;
+	background: -moz-linear-gradient(top, rgba(204, 0, 0, 1) 0%,
+		rgba(153, 0, 0, 1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(204,
+		0, 0, 1)), color-stop(100%, rgba(153, 0, 0, 1)));
+	background: -webkit-linear-gradient(top, rgba(204, 0, 0, 1) 0%,
+		rgba(153, 0, 0, 1) 100%);
+	background: -o-linear-gradient(top, rgba(204, 0, 0, 1) 0%,
+		rgba(153, 0, 0, 1) 100%);
+	background: -ms-linear-gradient(top, rgba(204, 0, 0, 1) 0%,
+		rgba(153, 0, 0, 1) 100%);
+	background: linear-gradient(top, rgba(204, 0, 0, 1) 0%,
+		rgba(153, 0, 0, 1) 100%);
+}
+
+pre {
+	font-size: 12px;
+	background-color: black;
+	color: green;
+}
+</style>
+<script type="text/javascript" id="iFSMscript">
+//
+	var aDataProcessor = {
+    InitProcessor : {
+			'start' : {
+				init_function : function(p, e, adata) {
+          this.trigger(this.opts.SBStatus);
+				},
+			},
+			'wait2Sell' : {
+				next_state:'wait2Sell'
+			},
+			'wait2Buy' : {
+				next_state:'wait2Buy'
+			},
+    },
+    wait2Buy:
+ 		{
+			enterState: {
+				init_function : function(p, e, adata) {
+          this.opts.Status.html('wait2Buy Status');
+				},
+			},
+			delegate_machines	:
+		 	{
+		 		processData:
+		 		{
+		 			submachine: {
+						initProcessData: {
+							enterState:{
+								init_function : function(p, e, adata) {
+				          this.opts.Status.html('wait2Buy Status / initProcessData');
+								},
+								next_state:'WaitData2Process',
+							},
+						},
+						WaitData2Process : {
+							processData:{
+								init_function : function(p, e, adata) {
+				          this.opts.Status.html('wait2Buy Status / initProcessData /processData');
+								},
+								propagate_event:'displayData',
+							},
+						},
+						DefaultState : {
+							start : {
+								next_state : 'initProcessData',
+							},
+						},
+		 			},
+		 		},
+ 			},
+		},
+    wait2Sell:
+    {
+			enterState: {
+				init_function : function(p, e, adata) {
+          this.opts.Status.html('wait2Sell Status');
+				},
+			},
+			delegate_machines	:
+		 	{
+		 		processData:
+		 		{
+		 			submachine: {},
+		 		},
+		 	},
+    },
+		DefaultState : {
+			start : {
+				next_state : 'InitProcessor',
+				propagate_event: true,
+			},
+			'reset' : {
+				init_function : function() {
+					this.opts.InputRead.val('');
+				},
+			},
+			dataReceived: {
+				init_function : function(p, e, adata) {
+					this.opts.currentReceivedData = adata;
+				},
+				propagate_event: 'processData',
+			},
+			displayData: {
+				init_function : function(p, e, adata) {
+					this.myUIObject.html(this.opts.currentReceivedData);
+				},
+			}
+		}
+	};
+
+	var aStimulator = {
+    InitSimulator : {
+			'start' : {
+				init_function : function(p, e, adata) {
+					this.myUIObject.html('STOP');
+				},
+				next_state:'StartReadInput'
+			},
+			'stopRead' : {
+				init_function : function(p, e, adata) {
+					this.myUIObject.html('START');
+				},
+			},
+    },
+		StartReadInput : {
+			'enterState' : {
+				init_function : function(p, e, adata) {
+				},
+				next_state:'ReadInput'
+			},
+		},
+		ReadInput : {
+			'enterState' : {
+				propagate_event:'startRead',
+			},
+			'restartRead':'startRead',
+			'startRead' : {
+				how_process_event:{delay:1000},
+				propagate_event:'readData',
+			},
+			'readData' : {
+				init_function : function(p, e, adata) {
+					this.opts.currentReadData = this.opts.inputData();
+					this.opts.processor.trigger('dataReceived',this.opts.currentReadData);
+				},
+				propagate_event:'restartRead',
+			},
+			'start':'stopRead',
+			'stopRead' : {
+				next_state:'InitSimulator',
+				propagate_event:'stopRead',
+			}
+		},
+		DefaultState : {
+			start : {
+				next_state : 'InitSimulator',
+			},
+
+		}
+	};
+
+	$(document).ready(function() {
+		aProcessorFSM = $('#result').iFSM(aDataProcessor, {
+			dataStart : 10,
+      SBStatus : 'wait2Buy',
+			Status : $('#Status'),
+      offsetBuy: a => parseFloat(a) * 1.01 + 0.03,
+      offsetSell: a => parseFloat(a) / 1.01 - 0.03,
+			debug:true,
+			LogLevel : 2,
+		});
+		$('#myButton').iFSM(aStimulator, {
+			inputData : function() {
+				// return JSON.parse($('#Data').val());
+				return $('#Data').val();
+			},
+			processor : aProcessorFSM,
+			debug:true,
+			LogLevel : 2,
+		});
+	});
+</script>
+</head>
+<body style="margin: 20px;">
+	<h1>Processing Data</h1>
+	<p>This example shows how to process data with state machines...</p>
+	<p>
+		Data to process: <input type="text" name="Data" id="Data">
+	</p>
+	<p>
+		Status : <span id="Status"></span>
+	</p>
+
+	<button id="myButton" onClick="$(this).trigger('start');">Send data</button>
+	<p id="result"></p>
+	<br>
+	<br>
+	<pre>
+	<script>
+		document.write($('#iFSMscript').html())
+	</script>
+  </pre>
+	<p>
+		provided by <a href="http://www.intersel.fr">Intersel</a>
+	</p>
+
+</body>
+</html>
