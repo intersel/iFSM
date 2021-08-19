@@ -38,7 +38,7 @@ This example shows a really simple example implementing the following state diag
 <html>
 <head>
     <title>iFSM in action! a Finite State Machine for jQuery</title>
-	<script type="text/javascript" src="extlib/jquery-3.2.0.min.js"></script>
+	<script type="text/javascript" src="extlib/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>
 	<script type="text/javascript" src="extlib/jquery.attrchange.js"></script>
 	<script type="text/javascript" src="iFSM.js"></script>
@@ -415,7 +415,7 @@ LIBRARY DEPENDENCIES
 ====================
 
 To work properly, you need to include the following javascript library:
-- jQuery (>= 1.10) `<script type="text/javascript" src="extlib/jquery-3.2.0.min.js"></script>`
+- jQuery (>= 3.2.0) `<script type="text/javascript" src="extlib/jquery-3.6.0.min.js"></script>`
 - doTimeout by ["Cowboy" Ben Alman](http://benalman.com/projects/jquery-dotimeout-plugin/)
 	- this library brings some very usefull feature on the usual javascript setTimeout function like Debouncing, Delays & Polling Loops, Hover Intent...
 	- `<script type="text/javascript" src="extlib/jquery.dotimeout.js"></script>`
