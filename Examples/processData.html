@@ -5,7 +5,7 @@
 	<title>iFSM in action! Finite state machines are great for
 		stimulation on simulation :-)</title>
 	<meta charset="utf-8">
-	<script type="text/javascript" src="../extlib/jquery-3.2.0.min.js"></script>
+	<script type="text/javascript" src="../extlib/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript" src="../extlib/jquery.dotimeout.js"></script>
 	<script type="text/javascript" src="../extlib/jquery.attrchange.js"></script>
 	<script type="text/javascript" src="../iFSM.js"></script>
@@ -89,7 +89,13 @@
 					init_function: function(p, e, adata){
 						//debugger;
 						this.trigger('updateStatus','wait2Buy Status / enterState');
+						this.opts.dataSell = {};
+						this.opts.dataBuy = {
+							'triggerValue': this.opts.dataStart,
+							'followOffset': this.opts.offsetBuy,
+						};
 					},
+					propagate_event:'initializeKPI'
 				},
 				testDoBuy: {
 					next_state: 'DoBuy',
@@ -105,10 +111,12 @@
 			 		},
 				},
 				delegate_machines: {
+					//general submachine - Main sub machine to trigger the other ones
 					processData: {
+						no_reinitialisation: true,
 						submachine: {
 							initProcessData: {
-								enterState: {
+								initializeKPI: {
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','wait2Buy Status / processData / initProcessData / enterState');
@@ -121,7 +129,8 @@
 								processData: {
 									init_function: function(p, e, adata) {
 										//debugger;
-										this.trigger('updateStatus','wait2Buy Status / processData/ WaitData2Process /processData');
+										this.trigger('updateStatus','wait2Buy Status / processData/ WaitData2Process /processData '+adata);
+										$("#currentValue").html(adata);
 									},
 									propagate_event: 'displayData',
 									next_state:'ProcessStockValue'
@@ -134,7 +143,7 @@
 								updateKpi: {
 									init_function: function(p, e, adata) {
 										//debugger;
-										this.trigger('updateStatus','wait2Buy Status / processData /ProcessStockValue /updateKpi');
+										this.trigger('updateStatus','wait2Buy Status / processData /ProcessStockValue /updateKpi '+adata);
 									},
 									propagate_event: 'analyseKpi',
 								},
@@ -142,6 +151,15 @@
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','wait2Buy Status / ProcessStockValue /analyseKpi');
+
+									},
+									propagate_event: ['kpiDone','displayData'],
+								},
+								kpiDone: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Buy Status / ProcessStockValue /kpiDone');
+
 									},
 									propagate_event: ['testDoBuy','displayData'],
 									next_state: 'WaitData2Process',
@@ -156,11 +174,14 @@
 						},
 					},//processData submachine
 					kpiBuyFollow: {
+						no_reinitialisation: true,
 						submachine: {
 							InitKpi : {
-									enterState : {
+									initializeKPI : {
 										init_function: function(p, e, adata) {
+											//debugger;
 											this.trigger('updateStatus','kpiBuyFollow Status / InitKpi /enterState');
+											this.opts=$.extend( this.opts, this.parentMachine.opts);
 											this.opts.kpiBuyFollow=false;
 										},
 										next_state : 'WaitData',
@@ -171,24 +192,37 @@
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','kpiBuyFollow Status / WaitData /updateKpi');
+										let offset = this.opts.dataBuy.followOffset(adata);
+										if (offset < this.opts.dataBuy.triggerValue)
+											this.opts.dataBuy.triggerValue = offset;
 									},
+									propagate_event:'displayTriggerValue',
 								},
 								analyseKpi: {
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','kpiBuyFollow Status / WaitData /analyseKpi');
-										this.opts.kpiBuyFollow = false;
+										this.opts.kpiBuyFollow = this.opts.dataBuy.triggerValue <= adata;
 									},
 									next_state_when:'this.opts.kpiBuyFollow',
 									next_state : 'doBuy',
 								},
 							},
-							doBuy : {
+							doBuy : { // end point of this kpi: DO BUY!
 								enterState : {
 									init_function: function(p, e, adata) {
 										this.trigger('updateStatus','kpiBuyFollow Status / doBuy /enterState');
+										$("#buyValue").html(adata);
 									},
 								},
+								initializeKPI : {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','kpiBuyFollow Status / doBuy /initializeKPI');
+									},
+									propagate_event: true,
+									next_state : 'InitKpi',
+								}
 							},
 							DefaultState: {
 								start: {
@@ -203,21 +237,203 @@
 				enterState: {
 					init_function: function(p, e, adata){
 						//debugger;
-						this.trigger('updateStatus','DoBuy Status');
+						this.trigger('updateStatus','DoBuy enterState');
+						$("#myButtonToBuy").show();
 					},
-					next_state:'wait2Buy'
+				},
+				buyDone: {
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','buyDone enterState');
+						$("#myButtonToBuy").hide();
+					},
+					next_state:'BuyDone'
+				},
+			},
+			BuyDone: {
+				enterState: {
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','BuyDone enterState '+adata);
+						this.opts.dataStart=this.opts.currentReceivedData;
+					},
+					next_state:'wait2Sell'
 				},
 			},
 			wait2Sell: {
 				enterState: {
-					init_function: function(p, e, adata) {
-						this.opts.Status.html('wait2Sell Status');
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','wait2Sell Status / enterState');
+						this.opts.dataBuy = {};
+						this.opts.dataSell = {
+							'triggerValue': this.opts.dataStart,
+							'followOffset': this.opts.offsetSell,
+						};
 					},
+					propagate_event:'initializeKPI'
+				},
+				testDoSell: {
+					next_state: 'DoSell',
+					next_state_on_target: {
+			 			condition 			: '&&',
+			 			submachines			:
+			 			{
+			 				kpiSellFollow 	:
+			 				{
+								target_list: ['doSell'],
+			 				}
+				 		}
+			 		},
 				},
 				delegate_machines: {
+					//general submachine - Main sub machine to trigger the other ones
 					processData: {
-						submachine: {},
+						no_reinitialisation: true,
+						submachine: {
+							initProcessData: {
+								initializeKPI: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Sell Status / processData / initProcessData / enterState');
+									},
+									next_state: 'WaitData2Process',
+									propagate_event: ['initKpi'],
+								},
+							},
+							WaitData2Process: {
+								processData: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Sell Status / processData/ WaitData2Process /processData '+adata);
+										$("#currentValue").html(adata);
+									},
+									propagate_event: 'displayData',
+									next_state:'ProcessStockValue'
+								},
+							},
+							ProcessStockValue: {
+								enterState: {
+									propagate_event:'updateKpi',
+								},
+								updateKpi: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Sell Status / processData /ProcessStockValue /updateKpi '+adata);
+									},
+									propagate_event: 'analyseKpi',
+								},
+								analyseKpi: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Sell Status / ProcessStockValue /analyseKpi');
+
+									},
+									propagate_event: ['kpiDone','displayData'],
+								},
+								kpiDone: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','wait2Sell Status / ProcessStockValue /kpiDone');
+
+									},
+									propagate_event: ['testDoSell','displayData'],
+									next_state: 'WaitData2Process',
+								},
+
+							},
+							DefaultState: {
+								start: {
+									next_state: 'initProcessData',
+								},
+							},
+						},
+					},//processData submachine
+					kpiSellFollow: {
+						no_reinitialisation: true,
+						submachine: {
+							InitKpi : {
+									initializeKPI : {
+										init_function: function(p, e, adata) {
+											//debugger;
+											this.trigger('updateStatus','kpiSellFollow Status / InitKpi /enterState');
+											this.opts=$.extend( this.opts, this.parentMachine.opts);
+											this.opts.kpiSellFollow=false;
+										},
+										next_state : 'WaitData',
+									}
+							},
+							WaitData : {
+								updateKpi: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','kpiSellFollow Status / WaitData /updateKpi');
+										let offset = this.opts.dataSell.followOffset(adata);
+										if (offset > this.opts.dataSell.triggerValue)
+											this.opts.dataSell.triggerValue = offset;
+									},
+									propagate_event:'displayTriggerValue',
+								},
+								analyseKpi: {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','kpiSellFollow Status / WaitData /analyseKpi');
+										this.opts.kpiSellFollow = this.opts.dataSell.triggerValue >= adata;
+									},
+									next_state_when:'this.opts.kpiSellFollow',
+									next_state : 'doSell',
+								},
+							},
+							doSell : { // end point of this kpi: DO SELL!
+								enterState : {
+									init_function: function(p, e, adata) {
+										this.trigger('updateStatus','kpiSellFollow Status / doSell /enterState');
+										$("#sellValue").html(adata);
+									},
+								},
+								initializeKPI : {
+									init_function: function(p, e, adata) {
+										//debugger;
+										this.trigger('updateStatus','kpiSellFollow Status / doSell /initializeKPI');
+									},
+									propagate_event: true,
+									next_state : 'InitKpi',
+								}
+							},
+							DefaultState: {
+								start: {
+									next_state: 'InitKpi',
+								},
+							},
+						},
 					},
+				},//delegate_machines
+			},
+			DoSell: {
+				enterState: {
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','DoSell enterState');
+						$("#myButtonToSell").show();
+					},
+				},
+				sellDone: {
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','DoSell sellDone');
+						$("#myButtonToSell").hide();
+					},
+					next_state:'SellDone'
+				},
+			},
+			SellDone: {
+				enterState: {
+					init_function: function(p, e, adata){
+						//debugger;
+						this.trigger('updateStatus','SellDone enterState '+adata);
+						this.opts.dataStart=this.opts.currentReceivedData;
+					},
+					next_state:'wait2Buy'
 				},
 			},
 			DefaultState: {
@@ -239,6 +455,11 @@
 				displayData: {
 					init_function: function(p, e, adata) {
 						this.myUIObject.html(this.opts.currentReceivedData);
+					},
+				},
+				displayTriggerValue: {
+					init_function: function(p, e, adata) {
+						this.opts.triggerValue.html(this.opts.dataBuy.triggerValue+ ' / '+ this.opts.dataSell.triggerValue);
 					},
 				},
 				updateStatus: {
@@ -308,8 +529,9 @@
 				dataStart: 10,
 				SBStatus: 'wait2Buy',
 				Status: $('#Status'),
-				offsetBuy: a => parseFloat(a) * 1.01 + 0.03,
-				offsetSell: a => parseFloat(a) / 1.01 - 0.03,
+				triggerValue: $('#triggerValue'),
+				offsetBuy: a => parseFloat(a) * 1.03 + 0.03,
+				offsetSell: a => parseFloat(a) / 1.03 - 0.03,
 				debug: true,
 				LogLevel: 2,
 			});
@@ -367,6 +589,11 @@
 	</p>
 
 	<button id="myButton" onClick="$(this).trigger('start');">Send data</button>
+	<button id="myButtonToBuy" style="display:none;" onClick="aProcessorFSM.trigger('buyDone');">BUY DONE</button>
+	<button id="myButtonToSell" style="display:none;" onClick="aProcessorFSM.trigger('sellDone');">SELL DONE</button>
+	<p id="">current Value: <span id="currentValue"></span></p>
+	<p id="">current trigger at: <span id="triggerValue"></span></p>
+	<p id="">Buy at: <span id="buyValue"></span> / Sell at: <span id="sellValue"></span></p>
 	<p id="result"></p>
 	<p>
 		Status : <span id="Status"></span>
