@@ -75,6 +75,8 @@
 				'start': {
 					init_function: function(p, e, adata) {
 						this.trigger(this.opts.SBStatus);
+						this.opts.totalGainValue=0;
+						this.opts.nbTrades=0
 					},
 				},
 				'wait2Sell': {
@@ -202,7 +204,7 @@
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','kpiBuyFollow Status / WaitData /analyseKpi');
-										this.opts.kpiBuyFollow = this.opts.dataBuy.triggerValue <= adata;
+										this.opts.kpiBuyFollow = this.opts.dataBuy.triggerValue < adata;
 									},
 									next_state_when:'this.opts.kpiBuyFollow',
 									next_state : 'doBuy',
@@ -212,7 +214,7 @@
 								enterState : {
 									init_function: function(p, e, adata) {
 										this.trigger('updateStatus','kpiBuyFollow Status / doBuy /enterState');
-										$("#buyValue").html(adata);
+										//$("#buyValue").html(adata);
 									},
 								},
 								initializeKPI : {
@@ -238,14 +240,16 @@
 					init_function: function(p, e, adata){
 						//debugger;
 						this.trigger('updateStatus','DoBuy enterState');
-						$("#myButtonToBuy").show();
+						//$("#myButtonToBuy").show();
+						$("#buyValue").html(this.opts.currentReceivedData);
+						this.trigger('buyDone'); //simulation of buying...
 					},
 				},
 				buyDone: {
 					init_function: function(p, e, adata){
 						//debugger;
 						this.trigger('updateStatus','buyDone enterState');
-						$("#myButtonToBuy").hide();
+						//$("#myButtonToBuy").hide();
 					},
 					next_state:'BuyDone'
 				},
@@ -378,7 +382,7 @@
 									init_function: function(p, e, adata) {
 										//debugger;
 										this.trigger('updateStatus','kpiSellFollow Status / WaitData /analyseKpi');
-										this.opts.kpiSellFollow = this.opts.dataSell.triggerValue >= adata;
+										this.opts.kpiSellFollow = this.opts.dataSell.triggerValue > adata;
 									},
 									next_state_when:'this.opts.kpiSellFollow',
 									next_state : 'doSell',
@@ -388,7 +392,7 @@
 								enterState : {
 									init_function: function(p, e, adata) {
 										this.trigger('updateStatus','kpiSellFollow Status / doSell /enterState');
-										$("#sellValue").html(adata);
+										//$("#sellValue").html(adata);
 									},
 								},
 								initializeKPI : {
@@ -414,14 +418,17 @@
 					init_function: function(p, e, adata){
 						//debugger;
 						this.trigger('updateStatus','DoSell enterState');
-						$("#myButtonToSell").show();
+						$("#sellValue").html(this.opts.currentReceivedData);
+						this.trigger('sellDone'); //simulation of buying...
+
+						//$("#myButtonToSell").show();
 					},
 				},
 				sellDone: {
 					init_function: function(p, e, adata){
 						//debugger;
 						this.trigger('updateStatus','DoSell sellDone');
-						$("#myButtonToSell").hide();
+						//$("#myButtonToSell").hide();
 					},
 					next_state:'SellDone'
 				},
@@ -432,6 +439,12 @@
 						//debugger;
 						this.trigger('updateStatus','SellDone enterState '+adata);
 						this.opts.dataStart=this.opts.currentReceivedData;
+						let gainValue = parseFloat(this.opts.currentReceivedData) - parseFloat($("#buyValue").html());
+						this.opts.totalGainValue += gainValue;
+						this.opts.nbTrades++;
+						$("#gainValue").html(gainValue);
+						$("#totalGainValue").html(this.opts.totalGainValue);
+						$("#nbTrades").html(this.opts.nbTrades);
 					},
 					next_state:'wait2Buy'
 				},
@@ -464,7 +477,7 @@
 				},
 				updateStatus: {
 					init_function: function(p, e, adata) {
-						this.opts.Status.html(this.opts.Status.html()+'<br>'+adata);
+						//this.opts.Status.html(this.opts.Status.html()+'<br>'+adata);
 					},
 				}
 			}
@@ -497,7 +510,7 @@
 				'restartRead': 'startRead',
 				'startRead': {
 					how_process_event: {
-						delay: 1000
+						delay: 2000
 					},
 					propagate_event: 'readData',
 				},
@@ -530,8 +543,8 @@
 				SBStatus: 'wait2Buy',
 				Status: $('#Status'),
 				triggerValue: $('#triggerValue'),
-				offsetBuy: a => parseFloat(a) * 1.03 + 0.03,
-				offsetSell: a => parseFloat(a) / 1.03 - 0.03,
+				offsetBuy: a => parseFloat(a) * 1.1,
+				offsetSell: a => parseFloat(a) * .9,
 				debug: true,
 				LogLevel: 2,
 			});
@@ -593,7 +606,9 @@
 	<button id="myButtonToSell" style="display:none;" onClick="aProcessorFSM.trigger('sellDone');">SELL DONE</button>
 	<p id="">current Value: <span id="currentValue"></span></p>
 	<p id="">current trigger at: <span id="triggerValue"></span></p>
-	<p id="">Buy at: <span id="buyValue"></span> / Sell at: <span id="sellValue"></span></p>
+	<p id="">Buy at: <span id="buyValue"></span> / Sell at: <span id="sellValue"></span> / NB Trades:<span id="nbTrades"></span></p>
+	<p id="">Gain: <span id="gainValue"></span> / Total Gain: <span id="totalGainValue"></span></p>
+
 	<p id="result"></p>
 	<p>
 		Status : <span id="Status"></span>
