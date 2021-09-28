@@ -246,7 +246,7 @@ var aStateDefinition =
 ```
 
 - **statename**:
-  - **delegate_machines**: sub machines list to delegate the events on the state
+  - **delegate_machines**: submachines list to delegate the events on the state
   	- submachine: the variable name of a state definition or a state definition description
   - **eventname**: <br>
   the name of an event. It may be any event name, supported by javascript or manually triggered.<br>
@@ -377,18 +377,23 @@ The "how_process_event" allows to define how the event should be processed by th
 
 
 
-SubMachine
-==========
-  - when there are sub machines defined for a state:
-	- the events are sent to each defined submachines in the order
-	- once the event is processed by the submachines, it is bubbled to the upper machines
-	- it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
-	- it is possible to propagate event only to the local submachine with the directive 'propagate_event_on_localmachine' to true
-	- a submachine works as the main one:
-		- if no_reinitialisation == false (default), it is initialized each time we enter the main state
-		- a start event is triggered to it (if initialized)
-		- once initialized, the submachine is ready to listen to the triggered events
-  - a sub machine can manage its first state by handling the 'start' event in the DefaultState
+SubMachines
+===========
+A submachine is a autonomous FSM working in the scope of a state defined in its parent machine.
+
+- when there are submachines defined for a state:
+  - the submachines are initialized and run before the "enterState" event of the main state
+  - the received events are sent to each defined submachines in their order, then bubbled to the main state
+    - so, once an event is processed by the submachines, it is bubbled to the upper machines
+    - it is possible to prevent the bubbling of events with the directive 'prevent_bubble' to true
+  - a 'propagate_event' in a submachine will trigger the event to every submachine in the main state and to the main state
+  - it is possible to propagate event only to the local submachine with the directive 'propagate_event_on_localmachine' set to true
+- when a submachine is launched:
+  - if 'no_reinitialisation' == false (default), it is initialized each time we enter the main state
+  - a 'start' event is triggered to it at initialization
+  - once initialized, the submachine is ready to listen to the triggered events
+  - a submachine can manage its first state by handling the 'start' event in the 'DefaultState'
+  - 'this' refers to the submachine, 'this.parentMachine' will refer to the parent machine.
 
 The public available variables
 ==============================
@@ -400,7 +405,7 @@ The public available variables
  - myFSM._stateDefinition.[statename].[eventname].EventIteration - the number of times an event has been called since we entered the state
  - myFSM.opts - the defined options
  - myFSM.rootMachine: the root machine
- - myFSM.parentMachine: the parent machine if we're in a sub machine (null if none)
+ - myFSM.parentMachine: the parent machine if we're in a submachine (null if none)
 
 Within the call of FSM function, you can refer to the FSM by 'this':
  - this.currentState
