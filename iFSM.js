@@ -751,7 +751,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	/*
 	 * Processing of the sub machines
 	 */
-	if ( ( this._stateDefinition[currentState].delegate_machines )
+	if (     ( this._stateDefinition[currentState].delegate_machines )
 		)
 	{
 		var aSubMachineDefinition;
@@ -771,7 +771,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 
 			if 	( anEvent == 'enterState' )
 			{
-				if (	(aSubMachineDefinition.myFSM.currentState =='')//never initialised if ==''
+				if (	(aSubMachineDefinition.myFSM.currentState =='')//never initialised if !==''
 					||	(aSubMachineDefinition.no_reinitialisation == undefined)
 					||	(aSubMachineDefinition.no_reinitialisation == false)
 					)
@@ -806,7 +806,9 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 				}
 
 				if (
-							(	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
+							(
+                  aSubMachineDefinition.myFSM.currentState
+              &&  aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent]
 							&& 	aSubMachineDefinition.myFSM._stateDefinition[aSubMachineDefinition.myFSM.currentState][anEvent].prevent_bubble
 							)
 						||
