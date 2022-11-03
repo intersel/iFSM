@@ -438,4 +438,4 @@ or leave a message on the [Issue board](https://github.com/intersel/iFSM/issues)
 Contact
 =======
 If you have any ideas, feedback, requests or bug reports, you can reach me at github@intersel.org,
-or via my website: http://www.intersel.fr
+or via my website: http://www.intersel.fr or https://www.livinweb.fr/
