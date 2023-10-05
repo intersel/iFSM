@@ -50,7 +50,7 @@
  * How to use it :
  * ===============
  * <code>
- * <script type="text/javascript" src="jquery-3.6.0.min.js"></script>
+ * <script type="text/javascript" src="jquery.min.js"></script>
  * <script type="text/javascript" src="jquery.dorequesttimeout.js"></script>
  * <script type="text/javascript" src="jquery.attrchange.js"></script>
  * <script type="text/javascript" src="ifsm.js"></script>
