@@ -399,7 +399,7 @@ The public available variables
 ==============================
  - myFSM.currentState: current state name
  - myFSM.lastState: previous state name of the current state
- - myFSM.eventCalled: current event name
+ - myFSM.receivedEvent: current event name
  - myFSM.myUIObject: the jQuery object associated to the FSM
  - myFSM._stateDefinition: the definition of the states and events
  - myFSM._stateDefinition.[statename].[eventname].EventIteration - the number of times an event has been called since we entered the state
