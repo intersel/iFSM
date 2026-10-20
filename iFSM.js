@@ -36,13 +36,14 @@
  *                                   add console.warn (instead of log) for errors message
  * - 2020/06/18 - E.Podvin - 1.7.8 - Add alert when next_state does not exist (not defined)
  * - 2021/04/19 - E.Podvin - 1.7.9 - fix delayProcess when data is not set
+ * - 2026/10/21 - E.Podvin - 1.7.10 - fix when no machines defined in getFSM()
  * -----------------------------------------------------------------------------------------
  *
- * @copyright Intersel 2013-2021
+ * @copyright Intersel 2013-2026
  * @fileoverview : iFSM : a finite state machine with jQuery
  * @see {@link https://github.com/intersel/iFSM}
  * @author : Emmanuel Podvin - emmanuel.podvin@intersel.fr
- * @version : 1.7.9
+ * @version : 1.7.10
  * -----------------------------------------------------------------------------------------
  */
 
@@ -50,7 +51,7 @@
  * How to use it :
  * ===============
  * <code>
- * <script type="text/javascript" src="jquery.min.js"></script>
+ * <script type="text/javascript" src="jquery-3.6.0.min.js"></script>
  * <script type="text/javascript" src="jquery.dorequesttimeout.js"></script>
  * <script type="text/javascript" src="jquery.attrchange.js"></script>
  * <script type="text/javascript" src="ifsm.js"></script>
@@ -751,7 +752,7 @@ fsm_manager.prototype.processEvent= function(anEvent,data,forceProcess) {
 	/*
 	 * Processing of the sub machines
 	 */
-	if (     ( this._stateDefinition[currentState].delegate_machines )
+	if ( ( this._stateDefinition[currentState].delegate_machines )
 		)
 	{
 		var aSubMachineDefinition;
@@ -1568,14 +1569,18 @@ $.fn.getFSM = function(aStateDefinition) {
 	if ( (this.length != 1) || (this.attr('id') == undefined) )
 		return [];
 
+	var aFSMList = iFSMList[$(this).attr('id')];
+	if (aFSMList == undefined)
+		return (aStateDefinition == undefined) ? [] : null;
+
 	if (aStateDefinition == undefined)
-		return iFSMList[$(this).attr('id')];
+		return aFSMList;
 	else
 	{
 		var aFSM = null;
-		for (var i = 0, aFSMItem = null; i < iFSMList[$(this).attr('id')].length ; i++)
+		for (var i = 0, aFSMItem = null; i < aFSMList.length ; i++)
 		{
-			aFSMItem = iFSMList[$(this).attr('id')][i];
+			aFSMItem = aFSMList[i];
 			if (aFSMItem._originalstateDefinition == aStateDefinition)
 			{
 				aFSM = aFSMItem;
@@ -1588,7 +1593,5 @@ $.fn.getFSM = function(aStateDefinition) {
 
 
 };
-
-
 
 })(jQuery);
